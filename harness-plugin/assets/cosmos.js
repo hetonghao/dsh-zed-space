@@ -79,7 +79,7 @@ void main() {
 }`,
 };
 
-const FRAME_CAP = REDUCED_MOTION ? 20 : 40;
+const FRAME_CAP = REDUCED_MOTION ? 20 : 30;
 const FRAME_MS = 1000 / FRAME_CAP;
 const TARGET_FPS = REDUCED_MOTION ? 18 : 28;
 const MIN_SCALE = 0.55;
@@ -215,7 +215,9 @@ let view = activeSkin.id === 'vortex' ? 1 : 0;
 let viewFrom = view;
 let viewTarget = view;
 let transitionElapsed = TRANSITION_SECONDS;
-let displayedParams = sceneParams(activeSkin.id, params, SHARED_CONTROLS);
+let targetParams = sceneParams(activeSkin.id, params, SHARED_CONTROLS);
+let displayedParams = { ...targetParams };
+const parameterUniforms = Object.keys(targetParams).map(key => [key, uniformName(key)]);
 let paramsFrom = { ...displayedParams };
 const phases = [0, 0];
 
@@ -224,9 +226,9 @@ function advanceScene(dt) {
   const t = transitionElapsed / TRANSITION_SECONDS;
   const blend = t * t * t * (t * (t * 6 - 15) + 10);
   view = viewFrom + (viewTarget - viewFrom) * blend;
-  const target = sceneParams(activeSkin.id, params, SHARED_CONTROLS);
+  const target = targetParams;
   const parameterBlend = SHARED_CONTROLS ? 1 : blend;
-  for (const key of Object.keys(target)) {
+  for (const [key] of parameterUniforms) {
     displayedParams[key] = paramsFrom[key] + (target[key] - paramsFrom[key]) * parameterBlend;
   }
   // 速度改变只影响此后的相位增量，避免贴图在切换或拖动滑杆时跳帧。
@@ -295,10 +297,14 @@ function render(now) {
   clock += sceneDt;
   advanceScene(sceneDt);
   // 指针平滑：跟随宿主鼠标，但留一点惯性
-  pointer[0] += (pointerTarget[0] - pointer[0]) * Math.min(1, dt * 6);
-  pointer[1] += (pointerTarget[1] - pointer[1]) * Math.min(1, dt * 6);
+  for (let axis = 0; axis < 2; axis++) {
+    const delta = pointerTarget[axis] - pointer[axis];
+    pointer[axis] = Math.abs(delta) < 0.00001 ? pointerTarget[axis] : pointer[axis] + delta * Math.min(1, dt * 6);
+  }
+  // 十秒后脉冲已低于 8 位颜色精度，清除尾迹以允许静止画面休眠。
+  if (pulseAt >= 0 && (displayedParams.pulse === 0 || clock - pulseAt >= 10)) pulseAt = -1;
 
-  if (now - lastRender < FRAME_MS - 0.5) return;
+  if (now - lastRender < FRAME_MS - 0.5) return false;
   lastRender = now;
 
   try {
@@ -330,8 +336,8 @@ function render(now) {
     gl.uniform1f(locate(program, 'uCycle'), autoCycle ? Math.sin((clock / 720) * Math.PI * 2) : 0);
     gl.uniform2f(locate(program, 'uPulsePos'), pulsePos[0], pulsePos[1]);
     gl.uniform1f(locate(program, 'uPulseAge'), pulseAt < 0 ? -1 : (clock - pulseAt));
-    for (const key of Object.keys(displayedParams)) {
-      const value = locate(program, uniformName(key));
+    for (const [key, name] of parameterUniforms) {
+      const value = locate(program, name);
       if (value) gl.uniform1f(value, displayedParams[key]);
     }
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -370,15 +376,32 @@ function render(now) {
     frames = 0;
     fpsWindowStart = now;
   }
+  return true;
+}
+
+// 静止时保留已合成的画面；只有仍会改变像素的输入才维持渲染。
+function needsAnimation() {
+  return autoCycle || displayedParams.spin > 0 || transitionElapsed < TRANSITION_SECONDS
+    || pulseAt >= 0 || pointer.some((value, axis) => value !== pointerTarget[axis]);
 }
 
 function tick(now) {
-  raf = requestAnimationFrame(tick);
-  render(now);
+  raf = 0;
+  const drawn = render(now);
+  if (!errorReported && !paused && !document.hidden && (!drawn || needsAnimation())) {
+    raf = requestAnimationFrame(tick);
+  } else {
+    if (!errorReported && !paused && !document.hidden && scale < 1) {
+      scale = 1;
+      applySize();
+      redraw();
+    }
+    fps = 0;
+  }
 }
 
 function start() {
-  if (paused || document.hidden || raf) return;
+  if (!gl || errorReported || paused || document.hidden || raf) return;
   lastFrame = performance.now();
   fpsWindowStart = adaptStart = lastFrame;
   frames = framesSinceAdapt = 0;
@@ -389,12 +412,17 @@ function start() {
 function stop() {
   if (raf) cancelAnimationFrame(raf);
   raf = 0;
+  fps = 0;
 }
 
 function redraw() {
   // 暂停时尺寸变化也要补一帧，否则画面会被拉伸
   lastRender = 0;
   lastFrame = performance.now();
+  if (!raf) {
+    fpsWindowStart = adaptStart = lastFrame;
+    frames = framesSinceAdapt = 0;
+  }
   render(lastFrame);
 }
 
@@ -419,13 +447,16 @@ window.addEventListener('message', (event) => {
       transitionElapsed = paused || REDUCED_MOTION ? TRANSITION_SECONDS : 0;
     }
     updateParams(data.params);
-    if (paused && data.params) paramsFrom = sceneParams(activeSkin.id, params, SHARED_CONTROLS);
+    targetParams = sceneParams(activeSkin.id, params, SHARED_CONTROLS);
+    if (paused && data.params) paramsFrom = { ...targetParams };
     redraw();
+    if (needsAnimation()) start();
   } else if (data.type === 'bs-set') {
     updateParams(data.params);
-    if (paused && data.params) paramsFrom = sceneParams(activeSkin.id, params, SHARED_CONTROLS);
+    targetParams = sceneParams(activeSkin.id, params, SHARED_CONTROLS);
+    if (paused && data.params) paramsFrom = { ...targetParams };
     if (data.auto !== undefined) autoCycle = data.auto !== false;
-    if (paused) redraw();
+    if (paused) redraw(); else start();
   } else if (data.type === 'bs-pointer') {
     const x = Number(data.x);
     const y = Number(data.y);
@@ -434,7 +465,7 @@ window.addEventListener('message', (event) => {
       if (paused) {
         pointer = [...pointerTarget];
         redraw();
-      }
+      } else start();
     }
   } else if (data.type === 'bs-pulse') {
     const x = Number(data.x);
@@ -442,7 +473,7 @@ window.addEventListener('message', (event) => {
     if (Number.isFinite(x) && Number.isFinite(y)) {
       pulsePos = [x, y];
       pulseAt = clock;
-      if (paused) redraw();
+      if (paused) redraw(); else start();
     }
   } else if (data.type === 'bs-pause') {
     paused = data.paused !== false;
@@ -474,6 +505,8 @@ window.__bsState = () => ({
   fps,
   renderScale: scale,
   paused,
+  idle: ready && !paused && !raf && !document.hidden,
+  frameCap: FRAME_CAP,
   frames: frameCount,
   firstFrameMs,
   drawingBuffer: [canvas.width, canvas.height],
