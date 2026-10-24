@@ -6,8 +6,8 @@
 // adapter, so both installation paths run the same DOM, glass and a11y code.
 //
 // 三皮肤架构（2026-10）：海面（ocean，Walegpu 渲染器）+ 事件视界（horizon）+
-// 吸积涡旋（vortex）。三张皮肤各自的独立参数在下面 SKINS 里声明；海面沿用原有
-// 的 state.sea / state.time 两个字段，两张新皮肤的参数存在 state.p[skinId]，
+// 吸积涡旋（vortex）。海面沿用 state.sea / state.time，两个宇宙视角共用
+// state.p.cosmos；旧 state.p.horizon / vortex 记录只保留作回退，
 // 整体序列化成一条 JSON 由三条安装入口各自持久化。公共参数（总开关、玻璃、
 // 对话面板、自动昼夜）对三张皮肤都生效。
 (function registerBackspaceSkinCore(global) {
@@ -36,47 +36,29 @@
   });
 
   // ---------------------------------------------------------------------------
-  // 皮肤清单：面板、持久化、帧分派都只认这张表。
-  // `params` 必须与 shared/skins/<id>.js 里导出的 props 一致（tests/skins.test.mjs
-  // 会逐项比对，避免两边工资单漂移）。
-  // 字段：key（同时决定 uniform 名与面板 id）、min/max/def、format、stopsCycle。
-  // ---------------------------------------------------------------------------
-  // SKIN-PARAMS-BEGIN
+  // 与渲染器 SCENE_PROPS 保持一致；构建后的控制器是无 import 的宿主脚本。
+  const COSMOS_PARAMS = Object.freeze([
+    Object.freeze({ key: 'glow', min: 0, max: 100, def: 70 }),
+    Object.freeze({ key: 'ring', min: 0, max: 100, def: 55 }),
+    Object.freeze({ key: 'turb', min: 0, max: 100, def: 55 }),
+    Object.freeze({ key: 'warm', min: 0, max: 100, def: 60 }),
+    Object.freeze({ key: 'spin', min: 0, max: 100, def: 50 }),
+    Object.freeze({ key: 'stars', min: 0, max: 100, def: 45 }),
+    Object.freeze({ key: 'parallax', min: 0, max: 100, def: 55 }),
+    Object.freeze({ key: 'pulse', min: 0, max: 100, def: 70 }),
+  ]);
   const SKINS = Object.freeze([
     Object.freeze({
-      id: 'ocean',
-      surface: 'ocean',
+      id: 'ocean', surface: 'ocean',
       params: Object.freeze([
         Object.freeze({ key: 'sea', min: 0, max: 100, def: 50 }),
         Object.freeze({ key: 'time', min: 0, max: 100, def: 55, format: 'time', stopsCycle: true }),
       ]),
     }),
-    Object.freeze({
-      id: 'horizon',
-      surface: 'cosmos',
-      params: Object.freeze([
-        Object.freeze({ key: 'glow', min: 0, max: 100, def: 70 }),
-        Object.freeze({ key: 'curl', min: 0, max: 100, def: 50 }),
-        Object.freeze({ key: 'hue', min: -60, max: 60, def: 0, format: 'signed' }),
-        Object.freeze({ key: 'stars', min: 0, max: 100, def: 45 }),
-        Object.freeze({ key: 'drift', min: 0, max: 100, def: 30 }),
-        Object.freeze({ key: 'pull', min: 0, max: 100, def: 55 }),
-      ]),
-    }),
-    Object.freeze({
-      id: 'vortex',
-      surface: 'cosmos',
-      params: Object.freeze([
-        Object.freeze({ key: 'spin', min: 0, max: 100, def: 50 }),
-        Object.freeze({ key: 'ring', min: 0, max: 100, def: 55 }),
-        Object.freeze({ key: 'turb', min: 0, max: 100, def: 55 }),
-        Object.freeze({ key: 'warm', min: 0, max: 100, def: 60 }),
-        Object.freeze({ key: 'pulse', min: 0, max: 100, def: 70 }),
-        Object.freeze({ key: 'parallax', min: 0, max: 100, def: 50 }),
-      ]),
-    }),
+    Object.freeze({ id: 'horizon', surface: 'cosmos', params: COSMOS_PARAMS }),
+    Object.freeze({ id: 'vortex', surface: 'cosmos', params: COSMOS_PARAMS }),
   ]);
-  // SKIN-PARAMS-END
+  const PARAM_GROUPS = [SKINS[0], { id: 'cosmos', surface: 'cosmos', params: COSMOS_PARAMS }];
 
   const skinById = (id) => SKINS.find((skin) => skin.id === id) || SKINS[0];
 
@@ -109,16 +91,17 @@
       chatOpacity: '对话面板不透明度',
       reset: '恢复默认',
       resetNote: () => resetNoteText('zh'),
-      note: '切换皮肤即时生效，三张皮肤各自的独立配置分别保存，重开 Harness 后恢复。调节即时生效并自动保存；手动设定「日光」会停止自动昼夜变化。开启「对话面板独立背景调整」后，可以用下面的拖动条单独设定中间对话区的背景浓度，100% 即 Harness 原生背景；关闭时对话区跟随上面的「玻璃不透明度」，左右侧栏始终使用主玻璃。两张宇宙皮肤支持鼠标与点击：移动鼠标产生视差/引力，点击产生脉冲。',
+      note: '事件视界与吸积涡旋平滑切换，共用一组宇宙参数；海面保留独立参数，重开 Harness 后恢复。调节即时生效并自动保存；手动设定「日光」会停止自动昼夜变化。开启「对话面板独立背景调整」后，可以用下面的拖动条单独设定中间对话区的背景浓度，100% 即 Harness 原生背景；关闭时对话区跟随上面的「玻璃不透明度」，左右侧栏始终使用主玻璃。两张宇宙皮肤支持鼠标与点击：移动鼠标产生视差/引力，点击产生脉冲。',
       times: ['黄昏', '金色时刻', '下午', '正午'],
       skinTitle: '皮肤',
       ownTitle: '独立配置',
+      cosmosTitle: '宇宙共用参数',
       commonTitle: '公共配置',
       skins: { ocean: '海面', horizon: '事件视界', vortex: '吸积涡旋' },
       params: {
         sea: '波浪大小', time: '日光',
-        glow: '吸积亮度', curl: '细丝曲率', hue: '色相偏移', stars: '星点密度', drift: '流动速度', pull: '鼠标引力',
-        spin: '自转速度', ring: '盘体半径', turb: '湍流细丝', warm: '色温', pulse: '点击脉冲', parallax: '鼠标视差',
+        glow: '吸积亮度', ring: '盘体尺度', turb: '气流细节', warm: '气体色温',
+        spin: '流动速度', stars: '星空浓度', parallax: '鼠标视差', pulse: '点击涟漪',
       },
     },
     en: {
@@ -133,28 +116,27 @@
       chatOpacity: 'Conversation opacity',
       reset: 'Reset to defaults',
       resetNote: () => resetNoteText('en'),
-      note: 'Skins switch instantly, and each skin keeps its own settings, restored after a reload. Changes apply immediately and save automatically. Setting daylight manually stops the automatic day cycle. Turning on the independent conversation background lets the slider below set how strongly the center column is tinted; 100% is Harness\'s native background. Switch it off and the conversation follows the glass opacity above, while the sidebars always use the workspace glass. Both cosmic skins react to the mouse and to clicks: pointer movement drives parallax/gravity, a click fires a pulse.',
+      note: 'Event Horizon and Accretion Vortex transition smoothly and share cosmic settings. Ocean settings stay separate, and all settings are restored after a reload. Changes apply immediately and save automatically. Setting daylight manually stops the automatic day cycle. Turning on the independent conversation background lets the slider below set how strongly the center column is tinted; 100% is Harness\'s native background. Switch it off and the conversation follows the glass opacity above, while the sidebars always use the workspace glass. Both cosmic skins react to the mouse and to clicks: pointer movement drives parallax/gravity, a click fires a pulse.',
       times: ['Dusk', 'Golden hour', 'Afternoon', 'Midday'],
       skinTitle: 'Skin',
       ownTitle: 'Skin settings',
+      cosmosTitle: 'Shared cosmic settings',
       commonTitle: 'Shared settings',
       skins: { ocean: 'Ocean', horizon: 'Event Horizon', vortex: 'Accretion Vortex' },
       params: {
         sea: 'Sea state', time: 'Daylight',
-        glow: 'Glow', curl: 'Filament curl', hue: 'Hue shift', stars: 'Star density', drift: 'Flow speed', pull: 'Pointer gravity',
-        spin: 'Spin speed', ring: 'Disk radius', turb: 'Turbulence', warm: 'Temperature', pulse: 'Click pulse', parallax: 'Pointer parallax',
+        glow: 'Accretion brightness', ring: 'Disk size', turb: 'Flow detail', warm: 'Gas temperature',
+        spin: 'Flow speed', stars: 'Star density', parallax: 'Pointer parallax', pulse: 'Click ripple',
       },
     },
   });
 
   // 恢复默认的说明文案由 SKINS 生成：加皮肤时不用再去改这两段中英文本。
   const resetNoteText = (lang) => {
-    const skinDefs = SKINS.filter((skin) => skin.surface === 'cosmos')
-      .map((skin) => `${COPY[lang].skins[skin.id]} ${skin.params.map((param) => param.def).join('·')}`)
-      .join(' / ');
+    const cosmicDefaults = COSMOS_PARAMS.map((param) => param.def).join('·');
     return lang === 'zh'
-      ? `恢复全部默认设置（每张皮肤的独立配置一并恢复，当前皮肤保持不变）：波浪 50 / 日光 55 / ${skinDefs} / 玻璃 70 / 自动昼夜开 / 对话面板独立背景开、不透明度 90`
-      : `Restore all defaults (every skin\'s own settings included; the active skin is kept): sea 50 / daylight 55 / ${skinDefs} / glass 70 / auto cycle on / independent conversation background on at 90%`;
+      ? `恢复全部默认设置（当前皮肤保持不变）：波浪 50 / 日光 55 / 宇宙共用参数 ${cosmicDefaults} / 玻璃 70 / 自动昼夜开 / 对话面板独立背景开、不透明度 90`
+      : `Restore all defaults (keep the active skin): sea 50 / daylight 55 / shared cosmic settings ${cosmicDefaults} / glass 70 / auto cycle on / independent conversation background on at 90%`;
   };
 
   const WAVE_ICON = `
@@ -171,18 +153,30 @@
     return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
   }
 
-  // 新皮肤的参数整块存成 JSON（state.p[skinId][key]）；缺失项按 def 补齐，
-  // 越界值夹紧，字段名不认识就丢——存储被手改过也不会把面板搞坏。
-  function normalizeParams(raw) {
-    const source = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const isRecord = (value) => value && typeof value === 'object' && !Array.isArray(value);
+
+  function normalizeParams(raw, activeSkin = 'horizon') {
+    const source = isRecord(raw) ? raw : {};
     const out = {};
-    for (const skin of SKINS) {
-      if (skin.surface === 'ocean') continue;
-      const given = source[skin.id] && typeof source[skin.id] === 'object' ? source[skin.id] : {};
-      out[skin.id] = {};
-      for (const param of skin.params) {
-        out[skin.id][param.key] = clamp(given[param.key], param.min, param.max, param.def);
-      }
+    for (const id of ['horizon', 'vortex']) {
+      if (isRecord(source[id])) out[id] = { ...source[id] };
+    }
+    let given = source.cosmos;
+    if (!isRecord(given)) {
+      const legacyId = activeSkin === 'vortex' ? 'vortex'
+        : activeSkin === 'horizon' || isRecord(source.horizon) ? 'horizon' : 'vortex';
+      const legacy = isRecord(source[legacyId]) ? source[legacyId] : {};
+      given = legacyId === 'vortex' ? { ...legacy } : {
+        glow: legacy.glow, stars: legacy.stars,
+        turb: clamp(legacy.curl, 0, 100, 50) + 5,
+        spin: (0.025 + 0.0013 * clamp(legacy.drift, 0, 100, 30)) / 0.064 * 50,
+        parallax: legacy.pull,
+      };
+      // 旧色相与新色温不等价，保留旧记录；共享色温从默认值开始，速度按新范围夹紧。
+    }
+    out.cosmos = {};
+    for (const param of COSMOS_PARAMS) {
+      out.cosmos[param.key] = clamp(given[param.key], param.min, param.max, param.def);
     }
     return out;
   }
@@ -197,7 +191,7 @@
       autoCycle: raw.autoCycle !== false,
       chatCustom: raw.chatCustom === true,
       chatOpacity: clamp(raw.chatOpacity, CHAT_OPACITY_MIN, CHAT_OPACITY_MAX, DEFAULTS.chatOpacity),
-      p: normalizeParams(raw.p),
+      p: normalizeParams(raw.p, raw.skin),
     };
   }
 
@@ -207,7 +201,7 @@
   }
 
   // 参数文案先查「皮肤.参数」，再回落裸 key：同一个 key 在不同皮肤里可以是不同的东西
-  // （horizon.drift 是流动速度，vortex.spin 是自转速度）。
+  // 宇宙两个视角使用同一组标签与控件。
   // 海面参数沿用 1.2.6 的 DOM id（`-sea-range`），验收脚本按它取元素；
   // 新增皮肤一律加 id 前缀，否则不同皮肤的同名 key 会撞同一个 id。
   function paramDomId(skin, param, suffix) {
@@ -560,6 +554,7 @@ ${legacyRoots} {
     let copy = selectCopy(options.locale);
     let state = normalize(DEFAULTS);
     let ownsSurface = false;
+    let startGeneration = 0;
     let panelOpen = false;
     let previousFocus = null;
     let placementObserver = null;
@@ -604,7 +599,7 @@ ${legacyRoots} {
     const postToCosmos = () => {
       const skin = skinById(state.skin);
       if (skin.surface !== 'cosmos') return;
-      postToFrame(IDS.cosmos, { type: 'bs-set', params: { ...state.p[skin.id] }, auto: state.autoCycle });
+      postToFrame(IDS.cosmos, { type: 'bs-set', params: { ...state.p.cosmos }, auto: state.autoCycle });
     };
 
     const setFrameActive = (id, active) => {
@@ -692,10 +687,11 @@ ${legacyRoots} {
       const skin = skinById(state.skin);
       const query = new URLSearchParams({
         skin: skin.id,
+        controls: 'shared',
         parentOrigin: location.origin,
         auto: state.autoCycle ? '1' : '0',
       });
-      for (const [key, value] of Object.entries(state.p[skin.id] || {})) query.set(key, String(value));
+      for (const [key, value] of Object.entries(state.p.cosmos || {})) query.set(key, String(value));
       const frame = document.createElement('iframe');
       frame.id = IDS.cosmos;
       frame.src = `${options.assetUrl('cosmos.html')}?${query}`;
@@ -751,7 +747,7 @@ ${legacyRoots} {
       } else {
         mountCosmosFrame();
         setFrameActive(IDS.cosmos, true);
-        postToFrame(IDS.cosmos, { type: 'bs-skin', skin: skin.id, params: { ...state.p[skin.id] } });
+        postToFrame(IDS.cosmos, { type: 'bs-skin', skin: skin.id, params: { ...state.p.cosmos } });
         postToCosmos();
         postToFrame(IDS.cosmos, { type: 'bs-pause', paused: false });
         if (document.getElementById(IDS.frame)) setFrameActive(IDS.frame, false);
@@ -798,10 +794,10 @@ ${legacyRoots} {
 
       panel.innerHTML = `
         <div class="bs-title"><span>BACKSPACE <span class="bs-mark">·</span> SKIN</span><button class="bs-close" type="button" aria-label="${copy.close}">×</button></div>
-        <div class="bs-tabs" role="tablist" aria-label="${copy.skinTitle}">${SKINS.map((skin) => `<button class="bs-tab" type="button" role="tab" data-skin="${skin.id}" aria-selected="${skin.id === state.skin}" aria-controls="${IDS.panel}-${skin.id}">${copy.skins[skin.id]}</button>`).join('')}</div>
-        <div class="bs-scroll">${SKINS.map((skin) => `
-          <section class="bs-skin-group" id="${IDS.panel}-${skin.id}" role="tabpanel" aria-label="${copy.skins[skin.id]}"${skin.id === state.skin ? '' : ' hidden'}>
-            <div class="bs-group-title">${copy.skins[skin.id]} · ${copy.ownTitle}</div>${skinRows(skin)}
+        <div class="bs-tabs" role="tablist" aria-label="${copy.skinTitle}">${SKINS.map((skin) => `<button class="bs-tab" type="button" role="tab" data-skin="${skin.id}" aria-selected="${skin.id === state.skin}" aria-controls="${IDS.panel}-${skin.surface}">${copy.skins[skin.id]}</button>`).join('')}</div>
+        <div class="bs-scroll">${PARAM_GROUPS.map((skin) => `
+          <section class="bs-skin-group" id="${IDS.panel}-${skin.id}" role="tabpanel" aria-label="${skin.surface === 'cosmos' ? copy.cosmosTitle : copy.skins[skin.id]}"${skin.surface === skinById(state.skin).surface ? '' : ' hidden'}>
+            <div class="bs-group-title">${skin.surface === 'cosmos' ? copy.cosmosTitle : `${copy.skins[skin.id]} · ${copy.ownTitle}`}</div>${skinRows(skin)}
           </section>`).join('')}
           <section class="bs-group">
             <div class="bs-group-title">${copy.commonTitle}</div>
@@ -830,7 +826,7 @@ ${legacyRoots} {
       const tabs = [...panel.querySelectorAll('.bs-tab')];
 
       const paramInputs = [];
-      for (const skin of SKINS) {
+      for (const skin of PARAM_GROUPS) {
         for (const param of skin.params) {
           paramInputs.push({
             skin,
@@ -841,7 +837,7 @@ ${legacyRoots} {
         }
       }
 
-      const paramValue = (skin, param) => (skin.surface === 'ocean' ? state[param.key] : state.p[skin.id][param.key]);
+      const paramValue = (skin, param) => (skin.surface === 'ocean' ? state[param.key] : state.p.cosmos[param.key]);
 
       const syncParams = () => {
         for (const { skin, param, input, out } of paramInputs) {
@@ -869,9 +865,9 @@ ${legacyRoots} {
       // 切换皮肤只切面板可见块与 iframe，不重建 DOM、不丢焦点
       syncSkinUi = () => {
         for (const tab of tabs) tab.setAttribute('aria-selected', String(tab.dataset.skin === state.skin));
-        for (const skin of SKINS) {
+        for (const skin of PARAM_GROUPS) {
           const group = panel.querySelector(`#${IDS.panel}-${skin.id}`);
-          if (group) group.hidden = skin.id !== state.skin;
+          if (group) group.hidden = skin.surface !== skinById(state.skin).surface;
         }
         syncParams();
       };
@@ -897,7 +893,8 @@ ${legacyRoots} {
         for (const group of panel.querySelectorAll('.bs-group-title')) {
           if (group.parentElement?.classList.contains('bs-skin-group')) {
             const id = group.parentElement.id.slice(`${IDS.panel}-`.length);
-            group.textContent = `${copy.skins[id]} · ${copy.ownTitle}`;
+            group.textContent = id === 'cosmos' ? copy.cosmosTitle : `${copy.skins[id]} · ${copy.ownTitle}`;
+            group.parentElement.setAttribute('aria-label', id === 'cosmos' ? copy.cosmosTitle : copy.skins[id]);
           } else group.textContent = copy.commonTitle;
         }
         resetBtn.textContent = copy.reset;
@@ -922,7 +919,7 @@ ${legacyRoots} {
             void save(patch);
             postToOcean();
           } else {
-            state.p[skin.id][param.key] = value;
+            state.p.cosmos[param.key] = value;
             void save({ p: state.p });
             postToCosmos();
           }
@@ -973,7 +970,7 @@ ${legacyRoots} {
           autoCycle: DEFAULTS.autoCycle,
           chatCustom: DEFAULTS.chatCustom,
           chatOpacity: DEFAULTS.chatOpacity,
-          p: normalizeParams({}),
+          p: normalizeParams({ ...state.p, cosmos: {} }),
         };
         void save(defaults).then(() => {
           syncUi();
@@ -1103,15 +1100,23 @@ ${legacyRoots} {
     });
 
     const start = async () => {
+      const generation = ++startGeneration;
       await ready();
+      if (generation !== startGeneration) return;
       try {
-        state = normalize(await options.storage.get(DEFAULTS));
+        const stored = await options.storage.get(DEFAULTS);
+        if (generation !== startGeneration) return;
+        state = normalize(stored);
+        if (!isRecord(stored.p?.cosmos)) await save({ p: state.p });
       } catch (error) {
+        if (generation !== startGeneration) return;
         console.warn('[Backspace] Failed to load settings; using defaults.', error);
       }
+      if (generation !== startGeneration) return;
       applyEnabled();
       if (typeof options.listen === 'function') {
         const dispose = options.listen((patch) => {
+          if (generation !== startGeneration) return;
           state = normalize({ ...state, ...patch });
           applyEnabled();
           updateGlass();
@@ -1124,6 +1129,7 @@ ${legacyRoots} {
     };
 
     const stop = () => {
+      startGeneration++;
       unmount();
       while (controllerCleanups.length > 0) controllerCleanups.pop()();
     };
@@ -1131,7 +1137,7 @@ ${legacyRoots} {
     return Object.freeze({
       start,
       stop,
-      getState: () => ({ ...state, p: normalizeParams(state.p) }),
+      getState: () => ({ ...state, p: normalizeParams(state.p, state.skin) }),
       setSkin: (id) => switchSkin(id),
     });
   }

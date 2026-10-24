@@ -2,7 +2,7 @@
   "name": "dsh-backspace",
   "version": "1.2.6",
   "type": "module",
-  "description": "Realtime WebGPU ocean skin for DeepSeek Harness on Chrome and Edge",
+  "description": "DeepSeek Harness 实时海面与宇宙背景皮肤，支持共享参数和双视角平滑切换",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hetonghao/dsh-backspace.git"

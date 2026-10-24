@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
+import { runInNewContext } from 'node:vm'
 
 import horizon from '../shared/skins/horizon.js'
 import vortex from '../shared/skins/vortex.js'
@@ -16,39 +17,26 @@ const COSMIC_IDS = ['horizon', 'vortex']
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const text = async (relative) => readFile(resolve(root, relative), 'utf8')
 
-// 解析 shared/skin-core.js 里 SKIN-PARAMS 区块，得到面板真正会渲染的参数
-function panelSkins(source) {
-  const block = source.slice(
-    source.indexOf('// SKIN-PARAMS-BEGIN'),
-    source.indexOf('// SKIN-PARAMS-END'),
-  )
-  const skins = {}
-  let current = null
-  for (const line of block.split('\n')) {
-    const id = line.match(/\bid: '(\w+)'/)
-    if (id) { current = id[1]; skins[current] = []; continue }
-    const param = line.match(/\{ key: '(\w+)', min: (-?\d+), max: (-?\d+), def: (-?\d+)/)
-    if (param && current) skins[current].push({ key: param[1], min: +param[2], max: +param[3], def: +param[4] })
-  }
-  return skins
+async function hostSkins() {
+  const context = {};
+  runInNewContext(await text('shared/skin-core.js'), context);
+  return context.BackspaceSkinCore.SKINS;
 }
 
-test('面板参数与皮肤源码的 props 完全一致', async () => {
-  const skins = panelSkins(await text('shared/skin-core.js'))
-  assert.deepEqual(Object.keys(skins).sort(), ['ocean', ...COSMIC_IDS].sort())
-  for (const skin of COSMIC) {
-    const panel = skins[skin.id].map(({ key, min, max, def }) => ({ key, min, max, def }))
-    assert.deepEqual(panel, skin.props.map(({ key, min, max, def }) => ({ key, min, max, def })), skin.id)
-  }
-  // 海面沿用 1.2.6 的两个参数与默认值，行为不能被改
-  assert.deepEqual(skins.ocean, [{ key: 'sea', min: 0, max: 100, def: 50 }, { key: 'time', min: 0, max: 100, def: 55 }])
-})
+test('宿主宇宙视角共用渲染器的八项参数，海面保持原契约', async () => {
+  const skins = await hostSkins();
+  assert.deepEqual([...skins].map(skin => skin.id), ['ocean', ...COSMIC_IDS]);
+  assert.equal(skins[1].params, skins[2].params);
+  const props = items => [...items].map(({ key, min, max, def }) => ({ key, min, max, def }));
+  assert.deepEqual(props(skins[1].params), props(SCENE_PROPS));
+  assert.deepEqual(props(skins[0].params), [{ key: 'sea', min: 0, max: 100, def: 50 }, { key: 'time', min: 0, max: 100, def: 55 }]);
+});
 
 test('每个皮肤参数都有中英文案，且按皮肤限定来源', async () => {
   const source = await text('shared/skin-core.js')
   // 'skinId.key' 形式的文案优先级更高：同一个 key 在不同皮肤里可以是不同的东西。
-  for (const skin of COSMIC) {
-    for (const prop of skin.props) {
+  for (const skin of await hostSkins()) {
+    for (const prop of skin.params) {
       for (const lang of ['zh', 'en']) {
         const start = source.indexOf('params: {', source.indexOf(`${lang}: {`))
         const table = source.slice(start, source.indexOf('},', start))
@@ -116,7 +104,7 @@ test('三条安装路径都带上了新皮肤产物', async () => {
   }
 })
 
-test('存储适配器为每张皮肤的独立配置各留一条记录', async () => {
+test('存储适配器沿用整块 JSON 以保存共享参数及旧记录', async () => {
   for (const file of ['shared/native-entry.js', 'shared/extension-entry.js', 'scripts/build-dsh-bundle.mjs']) {
     const source = await text(file)
     assert.match(source, /skinSkinParams|bsSkinParams/, file)
