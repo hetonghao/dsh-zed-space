@@ -5,7 +5,7 @@
 //
 // 对外协议（父页 ↔ 本帧）：
 //   父页 → 本帧
-//     { type: 'bs-skin',   skin }            切换皮肤 id（horizon / vortex / echo）
+//     { type: 'bs-skin',   skin }            切换皮肤 id（horizon / void / vortex / echo）
 //     { type: 'bs-set',    params, auto }    设置当前皮肤的独立参数 + 公共昼夜开关
 //     { type: 'bs-pointer', x, y }           鼠标位置（-1..1，y 向上）
 //     { type: 'bs-pulse',  x, y }            点击脉冲（-1..1，y 向上）
@@ -18,11 +18,13 @@
 // 本文件与皮肤源码都在包内，无外部请求、无素材文件。
 
 import horizon from './skins/horizon.js';
+import voidSkin from './skins/void.js';
 import echoSkin from './skins/echo.js';
 import vortex from './skins/vortex.js';
 
 const SKINS = new Map([
   [horizon.id, horizon],
+  [voidSkin.id, voidSkin],
   [vortex.id, vortex],
   [echoSkin.id, echoSkin],
 ]);
