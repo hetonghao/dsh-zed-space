@@ -63,6 +63,18 @@ emit('shared/ocean.js', [
   'native-dist/ocean.js',
   'harness-plugin/assets/ocean.js',
 ])
+// 两张新皮肤：引导分派器 shared/cosmos.js + shared/skins/*.js 逐字同步到
+// 三条安装路径。shared/ocean.js 保持字节不变，新皮肤一律走这两条新文件。
+emit('shared/cosmos.js', [
+  'extension/cosmos.js',
+  'native-dist/cosmos.js',
+  'harness-plugin/assets/cosmos.js',
+])
+emitTree('shared/skins', [
+  'extension/skins',
+  'native-dist/skins',
+  'harness-plugin/assets/skins',
+])
 emit('shared/styles.css', [
   'extension/styles.css',
   'native-dist/styles.css',
@@ -71,6 +83,10 @@ emit('shared/styles.css', [
 emit('extension/skin.html', [
   'native-dist/skin.html',
   'harness-plugin/assets/skin.html',
+])
+emit('extension/cosmos.html', [
+  'native-dist/cosmos.html',
+  'harness-plugin/assets/cosmos.html',
 ])
 emitTree('shared/vendor', [
   'extension/vendor',

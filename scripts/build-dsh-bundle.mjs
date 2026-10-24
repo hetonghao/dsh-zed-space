@@ -10,12 +10,14 @@ const core = readFileSync(resolve(root, 'shared/skin-core.js'), 'utf8')
 const adapter = String.raw`
   const KEYS = Object.freeze({
     enabled: 'bsEnabled',
+    skin: 'bsSkin',
     sea: 'bsSea',
     time: 'bsTime',
     glass: 'bsGlass',
     autoCycle: 'bsAutoCycle',
     chatCustom: 'bsChatCustom',
     chatOpacity: 'bsChatOpacity',
+    p: 'bsSkinParams',
   });
 
   function readSetting(key, fallback) {
@@ -24,6 +26,10 @@ const adapter = String.raw`
       if (value === null) return fallback;
       if (key === 'enabled' || key === 'autoCycle') return value !== 'false';
       if (key === 'chatCustom') return value === 'true';
+      if (key === 'skin') return value;
+      if (key === 'p') {
+        try { return JSON.parse(value); } catch { return fallback; }
+      }
       return Number(value);
     } catch {
       return fallback;
@@ -38,17 +44,20 @@ const adapter = String.raw`
       storage: {
         get: async (defaults) => ({
           enabled: readSetting('enabled', defaults.enabled),
+          skin: readSetting('skin', defaults.skin),
           sea: readSetting('sea', defaults.sea),
           time: readSetting('time', defaults.time),
           glass: readSetting('glass', defaults.glass),
           autoCycle: readSetting('autoCycle', defaults.autoCycle),
           chatCustom: readSetting('chatCustom', defaults.chatCustom),
           chatOpacity: readSetting('chatOpacity', defaults.chatOpacity),
+          p: readSetting('p', undefined),
         }),
         set: async (patch) => {
           try {
             for (const [key, value] of Object.entries(patch)) {
-              localStorage.setItem(KEYS[key], String(value));
+              if (key === 'p') localStorage.setItem(KEYS.p, JSON.stringify(value));
+              else localStorage.setItem(KEYS[key], String(value));
             }
           } catch {
             // Locked-down storage keeps the live value for this page.

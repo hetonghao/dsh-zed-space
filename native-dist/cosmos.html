@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Backspace · Cosmic</title>
+<style>
+  /* 宇宙皮肤：整屏 WebGL2 画布，首帧渲染完成前保持纯黑，完成后再淡入 */
+  html, body { margin: 0; height: 100%; background: #010102; overflow: hidden; }
+  body > canvas { opacity: 0; transition: opacity .6s ease; }
+  body.ready > canvas { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { body > canvas { transition: none; } }
+</style>
+</head>
+<body>
+  <script type="module" src="./cosmos.js"></script>
+</body>
+</html>

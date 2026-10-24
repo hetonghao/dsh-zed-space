@@ -14,15 +14,22 @@
     "default_popup": "popup.html",
     "default_title": "__MSG_extensionName__"
   },
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "http://127.0.0.1/*",
     "http://localhost/*"
   ],
   "content_scripts": [
     {
-      "matches": ["http://127.0.0.1/*", "http://localhost/*"],
-      "js": ["content.js"],
+      "matches": [
+        "http://127.0.0.1/*",
+        "http://localhost/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_start",
       "all_frames": false
     }
@@ -33,12 +40,18 @@
         "skin.html",
         "ocean.js",
         "styles.css",
+        "skins/*",
+        "cosmos.js",
+        "cosmos.html",
         "vendor/*",
         "vendor/addons/controls/*",
         "vendor/addons/tsl/display/*",
         "vendor/fonts/*"
       ],
-      "matches": ["http://127.0.0.1/*", "http://localhost/*"]
+      "matches": [
+        "http://127.0.0.1/*",
+        "http://localhost/*"
+      ]
     }
   ]
 }
