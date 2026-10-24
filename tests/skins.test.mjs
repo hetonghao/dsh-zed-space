@@ -8,11 +8,9 @@ import test from 'node:test'
 
 import horizon from '../shared/skins/horizon.js'
 import vortex from '../shared/skins/vortex.js'
-import echoSkin from '../shared/skins/echo.js'
-import voidSkin from '../shared/skins/void.js'
 
-const COSMIC = [horizon, vortex, echoSkin, voidSkin]
-const COSMIC_IDS = ['echo', 'horizon', 'void', 'vortex']
+const COSMIC = [horizon, vortex]
+const COSMIC_IDS = ['horizon', 'vortex']
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const text = async (relative) => readFile(resolve(root, relative), 'utf8')
