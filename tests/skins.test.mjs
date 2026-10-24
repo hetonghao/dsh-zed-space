@@ -8,6 +8,7 @@ import test from 'node:test'
 
 import horizon from '../shared/skins/horizon.js'
 import vortex from '../shared/skins/vortex.js'
+import accretion, { SCENE_PROPS } from '../shared/skins/accretion.js'
 
 const COSMIC = [horizon, vortex]
 const COSMIC_IDS = ['horizon', 'vortex']
@@ -59,18 +60,25 @@ test('每个皮肤参数都有中英文案，且按皮肤限定来源', async ()
   }
 })
 
-test('每个皮肤参数在着色器里都有对应的 uniform', () => {
-  for (const skin of COSMIC) {
-    assert.match(skin.fragment, /void\s+main\s*\(\s*\)/)
-    for (const prop of skin.props) {
-      const uniform = `u${prop.key[0].toUpperCase()}${prop.key.slice(1)}`
-      assert.ok(skin.fragment.includes(uniform), `${skin.id} 未使用 ${uniform}`)
-    }
+test('两个视角共用一个场景和一套预览参数', () => {
+  assert.equal(accretion.id, 'accretion')
+  assert.deepEqual(accretion.props, SCENE_PROPS)
+  assert.equal(SCENE_PROPS.length, 8)
+  assert.equal(new Set(SCENE_PROPS.map(prop => prop.key)).size, 8)
+  assert.match(accretion.fragment, /void\s+main\s*\(\s*\)/)
+  for (const prop of SCENE_PROPS) {
+    assert.ok(prop.def >= prop.min && prop.def <= prop.max, prop.key)
+    assert.ok(prop.label, prop.key)
+    // 旋转速度由渲染器积分为连续相位，不在 shader 中乘累计时间。
+    if (prop.key === 'spin') continue
+    const uniform = `u${prop.key[0].toUpperCase()}${prop.key.slice(1)}`
+    assert.ok(accretion.fragment.includes(uniform), `共享场景未使用 ${uniform}`)
   }
+  for (const skin of COSMIC) assert.equal(skin.fragment, undefined, `${skin.id} 不再维护独立场景`)
 })
 
 test('宇宙皮肤是纯代码：没有网络请求、图片和视频', async () => {
-  for (const file of ['shared/cosmos.js', ...COSMIC.map((s) => `shared/skins/${s.id}.js`), 'extension/cosmos.html']) {
+  for (const file of ['shared/cosmos.js', 'shared/skins/accretion.js', ...COSMIC.map((s) => `shared/skins/${s.id}.js`), 'extension/cosmos.html']) {
     // 注释里可以提到参考片文件名，运行时引用不行
     const source = (await text(file))
       .replace(/\/\*[\s\S]*?\*\//g, '')
@@ -100,7 +108,7 @@ test('三条安装路径都带上了新皮肤产物', async () => {
   for (const target of ['extension/cosmos.js', 'native-dist/cosmos.js', 'harness-plugin/assets/cosmos.js']) {
     assert.deepEqual(await readFile(resolve(root, target)), await readFile(resolve(root, 'shared/cosmos.js')), target)
   }
-  for (const skin of COSMIC) {
+  for (const skin of [...COSMIC, accretion]) {
     for (const dir of ['extension', 'native-dist', 'harness-plugin/assets']) {
       const target = `${dir}/skins/${skin.id}.js`
       assert.deepEqual(await readFile(resolve(root, target)), await readFile(resolve(root, `shared/skins/${skin.id}.js`)), target)

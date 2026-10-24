@@ -6,6 +6,10 @@ All notable changes to Backspace are documented here.
 
 ### Changed
 
+- 事件视界与吸积涡旋合并为一个吸积场景：共享星空、光线积分与辉光，保留紫红侧视和铜金俯视的视觉标定，并以约 2.2 秒连续切换。
+- 本地宇宙预览页提供两种视角和同一组八项参数；切换保留调参，支持中途反向、暂停补帧和减少动态效果。现有宿主参数入口保持兼容，尚未安装到 dsh。
+- 提升宇宙皮肤的 Retina 分辨率、近缘光弧采样和自适应画质恢复；补充浏览器回归检查。
+
 - **New code-level defaults**, matching the shipped skin baseline: sea state
   **50**, daylight **55** (afternoon), glass opacity **70%**, automatic day
   cycle on, and the independent conversation background **on at 90%**. Earlier

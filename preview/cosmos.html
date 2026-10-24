@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="data:,">
+  <title>宇宙 · Backspace</title>
+  <style>
+    @font-face { font-family: Geist; src: url('../shared/vendor/fonts/geist-sans-latin-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+    :root { --ink: #f2eee8; --muted: #b8b4b1; --surface: #151416; --line: #484448; --space: clamp(24px, 3.4vw, 52px); color-scheme: dark; font: 14px/1.5 Geist, 'PingFang SC', 'Microsoft YaHei', sans-serif; color: var(--ink); background: #010102; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+    ::selection { background: #e4c3bd; color: #151416; }
+    button, input { font: inherit; -webkit-tap-highlight-color: #f2eee81f; }
+    button { min-height: 44px; border: 1px solid transparent; background: transparent; color: inherit; padding: 0 14px; cursor: pointer; border-radius: 6px; }
+    button:hover { background: #ffffff0c; }
+    button[aria-expanded="true"] { background: #ffffff0c; border-color: var(--line); }
+    :focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+    button:disabled { opacity: .45; cursor: wait; }
+    [hidden] { display: none !important; }
+    #cosmos { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+    #artwork { position: fixed; inset: 0; cursor: crosshair; touch-action: none; }
+    #artwork:focus-visible { outline-offset: -8px; }
+    .identity { position: fixed; left: var(--space); bottom: calc(var(--space) + env(safe-area-inset-bottom)); pointer-events: none; }
+    h1 { margin: 0 0 6px; font-size: 22px; font-weight: 400; letter-spacing: .06em; }
+    .identity p { margin: 0; color: var(--muted); font-size: 12px; letter-spacing: .025em; }
+    .dock { position: fixed; right: var(--space); bottom: calc(var(--space) + env(safe-area-inset-bottom)); display: flex; gap: 4px; align-items: center; }
+    .dock button { font-size: 13px; }
+    .views { position: fixed; top: calc(var(--space) + env(safe-area-inset-top)); left: var(--space); display: flex; gap: 8px; }
+    .views button { color: var(--muted); border-radius: 0; border-bottom: 1px solid transparent; }
+    .views button[aria-pressed="true"] { color: var(--ink); border-bottom-color: currentColor; }
+    #settings { position: fixed; right: var(--space); bottom: calc(var(--space) + 64px + env(safe-area-inset-bottom)); width: 280px; max-height: calc(100dvh - 180px - env(safe-area-inset-bottom)); overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line) var(--surface); padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 12px 40px #0005; }
+    .parameter + .parameter { margin-top: 14px; }
+    .parameter label { display: flex; justify-content: space-between; font-size: 12px; }
+    output { color: var(--muted); font-variant-numeric: tabular-nums; }
+    input[type="range"] { appearance: none; display: block; width: 100%; height: 24px; margin: 2px 0 -4px; cursor: pointer; background: transparent; accent-color: var(--ink); }
+    input[type="range"]::-webkit-slider-runnable-track { height: 2px; border-radius: 2px; background: #666064; }
+    input[type="range"]::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; margin-top: -5px; border-radius: 50%; background: var(--ink); }
+    input[type="range"]::-moz-range-track { height: 2px; background: #666064; }
+    input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--ink); }
+    #restore { position: fixed; right: var(--space); bottom: calc(var(--space) + env(safe-area-inset-bottom)); color: var(--muted); font-size: 12px; }
+    #status { position: fixed; top: var(--space); left: var(--space); right: var(--space); max-width: 36rem; padding: 14px 18px; border-radius: 8px; background: var(--surface); color: var(--ink); }
+    #status p { margin: 0; overflow-wrap: anywhere; }
+    #retry { margin: 8px 0 0 -14px; text-decoration: underline; text-underline-offset: 4px; }
+    @media (max-width: 600px) {
+      :root { --space: 24px; }
+      .identity { bottom: calc(96px + env(safe-area-inset-bottom)); }
+      h1 { font-size: 20px; }
+      .dock { left: var(--space); right: var(--space); justify-content: space-between; }
+      .dock button { padding-inline: 10px; }
+      #settings { left: var(--space); right: var(--space); width: auto; bottom: calc(154px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 238px - env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; padding: 20px; }
+      .parameter + .parameter { margin-top: 0; }
+    }
+  </style>
+</head>
+<body>
+  <iframe id="cosmos" title="宇宙动态画布" tabindex="-1" aria-hidden="true"></iframe>
+  <main id="artwork" role="button" tabindex="0" aria-label="宇宙画布：移动指针探索，点击或按回车激发涟漪"></main>
+  <div id="interface">
+    <nav class="views" aria-label="观察视角">
+      <button id="view-horizon" type="button" aria-pressed="true" disabled>事件视界</button>
+      <button id="view-vortex" type="button" aria-pressed="false" disabled>吸积涡旋</button>
+    </nav>
+    <header class="identity"><h1 id="name">宇宙</h1><p id="description">移动探索 · 点击泛起涟漪</p></header>
+    <section id="settings" aria-label="两个视角共用的画面参数" hidden></section>
+    <nav class="dock" aria-label="预览控制">
+      <button id="pause" type="button" disabled>暂停</button>
+      <button id="adjust" type="button" aria-expanded="false" aria-controls="settings" disabled>调节</button>
+      <button id="reset" type="button" disabled>重置</button>
+      <button id="hide" type="button" title="隐藏界面，按 H 可切换">隐藏界面</button>
+    </nav>
+  </div>
+  <button id="restore" type="button" title="显示界面，按 H 可切换" hidden>显示界面</button>
+  <div id="status" role="status" aria-live="polite"><p id="status-text">正在点亮宇宙…</p><button id="retry" type="button" hidden>重新加载</button></div>
+  <script type="module">
+    const $ = (id) => document.getElementById(id);
+    let skinId = new URLSearchParams(location.search).get('skin') === 'vortex' ? 'vortex' : 'horizon';
+    const names = { horizon: '事件视界', vortex: '吸积涡旋' };
+    const controlIds = ['pause', 'adjust', 'reset', 'view-horizon', 'view-vortex'];
+    const frame = $('cosmos');
+    let paused = false;
+    let ready = false;
+    let props;
+    const params = {};
+    const send = (message) => frame.contentWindow.postMessage(message, location.origin);
+    const apply = () => send({ type: 'bs-set', params, auto: false });
+    const syncPause = () => send({ type: 'bs-pause', paused: paused || document.hidden });
+    const fail = (reason) => {
+      ready = false;
+      $('status').hidden = false;
+      $('status-text').textContent = `画面暂时无法显示：${reason}`;
+      $('retry').hidden = false;
+      document.body.dataset.ready = 'false';
+      for (const id of controlIds) $(id).disabled = true;
+    };
+    const loadingTimer = setTimeout(() => { if (!ready) fail('渲染等待超时，请重新加载。'); }, 20000);
+    $('retry').onclick = () => location.reload();
+    const syncView = () => {
+      $('name').textContent = names[skinId];
+      $('description').textContent = skinId === 'horizon' ? '侧视吸积盘 · 切换至涡旋，升起视角' : '俯瞰吸积盘 · 切换至视界，贴近盘面';
+      document.title = `${names[skinId]} · Backspace`;
+      document.body.dataset.skin = skinId;
+      for (const id of Object.keys(names)) $(`view-${id}`).setAttribute('aria-pressed', String(id === skinId));
+      const url = new URL(location.href);
+      url.searchParams.set('skin', skinId);
+      history.replaceState(null, '', url);
+    };
+    syncView();
+    for (const id of Object.keys(names)) {
+      $(`view-${id}`).onclick = () => {
+        if (!ready || id === skinId) return;
+        skinId = id;
+        syncView();
+        send({ type: 'bs-skin', skin: skinId });
+      };
+    }
+    window.addEventListener('message', (event) => {
+      if (event.source !== frame.contentWindow || event.origin !== location.origin) return;
+      if (event.data?.type === 'bs-cosmos-ready') {
+        ready = true;
+        clearTimeout(loadingTimer);
+        $('status').hidden = true;
+        document.body.dataset.ready = 'true';
+        for (const id of controlIds) $(id).disabled = false;
+        apply();
+        syncPause();
+      } else if (event.data?.type === 'bs-cosmos-error') {
+        clearTimeout(loadingTimer);
+        fail(event.data.reason);
+      }
+    });
+    $('pause').onclick = () => {
+      paused = !paused;
+      $('pause').textContent = paused ? '继续' : '暂停';
+      syncPause();
+    };
+    const closeSettings = () => { $('settings').hidden = true; $('adjust').setAttribute('aria-expanded', 'false'); };
+    $('adjust').onclick = () => {
+      const open = $('settings').hidden;
+      $('settings').hidden = !open;
+      $('adjust').setAttribute('aria-expanded', String(open));
+      if (open) $('settings').querySelector('input').focus();
+    };
+    $('reset').onclick = () => {
+      for (const prop of props) {
+        params[prop.key] = prop.def;
+        $(prop.key).value = prop.def;
+        $(`${prop.key}-value`).value = prop.def;
+      }
+      send({ type: 'bs-pointer', x: 0, y: 0 });
+      apply();
+    };
+    const toggleInterface = () => {
+      const hide = !$('interface').hidden;
+      $('interface').hidden = hide;
+      $('restore').hidden = !hide;
+      (hide ? $('restore') : $('hide')).focus();
+    };
+    $('hide').onclick = toggleInterface;
+    $('restore').onclick = toggleInterface;
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !$('settings').hidden) { closeSettings(); $('adjust').focus(); }
+      if (event.key.toLowerCase() === 'h' && !event.metaKey && !event.ctrlKey && !event.altKey && event.target.tagName !== 'INPUT') toggleInterface();
+    });
+    const point = (event) => ({ x: event.clientX / innerWidth * 2 - 1, y: 1 - event.clientY / innerHeight * 2 });
+    $('artwork').addEventListener('pointermove', (event) => send({ type: 'bs-pointer', ...point(event) }));
+    $('artwork').addEventListener('pointerleave', () => send({ type: 'bs-pointer', x: 0, y: 0 }));
+    $('artwork').addEventListener('click', (event) => send({ type: 'bs-pulse', ...point(event) }));
+    $('artwork').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); send({ type: 'bs-pulse', x: 0, y: 0 }); }
+    });
+    document.addEventListener('visibilitychange', syncPause);
+    try {
+      ({ SCENE_PROPS: props } = await import('../extension/skins/accretion.js'));
+      for (const prop of props) {
+        params[prop.key] = prop.def;
+        const row = document.createElement('div');
+        row.className = 'parameter';
+        row.innerHTML = `<label for="${prop.key}">${prop.label}<output id="${prop.key}-value" for="${prop.key}">${prop.def}</output></label><input id="${prop.key}" type="range" min="${prop.min}" max="${prop.max}" step="1" value="${prop.def}">`;
+        row.querySelector('input').addEventListener('input', (event) => {
+          params[prop.key] = Number(event.target.value);
+          $(`${prop.key}-value`).value = event.target.value;
+          apply();
+        });
+        $('settings').append(row);
+      }
+      frame.src = `../extension/cosmos.html?skin=${skinId}&controls=shared&auto=0&parentOrigin=${encodeURIComponent(location.origin)}`;
+    } catch (error) { clearTimeout(loadingTimer); fail(error.message); }
+  </script>
+</body>
+</html>
