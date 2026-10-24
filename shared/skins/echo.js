@@ -62,10 +62,10 @@ void main() {
   vec2 p = (gl_FragCoord.xy - uRes*.5)/uRes.y;
   p.y += .005;
 
-  float clock = uTime * (0.35 + uFlow/100.0 * 1.3);
+  float clock = uTime * (uFlow / 20.0);   // uFlow=20 → 1× 实时，与 PK-B 的 elapsed 同步
 
   p -= vec2(.27,.03);
-  float radius = .075 + uRadius*.14;
+  float radius = .075 + (uRadius / 100.0) * .14;
   float r = length(p);
   float angle = atan(p.y,p.x);
   vec3 col = nebula(p+vec2(.3,-.2),.65)*vec3(.65,.9,1.05);
@@ -78,7 +78,7 @@ void main() {
     float ring = radius+.07+n*.048;
     float drift = .003*sin(angle*4.0+clock*.08+n);
     float dd = abs(elliptical-ring-drift);
-    float visible = smoothstep(n/8.0,n/8.0+.12,uBands);
+    float visible = smoothstep(n/8.0,n/8.0+.12,uBands / 100.0);
     arc += exp(-dd*(260.0-n*18.0))*visible*(.7+.3*sin(angle*3.0+n+clock*.04));
   }
   float dust = pow(grain,3.0)*3.2;
@@ -89,7 +89,7 @@ void main() {
   col += hue*exp(-abs(r-radius-.015)*48.0)*dust*.13;
   col *= smoothstep(radius-.001,radius+.001,r);
 
-  float edge = 1.0-.22*smoothstep(.4,1.1,length(p+vec2(.27,.03)));
+  float edge = 1.0-.22*smoothstep(.4,1.1,length(p));
   fragColor = vec4(clamp(col*edge,0.0,1.0),1.0);
 }
 `,

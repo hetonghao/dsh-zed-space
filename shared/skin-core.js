@@ -63,15 +63,6 @@
       ]),
     }),
     Object.freeze({
-      id: 'void',
-      surface: 'cosmos',
-      params: Object.freeze([
-        Object.freeze({ key: 'flow', min: 0, max: 100, def: 20 }),
-        Object.freeze({ key: 'glow', min: 0, max: 100, def: 50 }),
-        Object.freeze({ key: 'cloud', min: 0, max: 100, def: 50 }),
-      ]),
-    }),
-    Object.freeze({
       id: 'echo',
       surface: 'cosmos',
       params: Object.freeze([
@@ -131,11 +122,10 @@
       skinTitle: '皮肤',
       ownTitle: '独立配置',
       commonTitle: '公共配置',
-      skins: { ocean: '海面', horizon: '事件视界', void: '深渊', echo: '余响', vortex: '吸积涡旋' },
+      skins: { ocean: '海面', horizon: '事件视界', echo: '余响', vortex: '吸积涡旋' },
       params: {
         sea: '波浪大小', time: '日光',
         glow: '吸积亮度', curl: '细丝曲率', hue: '色相偏移', stars: '星点密度', drift: '流动速度', pull: '鼠标引力',
-        'void.flow': '细丝流速', 'void.glow': '细丝辉光', 'void.cloud': '星云浓度',
         'echo.flow': '轨道流速', 'echo.radius': '黑盘尺度', 'echo.bands': '光环密度',
         spin: '自转速度', ring: '盘体半径', turb: '湍流细丝', warm: '色温', pulse: '点击脉冲', parallax: '鼠标视差',
       },
@@ -157,11 +147,10 @@
       skinTitle: 'Skin',
       ownTitle: 'Skin settings',
       commonTitle: 'Shared settings',
-      skins: { ocean: 'Ocean', horizon: 'Event Horizon', void: 'Abyss', echo: 'Echo', vortex: 'Accretion Vortex' },
+      skins: { ocean: 'Ocean', horizon: 'Event Horizon', echo: 'Echo', vortex: 'Accretion Vortex' },
       params: {
         sea: 'Sea state', time: 'Daylight',
         glow: 'Glow', curl: 'Filament curl', hue: 'Hue shift', stars: 'Star density', drift: 'Flow speed', pull: 'Pointer gravity',
-        'void.flow': 'Filament flow', 'void.glow': 'Filament glow', 'void.cloud': 'Nebula density',
         'echo.flow': 'Orbit speed', 'echo.radius': 'Disk radius', 'echo.bands': 'Ring density',
         spin: 'Spin speed', ring: 'Disk radius', turb: 'Turbulence', warm: 'Temperature', pulse: 'Click pulse', parallax: 'Pointer parallax',
       },
@@ -228,9 +217,9 @@
   }
 
   // 参数文案先查「皮肤.参数」，再回落裸 key：同一个 key 在不同皮肤里可以是不同的东西
-  // （void.flow 是细丝流速，echo.flow 是轨道流速）。
+  // （horizon.drift 是流动速度，echo.flow 是轨道流速）。
   // 海面参数沿用 1.2.6 的 DOM id（`-sea-range`），验收脚本按它取元素；
-  // 新增皮肤一律加 id 前缀，否则 void.flow 与 echo.flow 会撞同一个 id。
+  // 新增皮肤一律加 id 前缀，否则不同皮肤的同名 key 会撞同一个 id。
   function paramDomId(skin, param, suffix) {
     const base = skin.surface === 'ocean' ? param.key : `${skin.id}-${param.key}`;
     return `${IDS.panel}-${base}${suffix ? `-${suffix}` : ''}`;
