@@ -538,10 +538,7 @@ ${legacyRoots} {
 }`;
   }
 
-  // 两个 iframe 的表面样式：可见时铺满窗口；隐藏时缩到 1x1 并透明。
-  // 缩到 1x1 会让帧内的 window.innerWidth 变化并触发它的 resize 处理，
-  // 海面渲染器会把 WebGPU 画布同步缩到 1x1（几乎不耗 GPU），
-  // 切回来再自动恢复——不需要给 shared/ocean.js 加任何暂停协议。
+  // 隐藏帧缩小以释放大缓冲，并显式暂停它的渲染循环。
   const FRAME_STYLE_ON = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:0;pointer-events:none;background:transparent;';
   const FRAME_STYLE_OFF = 'position:fixed;left:0;top:0;width:1px;height:1px;border:0;z-index:0;pointer-events:none;opacity:0;background:transparent;';
 
@@ -558,9 +555,11 @@ ${legacyRoots} {
     let previousFocus = null;
     let placementObserver = null;
     let placementFrame = 0;
+    let placementAnchor = null;
     let readyTimer = 0;
     let pointerFrame = 0;
     let pointerPending = null;
+    let pointerSent = null;
     const surfaceCleanups = [];
     const controllerCleanups = [];
 
@@ -599,6 +598,32 @@ ${legacyRoots} {
       const skin = skinById(state.skin);
       if (skin.surface !== 'cosmos') return;
       postToFrame(IDS.cosmos, { type: 'bs-set', params: { ...state.p.cosmos }, auto: state.autoCycle });
+      schedulePointer();
+    };
+
+    const schedulePointer = () => {
+      if (pointerFrame || !pointerPending || !state.enabled || skinById(state.skin).surface !== 'cosmos' || state.p.cosmos.parallax === 0) return;
+      if (pointerSent && pointerPending.every((value, axis) => value === pointerSent[axis])) return;
+      pointerFrame = requestAnimationFrame(() => {
+        pointerFrame = 0;
+        if (!pointerPending || !state.enabled || skinById(state.skin).surface !== 'cosmos' || state.p.cosmos.parallax === 0) return;
+        postToFrame(IDS.cosmos, { type: 'bs-pointer', x: pointerPending[0], y: pointerPending[1] });
+        pointerSent = pointerPending;
+      });
+    };
+
+    const syncCosmosPreview = () => {
+      postToFrame(IDS.cosmos, {
+        type: 'bs-preview', active: state.enabled && panelOpen && skinById(state.skin).surface === 'cosmos',
+      });
+    };
+
+    const releaseInactiveFrame = () => {
+      if (!ownsSurface || panelOpen) return;
+      const id = skinById(state.skin).surface === 'ocean' ? IDS.cosmos : IDS.frame;
+      if (id === IDS.cosmos) { clearTimeout(readyTimer); readyTimer = 0; }
+      const frame = document.getElementById(id);
+      if (frame instanceof HTMLIFrameElement) { frame.onload = null; frame.remove(); }
     };
 
     const setFrameActive = (id, active) => {
@@ -608,31 +633,46 @@ ${legacyRoots} {
       if (frame.style.cssText !== next) frame.style.cssText = next;
     };
 
+    const anchorSelectors = ['[data-slot="sidebar.settings"] button', '[data-testid="settings-trigger"]', '.VOzbGW_trigger'];
+    const anchorSelector = anchorSelectors.join(',');
+
     const placeButton = () => {
+      placementFrame = 0;
       const button = document.getElementById(IDS.button);
       if (!(button instanceof HTMLElement)) return;
-      const selectors = [
-        '[data-slot="sidebar.settings"] button',
-        '[data-testid="settings-trigger"]',
-        '.VOzbGW_trigger',
-      ];
-      const trigger = selectors.map((selector) => document.querySelector(selector))
-        .find((candidate) => candidate instanceof HTMLElement && candidate.getBoundingClientRect().width > 0);
-      if (trigger instanceof HTMLElement) {
-        const rect = trigger.getBoundingClientRect();
-        button.style.left = `${Math.round(rect.right + 8)}px`;
-        button.style.top = `${Math.round(rect.top + rect.height / 2 - 17)}px`;
-        button.style.bottom = 'auto';
-      } else {
-        button.style.left = '16px';
-        button.style.bottom = '16px';
-        button.style.top = 'auto';
+      let rect = placementAnchor?.isConnected ? placementAnchor.getBoundingClientRect() : null;
+      if (!rect?.width) {
+        placementAnchor = null;
+        for (const selector of anchorSelectors) {
+          const candidate = document.querySelector(selector);
+          if (!(candidate instanceof HTMLElement)) continue;
+          const candidateRect = candidate.getBoundingClientRect();
+          if (!candidateRect.width) continue;
+          placementAnchor = candidate;
+          rect = candidateRect;
+          break;
+        }
       }
+      let position;
+      if (placementAnchor) {
+        position = {
+          left: `${Math.round(rect.right + 8)}px`,
+          top: `${Math.round(rect.top + rect.height / 2 - 17)}px`,
+          bottom: 'auto',
+        };
+      } else {
+        position = { left: '16px', bottom: '16px', top: 'auto' };
+      }
+      for (const [key, value] of Object.entries(position)) if (button.style[key] !== value) button.style[key] = value;
+    };
+
+    const cancelPanelResize = () => {
+      panelSizeAnimation?.cancel();
+      panelSizeAnimation = null;
     };
 
     const schedulePlace = () => {
-      cancelAnimationFrame(placementFrame);
-      placementFrame = requestAnimationFrame(placeButton);
+      if (!placementFrame) placementFrame = requestAnimationFrame(placeButton);
     };
 
     const setPanelOpen = (open) => {
@@ -640,6 +680,8 @@ ${legacyRoots} {
       const panel = document.getElementById(IDS.panel);
       if (!(button instanceof HTMLButtonElement) || !(panel instanceof HTMLElement)) return;
       panelOpen = open;
+      syncCosmosPreview();
+      if (!open) releaseInactiveFrame();
       panel.classList.toggle('open', open);
       button.classList.toggle('active', open);
       button.setAttribute('aria-expanded', String(open));
@@ -674,6 +716,12 @@ ${legacyRoots} {
       frame.setAttribute('aria-hidden', 'true');
       frame.setAttribute('tabindex', '-1');
       frame.style.cssText = FRAME_STYLE_ON;
+      frame.onload = () => {
+        if (document.getElementById(IDS.frame) !== frame) return;
+        const active = state.enabled && skinById(state.skin).surface === 'ocean';
+        postToFrame(IDS.frame, { type: 'bs-pause', paused: !active });
+        if (active) postToOcean();
+      };
       root.insertBefore(frame, root.firstChild);
       ownsSurface = true;
       return true;
@@ -687,16 +735,25 @@ ${legacyRoots} {
       const query = new URLSearchParams({
         skin: skin.id,
         controls: 'shared',
+        preview: panelOpen ? '1' : '0',
         parentOrigin: location.origin,
         auto: state.autoCycle ? '1' : '0',
       });
       for (const [key, value] of Object.entries(state.p.cosmos || {})) query.set(key, String(value));
       const frame = document.createElement('iframe');
       frame.id = IDS.cosmos;
+      pointerSent = null;
       frame.src = `${options.assetUrl('cosmos.html')}?${query}`;
       frame.setAttribute('aria-hidden', 'true');
       frame.setAttribute('tabindex', '-1');
       frame.style.cssText = FRAME_STYLE_ON;
+      frame.onload = () => {
+        if (document.getElementById(IDS.cosmos) !== frame) return;
+        pointerSent = null;
+        syncCosmosPreview();
+        postToFrame(IDS.cosmos, { type: 'bs-pause', paused: !state.enabled || skinById(state.skin).surface !== 'cosmos' });
+        schedulePointer();
+      };
       root.insertBefore(frame, root.firstChild);
       ownsSurface = true;
       armReadyWatchdog(skin.id);
@@ -739,6 +796,7 @@ ${legacyRoots} {
         mountOceanFrame();
         setFrameActive(IDS.frame, true);
         postToOcean();
+        postToFrame(IDS.frame, { type: 'bs-pause', paused: false });
         if (document.getElementById(IDS.cosmos)) {
           postToFrame(IDS.cosmos, { type: 'bs-pause', paused: true });
           setFrameActive(IDS.cosmos, false);
@@ -746,11 +804,16 @@ ${legacyRoots} {
       } else {
         mountCosmosFrame();
         setFrameActive(IDS.cosmos, true);
+        syncCosmosPreview();
         postToFrame(IDS.cosmos, { type: 'bs-skin', skin: skin.id, params: { ...state.p.cosmos } });
         postToCosmos();
         postToFrame(IDS.cosmos, { type: 'bs-pause', paused: false });
-        if (document.getElementById(IDS.frame)) setFrameActive(IDS.frame, false);
+        if (document.getElementById(IDS.frame)) {
+          postToFrame(IDS.frame, { type: 'bs-pause', paused: true });
+          setFrameActive(IDS.frame, false);
+        }
       }
+      releaseInactiveFrame();
       syncSkinUi();
     }
 
@@ -1013,6 +1076,7 @@ ${legacyRoots} {
         if (!data || typeof data !== 'object') return;
         if (data.type === 'bs-cosmos-ready') {
           clearTimeout(readyTimer);
+          applySkin();
         } else if (data.type === 'bs-cosmos-error') {
           console.warn('[Backspace] Cosmic skin unavailable:', data.reason);
           fallbackToOcean();
@@ -1028,21 +1092,23 @@ ${legacyRoots} {
       on(document, 'pointermove', (event) => {
         if (!state.enabled || skinById(state.skin).surface !== 'cosmos') return;
         pointerPending = pointerPayload(event);
-        if (pointerFrame) return;
-        pointerFrame = requestAnimationFrame(() => {
-          pointerFrame = 0;
-          if (!pointerPending) return;
-          postToFrame(IDS.cosmos, { type: 'bs-pointer', x: pointerPending[0], y: pointerPending[1] });
-        });
+        schedulePointer();
       }, { passive: true });
       on(document, 'pointerdown', (event) => {
-        if (!state.enabled || skinById(state.skin).surface !== 'cosmos') return;
+        if (!state.enabled || event.button !== 0 || skinById(state.skin).surface !== 'cosmos' || state.p.cosmos.pulse === 0) return;
         if (panel.contains(event.target) || button.contains(event.target)) return;
         const [x, y] = pointerPayload(event);
         postToFrame(IDS.cosmos, { type: 'bs-pulse', x, y });
       }, { passive: true });
 
-      placementObserver = new MutationObserver(schedulePlace);
+      placementObserver = new MutationObserver((records) => {
+        const addedAnchor = records.some(record => [...record.addedNodes].some(node => node instanceof Element
+          && (node.matches(anchorSelector) || node.querySelector(anchorSelector))));
+        if (addedAnchor) placementAnchor = null;
+        if (panelOpen && records.some(record => panel.contains(record.target))) { schedulePlace(); return; }
+        if (placementAnchor && !placementAnchor.isConnected) { placementAnchor = null; schedulePlace(); return; }
+        if (addedAnchor || records.some(record => placementAnchor && record.target.contains(placementAnchor))) schedulePlace();
+      });
       placementObserver.observe(host, { childList: true, subtree: true });
       schedulePlace();
     };
@@ -1052,8 +1118,11 @@ ${legacyRoots} {
       placementObserver?.disconnect();
       placementObserver = null;
       cancelAnimationFrame(placementFrame);
+      placementFrame = 0;
+      placementAnchor = null;
       cancelAnimationFrame(pointerFrame);
       pointerFrame = 0;
+      pointerPending = pointerSent = null;
       clearTimeout(readyTimer);
       while (surfaceCleanups.length > 0) surfaceCleanups.pop()();
       if (ownsSurface) {

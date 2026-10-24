@@ -381,6 +381,9 @@ if (SKIN) {
       if (Number.isFinite(t) && t >= 0 && t <= 100) {
         applyTimeOfDay(t / 100);
       }
+    } else if (d && d.type === 'bs-pause') {
+      hostPaused = d.paused !== false;
+      syncAnimationLoop();
     }
   });
   // tiny debug hook for automated checks
@@ -392,6 +395,10 @@ if (SKIN) {
     renderScale,
     reducedMotion: REDUCED_MOTION,
     lowEndDevice: LOW_END_DEVICE,
+    paused: hostPaused,
+    initialized: loopStarted,
+    loopActive,
+    frames: renderedFrames,
   });
 }
 
@@ -416,6 +423,9 @@ let adaptStamp = performance.now();
 let skinTimeWindow = 0;
 let firstFrameShown = false;
 let loopStarted = false;
+let hostPaused = false;
+let loopActive = false;
+let renderedFrames = 0;
 
 let PIXEL_RATIO_CAP = REDUCED_MOTION ? 0.9 : LOW_END_DEVICE ? 1.0 : 1.5;
 let BASE_PIXEL_RATIO = Math.min(window.devicePixelRatio || 1, PIXEL_RATIO_CAP);
@@ -430,9 +440,29 @@ function applyResolutionScale(scale) {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+function syncAnimationLoop() {
+  if (!loopStarted) return;
+  const active = !hostPaused && !document.hidden;
+  if (active === loopActive) return;
+  loopActive = active;
+  if (!active) {
+    renderer.setAnimationLoop(null);
+    renderer._animation.stop();
+    fpsNow = 0;
+    return;
+  }
+  lastFrameTime = fpsStamp = adaptStamp = performance.now();
+  lastRenderAt = fpsFrames = fpsWindow = adaptWindow = 0;
+  fpsNow = 0;
+  // shortcut: 固定版本 Three 清空回调仍保留 RAF；升级 vendor 时复验此处。
+  renderer._animation.start();
+  renderer.setAnimationLoop(animate);
+}
+
 function animate(now) {
+  if (!loopActive) return;
   // high-resolution timestamp -> delta, clamped so hitches never cause jumps
-  const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+  const dt = Math.max(0, Math.min((now - lastFrameTime) / 1000, 0.1));
   lastFrameTime = now;
 
   uTime.value += dt * (REDUCED_MOTION ? 0.12 : 1);
@@ -443,6 +473,7 @@ function animate(now) {
   lastRenderAt = now;
 
   postProcessing.render();
+  renderedFrames += 1;
 
   // rolling FPS + adaptive resolution (rechecked every 2 s)
   // wall-clock windows: skipped frames must not shrink the meter's time base
@@ -601,16 +632,7 @@ async function boot() {
     });
 
     // --- lifecycle: pause when the tab is hidden -------------------------------
-    document.addEventListener('visibilitychange', () => {
-      if (!loopStarted) return;
-      if (document.hidden) {
-        renderer.setAnimationLoop(null);
-      } else {
-        lastFrameTime = performance.now();
-        lastRenderAt = 0;
-        renderer.setAnimationLoop(animate);
-      }
-    });
+    document.addEventListener('visibilitychange', syncAnimationLoop);
 
     // --- initialize the GPU and start rendering --------------------------------
     await renderer.init();
@@ -627,8 +649,9 @@ async function boot() {
       applyResolutionScale(renderScale);
     }
 
+    renderer._animation.stop();
     loopStarted = true;
-    renderer.setAnimationLoop(animate);
+    syncAnimationLoop();
   } catch (err) {
     showInitError(err);
   }

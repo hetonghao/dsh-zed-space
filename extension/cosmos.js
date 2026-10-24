@@ -6,6 +6,7 @@
 //     { type: 'bs-set',    params, auto }    设置参数 + 公共昼夜开关（controls=shared 使用共用参数）
 //     { type: 'bs-pointer', x, y }           鼠标位置（-1..1，y 向上）
 //     { type: 'bs-pulse',  x, y }            点击脉冲（-1..1，y 向上）
+//     { type: 'bs-preview', active }          设置面板完整预览 / 日常背景帧预算
 //     { type: 'bs-pause',  paused }          暂停/恢复渲染（父页隐藏本帧时）
 //   本帧 → 父页
 //     { type: 'bs-cosmos-ready', skin }      首帧渲染成功（父页据此确认皮肤可用）
@@ -24,6 +25,7 @@ const SKINS = new Map([
 ]);
 const QUERY = new URLSearchParams(location.search);
 const SHARED_CONTROLS = QUERY.get('controls') === 'shared';
+let previewing = QUERY.get('preview') !== '0';
 const TRANSITION_SECONDS = 2.2;
 const PARENT_ORIGIN = QUERY.get('parentOrigin') || '';
 const REDUCED_MOTION = typeof matchMedia === 'function'
@@ -79,9 +81,8 @@ void main() {
 }`,
 };
 
-const FRAME_CAP = REDUCED_MOTION ? 20 : 30;
-const FRAME_MS = 1000 / FRAME_CAP;
-const TARGET_FPS = REDUCED_MOTION ? 18 : 28;
+const PREVIEW_FRAME_CAP = REDUCED_MOTION ? 20 : 30;
+const BACKGROUND_FRAME_CAP = REDUCED_MOTION ? 5 : 10;
 const MIN_SCALE = 0.55;
 const START_SCALE = 1.0;
 const PIXEL_CAP = 2.0;
@@ -257,6 +258,7 @@ let firstFrameMs = -1;
 let drawnSkin = null;
 let frameCount = 0;
 let raf = 0;
+let lastFrameCap = previewing ? PREVIEW_FRAME_CAP : BACKGROUND_FRAME_CAP;
 let ready = false;
 
 let errorReported = false;
@@ -290,6 +292,18 @@ function applySize() {
 // 渲染循环
 // ---------------------------------------------------------------------------
 
+function frameCap() {
+  const interaction = displayedParams.parallax > 0 && pointer.some((value, axis) => value !== pointerTarget[axis]);
+  const pulse = pulseAt >= 0 && displayedParams.pulse > 0 && clock - pulseAt < 2;
+  return previewing || transitionElapsed < TRANSITION_SECONDS || interaction || pulse
+    ? PREVIEW_FRAME_CAP : BACKGROUND_FRAME_CAP;
+}
+
+function resetFrameStats(now) {
+  fpsWindowStart = adaptStart = now;
+  frames = framesSinceAdapt = 0;
+}
+
 function render(now) {
   const dt = paused ? 0 : Math.max(0, Math.min((now - lastFrame) / 1000, 0.1));
   lastFrame = now;
@@ -304,7 +318,13 @@ function render(now) {
   // 十秒后脉冲已低于 8 位颜色精度，清除尾迹以允许静止画面休眠。
   if (pulseAt >= 0 && (displayedParams.pulse === 0 || clock - pulseAt >= 10)) pulseAt = -1;
 
-  if (now - lastRender < FRAME_MS - 0.5) return false;
+  const cap = frameCap();
+  if (cap !== lastFrameCap) {
+    lastFrameCap = cap;
+    resetFrameStats(now);
+    lastRender = 0;
+  }
+  if (now - lastRender < 1000 / cap - 0.5) return false;
   lastRender = now;
 
   try {
@@ -314,10 +334,12 @@ function render(now) {
       framesSinceAdapt = 0;
       adaptStart = now;
       if (measured > 0) {
-        if (measured < TARGET_FPS - 6 && scale > MIN_SCALE) {
+        const target = cap - 2;
+        const floor = cap >= 20 ? target - 6 : cap * 0.6;
+        if (measured < floor && scale > MIN_SCALE) {
           scale = Math.max(MIN_SCALE, +(scale * 0.92).toFixed(3));
           applySize();
-        } else if (measured > TARGET_FPS && scale < 1) {
+        } else if (measured > target && scale < 1) {
           scale = Math.min(1, +(scale * 1.05).toFixed(3));
           applySize();
         }
@@ -364,8 +386,7 @@ function render(now) {
   if (!ready) {
     ready = true;
     firstFrameMs = performance.now();
-    fpsWindowStart = adaptStart = firstFrameMs;
-    frames = framesSinceAdapt = 0;
+    resetFrameStats(firstFrameMs);
     post({ type: 'bs-cosmos-ready', skin: activeSkin.id });
   }
 
@@ -382,7 +403,7 @@ function render(now) {
 // 静止时保留已合成的画面；只有仍会改变像素的输入才维持渲染。
 function needsAnimation() {
   return autoCycle || displayedParams.spin > 0 || transitionElapsed < TRANSITION_SECONDS
-    || pulseAt >= 0 || pointer.some((value, axis) => value !== pointerTarget[axis]);
+    || pulseAt >= 0 || (displayedParams.parallax > 0 && pointer.some((value, axis) => value !== pointerTarget[axis]));
 }
 
 function tick(now) {
@@ -403,8 +424,7 @@ function tick(now) {
 function start() {
   if (!gl || errorReported || paused || document.hidden || raf) return;
   lastFrame = performance.now();
-  fpsWindowStart = adaptStart = lastFrame;
-  frames = framesSinceAdapt = 0;
+  resetFrameStats(lastFrame);
   lastRender = 0;
   raf = requestAnimationFrame(tick);
 }
@@ -420,8 +440,7 @@ function redraw() {
   lastRender = 0;
   lastFrame = performance.now();
   if (!raf) {
-    fpsWindowStart = adaptStart = lastFrame;
-    frames = framesSinceAdapt = 0;
+    resetFrameStats(lastFrame);
   }
   render(lastFrame);
 }
@@ -457,6 +476,9 @@ window.addEventListener('message', (event) => {
     if (paused && data.params) paramsFrom = { ...targetParams };
     if (data.auto !== undefined) autoCycle = data.auto !== false;
     if (paused) redraw(); else start();
+  } else if (data.type === 'bs-preview' && typeof data.active === 'boolean') {
+    previewing = data.active;
+    start();
   } else if (data.type === 'bs-pointer') {
     const x = Number(data.x);
     const y = Number(data.y);
@@ -506,7 +528,8 @@ window.__bsState = () => ({
   renderScale: scale,
   paused,
   idle: ready && !paused && !raf && !document.hidden,
-  frameCap: FRAME_CAP,
+  frameCap: frameCap(),
+  preview: previewing,
   frames: frameCount,
   firstFrameMs,
   drawingBuffer: [canvas.width, canvas.height],
