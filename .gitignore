@@ -12,3 +12,15 @@ docs/screenshots/*.actual.png
 
 # Local release artifacts produced by npm pack
 *.tgz
+
+# 本地实验与素材不入库；仅保留正式规格、票据和进度记录。
+.archify/
+.omo/
+docs/wallpaper-samples/
+.scratch/*
+!.scratch/video-background/
+.scratch/video-background/*
+!.scratch/video-background/spec.md
+!.scratch/video-background/issues/
+!.scratch/video-background/progress.md
+!.scratch/video-background/prototype.md
