@@ -76,7 +76,7 @@ try {
     document.body.append(formal)
     await new Promise(requestAnimationFrame)
     await new Promise(requestAnimationFrame)
-    return { before, after: button.getBoundingClientRect().left, expected: Math.round(formal.firstChild.getBoundingClientRect().right + 8) }
+    return { before, after: button.getBoundingClientRect().left, expected: Math.round(formal.firstChild.getBoundingClientRect().right + 13) }
   }, buttonId)
   assert.equal(promoted.after, promoted.expected, 'a late official settings anchor must replace the cached legacy anchor')
   assert.notEqual(promoted.after, promoted.before)
@@ -223,6 +223,12 @@ try {
   await oldCosmos.dispose()
   await rebuilt.dispose()
 
+  // 流式消息在固定高度的对话区内滚动，避免测试内容撑高整个侧栏。
+  await page.locator('.conversation').evaluate(async element => {
+    element.style.minHeight = '0'
+    element.style.overflow = 'auto'
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  })
   const placement = await page.evaluate(async buttonId => {
     const button = document.getElementById(buttonId)
     const before = button.getBoundingClientRect().toJSON()
@@ -238,7 +244,7 @@ try {
     const after = button.getBoundingClientRect().toJSON()
     observer.disconnect()
     const anchor = document.querySelector('[data-slot="sidebar.settings"] button')
-    const replacement = anchor.cloneNode(true); replacement.style.transform = 'translateX(40px)'; anchor.replaceWith(replacement)
+    const replacement = anchor.cloneNode(true); replacement.style.transform = 'translateY(-40px)'; anchor.replaceWith(replacement)
     await new Promise(requestAnimationFrame)
     await new Promise(requestAnimationFrame)
     return { before, after, styleWrites, moved: button.getBoundingClientRect().toJSON() }
@@ -246,7 +252,8 @@ try {
   assert.equal(placement.styleWrites, 0, 'streamed messages must not repeatedly rewrite the fixed launcher position')
   assert.equal(placement.before.x, placement.after.x)
   assert.equal(placement.before.y, placement.after.y)
-  assert.ok(placement.moved.x >= placement.after.x + 30, 'a replaced settings anchor must still reposition the launcher')
+  assert.equal(placement.moved.x, placement.after.x, 'an account replacement must not shift the conversation-corner launcher')
+  assert.equal(placement.moved.y, placement.after.y, 'account position must not override the conversation bottom edge')
   evidence.push({ scenario: 'streaming-placement-and-anchor-replacement', result: 'PASS', ...placement })
   assert.deepEqual(errors, [])
   await page.close()

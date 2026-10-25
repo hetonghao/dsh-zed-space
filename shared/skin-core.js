@@ -5,10 +5,10 @@
 // adapter, so both installation paths run the same DOM, glass and a11y code.
 //
 // 三皮肤架构（2026-10）：海面（ocean，Walegpu 渲染器）+ 事件视界（horizon）+
-// 吸积涡旋（vortex）。海面沿用 state.sea / state.time，两个宇宙视角共用
-// state.p.cosmos；旧 state.p.horizon / vortex 记录只保留作回退，
-// 整体序列化成一条 JSON 由三条安装入口各自持久化。公共参数（总开关、玻璃、
-// 对话面板、自动昼夜）对三张皮肤都生效。
+// 吸积涡旋（vortex）。海面沿用 state.sea / state.time，宇宙视角分别保存于
+// state.p.views；旧 state.p.cosmos / horizon / vortex 记录保留用于迁移，
+// 整体序列化成一条 JSON 由三条安装入口各自持久化。通用配置按皮肤保存于
+// state.p.general，顶层值保留当前皮肤的投影；只有总开关全局生效。
 (function registerBackspaceSkinCore(global) {
   'use strict';
 
@@ -58,6 +58,7 @@
     Object.freeze({ id: 'vortex', surface: 'cosmos', params: COSMOS_PARAMS }),
   ]);
   const PARAM_GROUPS = [SKINS[0], { id: 'cosmos', surface: 'cosmos', params: COSMOS_PARAMS }];
+  const SKIN_TABS = [SKINS[1], SKINS[2], SKINS[0]];
 
   const skinById = (id) => SKINS.find((skin) => skin.id === id) || SKINS[0];
 
@@ -86,16 +87,38 @@
       glass: '玻璃不透明度',
       enable: '启用 Backspace 皮肤',
       autoCycle: '自动昼夜变化',
-      chatCustom: '对话面板独立背景调整',
+      cosmicCycle: '自动光影变化',
+      chatCustom: '对话面板独立调整',
       chatOpacity: '对话面板不透明度',
       reset: '恢复默认',
-      resetNote: () => resetNoteText('zh'),
-      note: '事件视界与吸积涡旋平滑切换，共用一组宇宙参数；海面保留独立参数，重开 Harness 后恢复。调节即时生效并自动保存；手动设定「日光」会停止自动昼夜变化。开启「对话面板独立背景调整」后，可以用下面的拖动条单独设定中间对话区的背景浓度，100% 即 Harness 原生背景；关闭时对话区跟随上面的「玻璃不透明度」，左右侧栏始终使用主玻璃。两张宇宙皮肤支持鼠标与点击：移动鼠标产生视差/引力，点击产生脉冲。',
+      resetConfirm: '确认恢复',
+      cancel: '取消',
+      resetTitle: (skin) => `恢复「${skin}」的默认配置？`,
+      resetNote: '恢复当前皮肤的效果参数与通用配置。其他皮肤和总开关保持不变。',
+      helpLabel: '说明',
+      saveHint: '即时生效 · 自动保存',
+      help: {
+        skinTitle: '可控制完全开/关 Backspace Skin',
+        sea: '调整海面波浪的大小。海面参数独立保存，不影响宇宙皮肤。',
+        time: '调整海面的日光。手动调节会停止自动昼夜变化，可通过下方开关重新开启。',
+        glow: '调整吸积盘的发光亮度，仅影响当前皮肤。',
+        ring: '调整吸积盘的尺度，仅影响当前皮肤。',
+        turb: '调整气流纹理的细节，仅影响当前皮肤。',
+        warm: '调整气体的冷暖色温，仅影响当前皮肤。',
+        spin: '调整宇宙气流的流动速度，仅影响当前皮肤。',
+        stars: '调整背景星空的浓度，仅影响当前皮肤。',
+        parallax: '移动鼠标时产生视差与引力效果，数值越大，响应越明显。',
+        pulse: '点击背景时产生涟漪脉冲。仅影响当前皮肤。',
+        glass: '调整工作区的玻璃不透明度。左右侧栏始终使用此设置；对话区仅在关闭独立背景时跟随。',
+        autoCycle: '循环变化海面的日光。手动调整「日光」会关闭此开关；不影响宇宙皮肤的光影变化。',
+        cosmicCycle: '让宇宙背景的亮度缓慢起伏。仅影响当前皮肤，与海面昼夜独立。',
+        chatCustom: '开启后，可单独调整中间对话区的背景浓度；关闭后，对话区跟随「玻璃不透明度」。左右侧栏不受此开关影响。',
+        chatOpacity: '单独调整中间对话区的背景浓度。100% 为 Harness 原生背景。',
+      },
       times: ['黄昏', '金色时刻', '下午', '正午'],
       skinTitle: '皮肤',
       ownTitle: '独立配置',
-      cosmosTitle: '宇宙共用参数',
-      commonTitle: '公共配置',
+      commonTitle: '通用配置',
       skins: { ocean: '海面', horizon: '事件视界', vortex: '吸积涡旋' },
       params: {
         sea: '波浪大小', time: '日光',
@@ -111,16 +134,38 @@
       glass: 'Glass opacity',
       enable: 'Enable Backspace skin',
       autoCycle: 'Automatic day cycle',
-      chatCustom: 'Independent conversation background',
+      cosmicCycle: 'Automatic light variation',
+      chatCustom: 'Independent conversation settings',
       chatOpacity: 'Conversation opacity',
       reset: 'Reset to defaults',
-      resetNote: () => resetNoteText('en'),
-      note: 'Event Horizon and Accretion Vortex transition smoothly and share cosmic settings. Ocean settings stay separate, and all settings are restored after a reload. Changes apply immediately and save automatically. Setting daylight manually stops the automatic day cycle. Turning on the independent conversation background lets the slider below set how strongly the center column is tinted; 100% is Harness\'s native background. Switch it off and the conversation follows the glass opacity above, while the sidebars always use the workspace glass. Both cosmic skins react to the mouse and to clicks: pointer movement drives parallax/gravity, a click fires a pulse.',
+      resetConfirm: 'Restore',
+      cancel: 'Cancel',
+      resetTitle: (skin) => `Restore ${skin} defaults?`,
+      resetNote: 'Restore this skin’s effects and general settings. Other skins and the main switch stay unchanged.',
+      helpLabel: 'Help',
+      saveHint: 'Applies instantly · Saves automatically',
+      help: {
+        skinTitle: 'Turn Backspace Skin completely on or off.',
+        sea: 'Adjust the size of the ocean waves. Ocean settings are saved separately from the cosmic skins.',
+        time: 'Adjust ocean daylight. Manual changes stop the automatic day cycle; use the switch below to turn it back on.',
+        glow: 'Adjust the brightness of the accretion disk. Only affects this skin.',
+        ring: 'Adjust the size of the accretion disk. Only affects this skin.',
+        turb: 'Adjust the detail in the gas flow. Only affects this skin.',
+        warm: 'Adjust the gas from cool to warm colors. Only affects this skin.',
+        spin: 'Adjust the speed of the cosmic flow. Only affects this skin.',
+        stars: 'Adjust the density of the background stars. Only affects this skin.',
+        parallax: 'Pointer movement creates parallax and gravity effects. Higher values make the response stronger.',
+        pulse: 'Click the background to create a ripple pulse. Only affects this skin.',
+        glass: 'Adjust workspace glass opacity. Sidebars always use this setting; the conversation follows it when its independent background is off.',
+        autoCycle: 'Cycle ocean daylight automatically. Adjusting daylight manually turns this off. Cosmic light variation is unaffected.',
+        cosmicCycle: 'Slowly vary the cosmic background brightness. Only affects this skin, independently of the ocean day cycle.',
+        chatCustom: 'Set the center conversation background independently. When off, the conversation follows glass opacity. Sidebars are unaffected.',
+        chatOpacity: 'Adjust the center conversation background opacity. At 100%, it matches the native Harness background.',
+      },
       times: ['Dusk', 'Golden hour', 'Afternoon', 'Midday'],
       skinTitle: 'Skin',
       ownTitle: 'Skin settings',
-      cosmosTitle: 'Shared cosmic settings',
-      commonTitle: 'Shared settings',
+      commonTitle: 'General settings',
       skins: { ocean: 'Ocean', horizon: 'Event Horizon', vortex: 'Accretion Vortex' },
       params: {
         sea: 'Sea state', time: 'Daylight',
@@ -130,19 +175,15 @@
     },
   });
 
-  // 恢复默认的说明文案由 SKINS 生成：加皮肤时不用再去改这两段中英文本。
-  const resetNoteText = (lang) => {
-    const cosmicDefaults = COSMOS_PARAMS.map((param) => param.def).join('·');
-    return lang === 'zh'
-      ? `恢复全部默认设置（当前皮肤保持不变）：波浪 50 / 日光 55 / 宇宙共用参数 ${cosmicDefaults} / 玻璃 70 / 自动昼夜开 / 对话面板独立背景开、不透明度 90`
-      : `Restore all defaults (keep the active skin): sea 50 / daylight 55 / shared cosmic settings ${cosmicDefaults} / glass 70 / auto cycle on / independent conversation background on at 90%`;
-  };
-
-  const WAVE_ICON = `
-<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-  <path d="M1.5 8.5c1.2-1.7 2.4-1.7 3.6 0s2.4 1.7 3.6 0 1.9-1.2 3-0.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-  <path d="M1.5 12c1.2-1.4 2.4-1.4 3.6 0s2.4 1.4 3.6 0 1.9-1 3-.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/>
+  const BLACK_HOLE_ICON = `
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <ellipse cx="12" cy="12" rx="10" ry="3.8" transform="rotate(-25 12 12)" stroke="currentColor" stroke-width="1.4"/>
+  <circle cx="12" cy="12" r="5" fill="#091114" stroke="currentColor" stroke-width="1.5"/>
+  <path d="M3.1 16.2c2.5.8 6.1.1 10.1-1.8s7.2-4.3 7.8-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
 </svg>`;
+
+  const HELP_ICON = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.75" stroke="currentColor" stroke-width="1.25"/><path d="M8 7.2v3.4M8 5.2v.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  const CLOSE_ICON = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 
   // 宇宙皮肤若在此时限内没有报「首帧成功」，视为加载失败并回退海面。
   const COSMOS_READY_TIMEOUT = 8000;
@@ -154,7 +195,7 @@
 
   const isRecord = (value) => value && typeof value === 'object' && !Array.isArray(value);
 
-  function normalizeParams(raw, activeSkin = 'horizon') {
+  function normalizeParams(raw, activeSkin = 'horizon', legacyAutoCycle = true) {
     const source = isRecord(raw) ? raw : {};
     const out = {};
     for (const id of ['horizon', 'vortex']) {
@@ -177,20 +218,42 @@
     for (const param of COSMOS_PARAMS) {
       out.cosmos[param.key] = clamp(given[param.key], param.min, param.max, param.def);
     }
+    out.views = {};
+    for (const id of ['horizon', 'vortex']) {
+      const profile = isRecord(source.views?.[id]) ? source.views[id] : {};
+      const params = {};
+      for (const param of COSMOS_PARAMS) {
+        params[param.key] = clamp(profile.params?.[param.key], param.min, param.max, out.cosmos[param.key]);
+      }
+      out.views[id] = { params, autoCycle: typeof profile.autoCycle === 'boolean' ? profile.autoCycle : legacyAutoCycle !== false };
+    }
     return out;
   }
 
+  const GENERAL_KEYS = ['glass', 'chatCustom', 'chatOpacity'];
+  const normalizeGeneral = (raw) => ({
+    glass: clamp(raw.glass, 40, 90, DEFAULTS.glass),
+    chatCustom: raw.chatCustom === true,
+    chatOpacity: clamp(raw.chatOpacity, CHAT_OPACITY_MIN, CHAT_OPACITY_MAX, DEFAULTS.chatOpacity),
+  });
+
   function normalize(raw) {
+    const skin = SKINS.some((skin) => skin.id === raw.skin) ? raw.skin : DEFAULTS.skin;
+    const p = normalizeParams(raw.p, raw.skin, raw.autoCycle);
+    const legacy = normalizeGeneral(raw);
+    p.general = {};
+    for (const { id } of SKINS) {
+      const profile = raw.p?.general?.[id];
+      p.general[id] = normalizeGeneral({ ...legacy, ...(isRecord(profile) ? profile : {}) });
+    }
     return {
       enabled: raw.enabled !== false,
-      skin: SKINS.some((skin) => skin.id === raw.skin) ? raw.skin : DEFAULTS.skin,
+      skin,
       sea: clamp(raw.sea, 0, 100, DEFAULTS.sea),
       time: clamp(raw.time, 0, 100, DEFAULTS.time),
-      glass: clamp(raw.glass, 40, 90, DEFAULTS.glass),
       autoCycle: raw.autoCycle !== false,
-      chatCustom: raw.chatCustom === true,
-      chatOpacity: clamp(raw.chatOpacity, CHAT_OPACITY_MIN, CHAT_OPACITY_MAX, DEFAULTS.chatOpacity),
-      p: normalizeParams(raw.p, raw.skin),
+      ...p.general[skin],
+      p,
     };
   }
 
@@ -473,68 +536,105 @@ ${legacyRoots} {
 
   function uiCss() {
     return `
+#${IDS.button}, #${IDS.panel}, #${IDS.panel}-help {
+  --bs-surface:#f9fbfc; --bs-inset:#edf2f4; --bs-text:#23353c; --bs-muted:#586b74;
+  --bs-line:#d7e0e4; --bs-accent:#126e69; --bs-selected:#dcefeb; --bs-track:#bfccd2;
+  color:var(--bs-text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  box-sizing:border-box; color-scheme:light;
+}
+body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel}, body[data-ds-dark-theme] #${IDS.panel}-help {
+  --bs-surface:#171f26; --bs-inset:#222d35; --bs-text:#e4edf0; --bs-muted:#a2b3bd;
+  --bs-line:#35444e; --bs-accent:#8fe9e4; --bs-selected:#294644; --bs-track:#536671;
+  color-scheme:dark;
+}
 #${IDS.button} {
-  position: fixed; z-index: 6000; width: 34px; height: 34px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 10px; border: 1px solid rgba(255,255,255,.14);
-  background: rgba(12,16,22,.58); backdrop-filter: blur(14px) saturate(130%);
-  color: #9fb3bd; cursor: pointer; padding: 0;
-  transition: color .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .1s ease;
+  position:fixed; z-index:6000; width:38px; height:38px; padding:0;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  border-radius:11px; border:1px solid var(--bs-line); background:var(--bs-surface);
+  color:var(--bs-muted); box-shadow:0 2px 6px rgba(9,22,30,.08);
+  transition:color .16s ease, border-color .16s ease, background .16s ease;
 }
-#${IDS.button}:hover { color:#8fe9e4; border-color:rgba(143,233,228,.5); background:rgba(16,22,30,.72); }
-#${IDS.button}.active { color:#dafdfb; border-color:rgba(143,233,228,.55); background:rgba(143,233,228,.14); box-shadow:0 0 14px rgba(143,233,228,.25); }
-#${IDS.button}:active { transform:scale(.94); }
-#${IDS.button}:focus-visible, #${IDS.panel} button:focus-visible, #${IDS.panel} input:focus-visible { outline:2px solid rgba(143,233,228,.7); outline-offset:2px; }
+#${IDS.button}:hover, #${IDS.button}.active { color:var(--bs-accent); border-color:var(--bs-accent); background:var(--bs-selected); }
+#${IDS.button}:active { background:var(--bs-inset); }
+#${IDS.button} > svg { transition:transform .24s cubic-bezier(.16,1,.3,1); }
+#${IDS.button}:hover > svg, #${IDS.button}.active > svg { transform:rotate(18deg) scale(1.08); }
+#${IDS.button} .bs-launcher-tip { position:absolute; bottom:calc(100% + 8px); left:0; width:max-content; padding:7px 10px; border:1px solid var(--bs-line); border-radius:8px; background:var(--bs-surface); color:var(--bs-text); font-size:12px; line-height:1.5; box-shadow:0 4px 16px rgba(9,22,30,.14); pointer-events:none; visibility:hidden; }
+#${IDS.button}:is(:hover,:focus-visible):not(.active) .bs-launcher-tip { visibility:visible; }
+#${IDS.button}:focus-visible, #${IDS.panel} button:focus-visible, #${IDS.panel} input:focus-visible { outline:2px solid var(--bs-accent); outline-offset:3px; }
 #${IDS.panel} {
-  position:fixed; z-index:6001; width:262px; padding:16px;
-  border-radius:16px; border:1px solid rgba(255,255,255,.14);
-  background:rgba(10,14,20,.86); backdrop-filter:blur(22px) saturate(140%);
-  box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.1);
-  color:#eef4f6; font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
-  display:none; flex-direction:column;
-  /* 1280x600 及更小的视口里，面板整体不超出屏幕，内容区自己滚动 */
-  max-height:calc(100vh - 88px);
+  position:fixed; z-index:6001; width:360px; max-width:calc(100vw - 24px); padding:20px;
+  border-radius:18px; border:1px solid var(--bs-line); background:var(--bs-surface) !important;
+  box-shadow:0 16px 48px rgba(9,22,30,.2), 0 3px 10px rgba(9,22,30,.08);
+  display:none; flex-direction:column; max-height:calc(100dvh - 24px); font-size:13px; line-height:1.5;
 }
+#${IDS.panel} * { box-sizing:border-box; }
+#${IDS.panel} button, #${IDS.panel} input { font:inherit; }
 #${IDS.panel}.open { display:flex; }
-#${IDS.panel} .bs-title { display:flex; align-items:center; justify-content:space-between; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.6); margin-bottom:12px; flex:0 0 auto; }
-#${IDS.panel} .bs-mark, #${IDS.panel} .bs-value { color:#8fe9e4; }
-#${IDS.panel} .bs-close { background:none; border:0; color:rgba(255,255,255,.55); font-size:18px; line-height:1; cursor:pointer; padding:3px 6px; border-radius:6px; }
-#${IDS.panel} .bs-close:hover { color:#fff; background:rgba(255,255,255,.08); }
-#${IDS.panel} .bs-tabs { display:flex; flex-wrap:wrap; gap:4px; flex:0 0 auto; }
+#${IDS.panel} ::selection { background:var(--bs-selected); color:var(--bs-text); }
+#${IDS.panel} .bs-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex:0 0 auto; }
+#${IDS.panel} .bs-brand { display:flex; align-items:center; gap:9px; font-size:18px; font-weight:600; letter-spacing:-.02em; }
+#${IDS.panel} .bs-brand svg { color:var(--bs-accent); }
+#${IDS.panel} .bs-close { display:grid; place-items:center; width:30px; height:30px; padding:0; border:0; border-radius:8px; background:transparent; color:var(--bs-muted); cursor:pointer; }
+#${IDS.panel} .bs-close:hover { color:var(--bs-text); background:var(--bs-inset); }
+#${IDS.panel} .bs-switch.bs-skin-heading { display:flex; align-items:center; justify-content:flex-start; gap:6px; margin:0 0 7px; min-height:24px; font-weight:500; }
+#${IDS.panel} .bs-tabs { position:relative; isolation:isolate; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; padding:4px; border-radius:11px; background:var(--bs-inset); flex:0 0 auto; }
+#${IDS.panel} .bs-tabs::before { content:''; box-sizing:border-box; position:absolute; z-index:-1; top:4px; bottom:4px; left:4px; width:calc((100% - 16px) / 3); border:1px solid var(--bs-line); border-radius:8px; background:var(--bs-surface); box-shadow:0 2px 5px rgba(9,22,30,.08); transform:translateX(calc(var(--bs-tab-index, 0) * 100% + var(--bs-tab-index, 0) * 4px)); transition:transform .24s cubic-bezier(.16,1,.3,1); }
 #${IDS.panel} .bs-tab {
-  flex:1 1 0; min-width:calc(33.333% - 4px); padding:6px 2px; border-radius:8px; cursor:pointer;
-  border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05);
-  color:rgba(255,255,255,.72); font-size:10px; line-height:1.3; letter-spacing:.02em;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  transition:background .15s ease, color .15s ease, border-color .15s ease;
+  min-width:0; padding:8px 3px; border:1px solid transparent; border-radius:8px; cursor:pointer;
+  background:transparent; color:var(--bs-muted); font-size:12px; line-height:1.35;
+  transition:color .14s ease, transform .14s cubic-bezier(.16,1,.3,1);
 }
-#${IDS.panel} .bs-tab:hover { color:#fff; border-color:rgba(143,233,228,.45); }
-#${IDS.panel} .bs-tab[aria-selected='true'] { background:#8fe9e4; border-color:#8fe9e4; color:#08161a; font-weight:600; }
-#${IDS.panel} .bs-scroll { overflow-y:auto; overscroll-behavior:contain; padding-right:3px; min-height:0; }
-#${IDS.panel} .bs-scroll::-webkit-scrollbar { width:6px; }
-#${IDS.panel} .bs-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,.16); border-radius:3px; }
-#${IDS.panel} .bs-group-title { margin:13px 0 1px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.42); }
-#${IDS.panel} .bs-skin-group[hidden] { display:none; }
-#${IDS.panel} .bs-row { margin-top:11px; }
-/* The conversation slider is a child of its switch: indented, and hidden
-   entirely (including from the tab order) while the switch is off. */
-#${IDS.panel} .bs-sub { margin-top:9px; padding-left:11px; border-left:2px solid rgba(143,233,228,.28); }
-#${IDS.panel} .bs-sub[hidden] { display:none; }
-#${IDS.panel} .bs-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px; font-size:11px; letter-spacing:.1em; color:rgba(255,255,255,.7); }
-#${IDS.panel} .bs-value { font-variant-numeric:tabular-nums; }
-#${IDS.panel} input[type='range'] { appearance:none; display:block; width:100%; height:14px; margin:0; padding:0; background:transparent; cursor:pointer; }
-#${IDS.panel} input[type='range']::-webkit-slider-runnable-track { height:3px; border-radius:2px; background:rgba(255,255,255,.2); }
-#${IDS.panel} input[type='range']::-webkit-slider-thumb { appearance:none; width:14px; height:14px; margin-top:-5.5px; border:0; border-radius:50%; background:#8fe9e4; box-shadow:0 0 10px rgba(143,233,228,.75); }
-#${IDS.panel} input[type='range']::-moz-range-track { height:3px; border-radius:2px; background:rgba(255,255,255,.2); }
-#${IDS.panel} input[type='range']::-moz-range-thumb { width:14px; height:14px; border:0; border-radius:50%; background:#8fe9e4; box-shadow:0 0 10px rgba(143,233,228,.75); }
-#${IDS.panel} .bs-note { margin-top:12px; font-size:10px; line-height:1.65; color:rgba(255,255,255,.46); }
-#${IDS.panel} .bs-switch { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-#${IDS.panel} .bs-switch label { font-size:11px; color:rgba(255,255,255,.7); }
-#${IDS.panel} .bs-switch input[type='checkbox'] { width:15px; height:15px; margin:0; accent-color:#8fe9e4; cursor:pointer; }
-#${IDS.panel} .bs-reset { width:100%; margin-top:14px; padding:7px 0; border-radius:8px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); color:#eef4f6; font-size:11px; cursor:pointer; transition:background .15s ease, border-color .15s ease; }
-#${IDS.panel} .bs-reset:hover { background:rgba(143,233,228,.12); border-color:rgba(143,233,228,.4); }
-@media (prefers-reduced-motion: reduce) {
-  #${IDS.button}, #${IDS.panel}, #${IDS.panel} * { transition:none !important; }
+#${IDS.panel} .bs-tab:hover { color:var(--bs-text); transform:translateY(-1px); }
+#${IDS.panel} .bs-tab:active { transform:scale(.96); }
+#${IDS.panel} .bs-tab[aria-selected='true'] { color:var(--bs-accent); font-weight:600; }
+#${IDS.panel} .bs-scroll { flex:1 1 auto; overflow-y:auto; overflow-anchor:none; overscroll-behavior:contain; min-height:0; padding:0 4px 0 3px; margin:0 -4px 0 -3px; scrollbar-width:thin; scrollbar-color:var(--bs-track) transparent; }
+#${IDS.panel} .bs-skin-region, #${IDS.panel} .bs-group { display:flow-root; }
+#${IDS.panel} .bs-group-title { margin:16px 0 8px; color:var(--bs-muted); font-size:12px; font-weight:500; }
+#${IDS.panel} .bs-skin-group[hidden], #${IDS.panel} .bs-sub[hidden], #${IDS.panel}-help[hidden] { display:none; }
+#${IDS.panel} .bs-group { margin-top:16px; padding-top:16px; border-top:1px solid var(--bs-line); }
+#${IDS.panel} .bs-group > .bs-group-title { margin:0 0 8px; }
+#${IDS.panel} .bs-params { display:grid; gap:10px; align-items:end; }
+#${IDS.panel} #${IDS.panel}-cosmos .bs-params { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 20px; }
+#${IDS.panel} .bs-head { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:3px; }
+#${IDS.panel} .bs-label { display:flex; align-items:center; gap:2px; min-width:0; }
+#${IDS.panel} .bs-label label { cursor:pointer; }
+#${IDS.panel} .bs-value { color:var(--bs-accent); font-size:12px; font-weight:500; font-variant-numeric:tabular-nums; white-space:nowrap; }
+#${IDS.panel} input[type='range'] { appearance:none; display:block; width:100%; height:22px; margin:0; padding:0; background:transparent; cursor:pointer; --bs-fill:50%; }
+#${IDS.panel} input[type='range']::-webkit-slider-runnable-track { height:4px; border-radius:4px; background:linear-gradient(to right,var(--bs-accent) var(--bs-fill),var(--bs-track) var(--bs-fill)); }
+#${IDS.panel} input[type='range']::-webkit-slider-thumb { appearance:none; width:14px; height:14px; margin-top:-5px; border:2px solid var(--bs-surface); border-radius:50%; background:var(--bs-accent); box-shadow:0 1px 4px rgba(9,22,30,.25); }
+#${IDS.panel} input[type='range']::-moz-range-track { height:4px; border-radius:4px; background:var(--bs-track); }
+#${IDS.panel} input[type='range']::-moz-range-progress { height:4px; border-radius:4px; background:var(--bs-accent); }
+#${IDS.panel} input[type='range']::-moz-range-thumb { width:12px; height:12px; border:2px solid var(--bs-surface); border-radius:50%; background:var(--bs-accent); }
+#${IDS.panel} .bs-switch { display:flex; align-items:center; justify-content:space-between; gap:14px; min-height:34px; margin-top:4px; }
+#${IDS.panel} .bs-switch input[type='checkbox'] { appearance:none; position:relative; flex:0 0 32px; width:32px; height:20px; margin:0; border:1px solid var(--bs-track); border-radius:12px; background:var(--bs-track); cursor:pointer; transition:background .16s ease; }
+#${IDS.panel} .bs-switch input[type='checkbox']::after { content:''; position:absolute; width:14px; height:14px; top:2px; left:2px; border-radius:50%; background:var(--bs-surface); box-shadow:0 1px 3px rgba(9,22,30,.18); transition:transform .16s ease; }
+#${IDS.panel} .bs-switch input[type='checkbox']:checked { background:var(--bs-accent); border-color:var(--bs-accent); }
+#${IDS.panel} .bs-switch input[type='checkbox']:checked::after { transform:translateX(12px); }
+#${IDS.panel} .bs-sub { margin:2px 0 6px; padding:8px 12px; border-radius:9px; background:var(--bs-inset); }
+#${IDS.panel} .bs-help { display:inline-grid; place-items:center; flex:0 0 24px; width:24px; height:24px; padding:0; border:0; border-radius:6px; background:transparent; color:var(--bs-muted); cursor:help; }
+#${IDS.panel} .bs-help:hover, #${IDS.panel} .bs-help[aria-describedby] { color:var(--bs-accent); }
+#${IDS.panel}-help { position:fixed; z-index:6002; width:280px; max-width:calc(100vw - 24px); border:1px solid var(--bs-line); border-radius:10px; background:var(--bs-surface) !important; color:var(--bs-text); box-shadow:0 8px 28px rgba(9,22,30,.2); font-size:12px; line-height:1.65; overflow-wrap:break-word; }
+#${IDS.panel}-help > div { box-sizing:border-box; overflow-y:auto; padding:12px 14px; scrollbar-width:thin; scrollbar-color:var(--bs-track) transparent; }
+#${IDS.panel}-help::after { content:''; position:absolute; left:0; right:0; top:100%; height:8px; }
+#${IDS.panel} .bs-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; padding-top:12px; margin-top:12px; border-top:1px solid var(--bs-line); flex:0 0 auto; }
+#${IDS.panel} .bs-save-hint { color:var(--bs-muted); font-size:11px; }
+#${IDS.panel} .bs-reset-wrap { display:flex; align-items:center; flex:0 0 auto; gap:1px; }
+#${IDS.panel} .bs-reset { padding:6px 8px; border-radius:7px; border:1px solid transparent; background:transparent; color:var(--bs-text); font-size:12px; cursor:pointer; transition:background .16s ease; }
+#${IDS.panel} .bs-reset:hover:not(:disabled) { border-color:var(--bs-line); background:var(--bs-inset); }
+#${IDS.panel} .bs-reset:disabled { color:var(--bs-muted); opacity:.5; cursor:default; }
+#${IDS.panel} .bs-reset-confirm { position:fixed; inset:auto; margin:0; width:280px; max-width:calc(100vw - 24px); padding:14px; border:1px solid var(--bs-line); border-radius:12px; background:var(--bs-surface) !important; color:var(--bs-text); box-shadow:0 8px 28px rgba(9,22,30,.2); font-size:12px; line-height:1.6; }
+#${IDS.panel} .bs-reset-confirm strong { display:block; font-size:13px; font-weight:600; }
+#${IDS.panel} .bs-confirm-actions { display:flex; justify-content:flex-end; gap:6px; margin-top:12px; }
+#${IDS.panel} .bs-confirm-actions button { padding:6px 10px; border:1px solid var(--bs-line); border-radius:7px; background:var(--bs-inset); color:var(--bs-text); cursor:pointer; }
+#${IDS.panel} .bs-confirm-actions button:hover { border-color:var(--bs-accent); }
+#${IDS.panel} .bs-confirm-actions .bs-confirm-restore { background:var(--bs-selected); color:var(--bs-accent); }
+@media (max-width:380px) {
+  #${IDS.panel} { padding:16px; }
+  #${IDS.panel} .bs-footer { align-items:flex-start; }
+  #${IDS.panel} #${IDS.panel}-cosmos .bs-params { grid-template-columns:1fr; }
+}
+@media (prefers-reduced-motion:reduce) {
+  #${IDS.button}, #${IDS.button} > svg, #${IDS.panel}, #${IDS.panel} *, #${IDS.panel} .bs-tabs::before { transition:none !important; }
 }`;
   }
 
@@ -554,8 +654,15 @@ ${legacyRoots} {
     let panelOpen = false;
     let previousFocus = null;
     let placementObserver = null;
+    let placementResizeObserver = null;
+    let placementTargets = [];
     let placementFrame = 0;
     let placementAnchor = null;
+    let hideHelp = () => {};
+    let hideResetConfirm = () => {};
+    let panelAnimation = null;
+    let panelSizeAnimation = null;
+    let sectionSizeAnimations = [];
     let readyTimer = 0;
     let pointerFrame = 0;
     let pointerPending = null;
@@ -568,8 +675,21 @@ ${legacyRoots} {
       surfaceCleanups.push(() => target.removeEventListener(event, listener, settings));
     };
 
+    const mergePatch = (patch) => {
+      const next = normalize({ ...state, ...patch });
+      if (GENERAL_KEYS.some(key => Object.hasOwn(patch, key))) {
+        const general = normalizeGeneral({ ...next.p.general[next.skin], ...patch });
+        next.p.general[next.skin] = general;
+        Object.assign(next, general);
+      }
+      return next;
+    };
+
     const save = (patch) => {
-      state = normalize({ ...state, ...patch });
+      state = mergePatch(patch);
+      if (Object.hasOwn(patch, 'skin') || GENERAL_KEYS.some(key => Object.hasOwn(patch, key))) {
+        patch = { ...patch, ...state.p.general[state.skin], p: state.p };
+      }
       return Promise.resolve(options.storage.set(patch)).catch((error) => {
         console.warn('[Backspace] Failed to save settings.', error);
       });
@@ -588,6 +708,8 @@ ${legacyRoots} {
       frame.contentWindow.postMessage(payload, targetOrigin);
     };
 
+    const cosmicSettings = () => state.p.views[state.skin === 'vortex' ? 'vortex' : 'horizon'];
+
     const postToOcean = () => {
       postToFrame(IDS.frame, {
         type: 'bs-set', sea: state.sea, t: state.time, auto: state.autoCycle,
@@ -597,16 +719,16 @@ ${legacyRoots} {
     const postToCosmos = () => {
       const skin = skinById(state.skin);
       if (skin.surface !== 'cosmos') return;
-      postToFrame(IDS.cosmos, { type: 'bs-set', params: { ...state.p.cosmos }, auto: state.autoCycle });
+      postToFrame(IDS.cosmos, { type: 'bs-set', params: { ...cosmicSettings().params }, auto: cosmicSettings().autoCycle });
       schedulePointer();
     };
 
     const schedulePointer = () => {
-      if (pointerFrame || !pointerPending || !state.enabled || skinById(state.skin).surface !== 'cosmos' || state.p.cosmos.parallax === 0) return;
+      if (pointerFrame || !pointerPending || !state.enabled || skinById(state.skin).surface !== 'cosmos' || cosmicSettings().params.parallax === 0) return;
       if (pointerSent && pointerPending.every((value, axis) => value === pointerSent[axis])) return;
       pointerFrame = requestAnimationFrame(() => {
         pointerFrame = 0;
-        if (!pointerPending || !state.enabled || skinById(state.skin).surface !== 'cosmos' || state.p.cosmos.parallax === 0) return;
+        if (!pointerPending || !state.enabled || skinById(state.skin).surface !== 'cosmos' || cosmicSettings().params.parallax === 0) return;
         postToFrame(IDS.cosmos, { type: 'bs-pointer', x: pointerPending[0], y: pointerPending[1] });
         pointerSent = pointerPending;
       });
@@ -635,6 +757,7 @@ ${legacyRoots} {
 
     const anchorSelectors = ['[data-slot="sidebar.settings"] button', '[data-testid="settings-trigger"]', '.VOzbGW_trigger'];
     const anchorSelector = anchorSelectors.join(',');
+    const sidebarSelector = 'div:has(> [data-shell-overlay]) > :first-child, .dshDesktopSidebarSurface, .pI_x6G_sidebarCol, aside';
 
     const placeButton = () => {
       placementFrame = 0;
@@ -653,22 +776,61 @@ ${legacyRoots} {
           break;
         }
       }
+      const sidebar = placementAnchor
+        ? placementAnchor.closest(sidebarSelector)
+        : document.querySelector(sidebarSelector);
+      const conversation = sidebar && CONVERSATION_ROOTS.map(selector => document.querySelector(selector))
+        .find(element => element instanceof HTMLElement && element.getBoundingClientRect().height > 0);
+      const targets = [sidebar, conversation, sidebar ? null : placementAnchor];
+      if (targets.some((target, index) => target !== placementTargets[index])) {
+        placementResizeObserver?.disconnect();
+        for (const target of targets) if (target) placementResizeObserver?.observe(target, { box: 'border-box' });
+        placementTargets = targets;
+      }
+      const sidebarRect = sidebar?.getBoundingClientRect();
+      const conversationRect = conversation?.getBoundingClientRect();
+      const surfaceRect = conversationRect || sidebarRect;
+      const edge = conversationRect?.left ?? sidebarRect?.right ?? (placementAnchor ? rect.right : null);
+      const left = edge === null ? '13px'
+        : `${Math.max(12, Math.min(Math.round(edge + 13), window.innerWidth - button.offsetWidth - 12))}px`;
       let position;
-      if (placementAnchor) {
+      if (surfaceRect || placementAnchor) {
+        const top = surfaceRect ? surfaceRect.bottom - button.offsetHeight - 13
+          : rect.top + (rect.height - button.offsetHeight) / 2;
         position = {
-          left: `${Math.round(rect.right + 8)}px`,
-          top: `${Math.round(rect.top + rect.height / 2 - 17)}px`,
+          left,
+          top: `${Math.max(12, Math.min(Math.round(top), window.innerHeight - button.offsetHeight - 12))}px`,
           bottom: 'auto',
         };
       } else {
-        position = { left: '16px', bottom: '16px', top: 'auto' };
+        position = { left, bottom: '13px', top: 'auto' };
       }
       for (const [key, value] of Object.entries(position)) if (button.style[key] !== value) button.style[key] = value;
+      if (panelOpen) placePanel();
     };
 
     const cancelPanelResize = () => {
       panelSizeAnimation?.cancel();
       panelSizeAnimation = null;
+      for (const animation of sectionSizeAnimations) animation.cancel();
+      sectionSizeAnimations = [];
+    };
+
+    const placePanel = () => {
+      if (panelSizeAnimation) return;
+      const button = document.getElementById(IDS.button);
+      const panel = document.getElementById(IDS.panel);
+      if (!button || !panel) return;
+      const rect = button.getBoundingClientRect();
+      const aboveSpace = rect.top - 22;
+      const belowSpace = window.innerHeight - rect.bottom - 22;
+      panel.style.maxHeight = `${Math.min(window.innerHeight - 24, Math.max(240, aboveSpace, belowSpace))}px`;
+      const left = Math.max(12, Math.min(rect.right - panel.offsetWidth, window.innerWidth - panel.offsetWidth - 12));
+      const above = rect.top - panel.offsetHeight - 10;
+      const top = above >= 12 ? above : Math.max(12, Math.min(rect.bottom + 10, window.innerHeight - panel.offsetHeight - 12));
+      panel.style.left = `${left}px`;
+      panel.style.top = `${top}px`;
+      panel.style.transformOrigin = `${rect.left + rect.width / 2 - left}px ${above >= 12 ? '100%' : '0%'}`;
     };
 
     const schedulePlace = () => {
@@ -679,17 +841,29 @@ ${legacyRoots} {
       const button = document.getElementById(IDS.button);
       const panel = document.getElementById(IDS.panel);
       if (!(button instanceof HTMLButtonElement) || !(panel instanceof HTMLElement)) return;
+      if (panelOpen === open) return;
+      cancelPanelResize();
+      if (panelOpen) placePanel();
+      const current = panelAnimation ? {
+        opacity: getComputedStyle(panel).opacity,
+        transform: getComputedStyle(panel).transform,
+        clipPath: getComputedStyle(panel).clipPath,
+      } : null;
+      panelAnimation?.cancel();
+      panelAnimation = null;
       panelOpen = open;
       syncCosmosPreview();
       if (!open) releaseInactiveFrame();
-      panel.classList.toggle('open', open);
+      panel.classList.add('open');
+      panel.inert = !open;
+      panel.setAttribute('aria-hidden', String(!open));
       button.classList.toggle('active', open);
       button.setAttribute('aria-expanded', String(open));
+      hideHelp();
+      hideResetConfirm();
       if (open) {
         previousFocus = document.activeElement;
-        const rect = button.getBoundingClientRect();
-        panel.style.left = `${Math.min(Math.max(12, rect.left - panel.offsetWidth + 34), window.innerWidth - panel.offsetWidth - 12)}px`;
-        panel.style.bottom = `${Math.max(12, window.innerHeight - rect.top + 10)}px`;
+        placePanel();
         // 焦点落在当前皮肤的可见控件上，避免落到隐藏皮肤的行里
         const first = panel.querySelector('.bs-skin-group:not([hidden]) input[type=\'range\']')
           || panel.querySelector('input');
@@ -697,6 +871,20 @@ ${legacyRoots} {
       } else if (previousFocus instanceof HTMLElement) {
         previousFocus.focus();
       }
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        panel.classList.toggle('open', open);
+        return;
+      }
+      const expanded = { opacity: 1, transform: 'none', clipPath: 'inset(0 round 18px)' };
+      const folded = { opacity: 0, transform: 'translateY(10px) scale(.94)', clipPath: 'inset(10% 4% 0 round 24px)' };
+      panelAnimation = panel.animate([current || (open ? folded : expanded), open ? expanded : folded], {
+        duration: open ? 240 : 140,
+        easing: open ? 'cubic-bezier(.16,1,.3,1)' : 'cubic-bezier(.4,0,1,1)',
+      });
+      panelAnimation.onfinish = () => {
+        panelAnimation = null;
+        if (!panelOpen) panel.classList.remove('open');
+      };
     };
 
     // 海面 iframe：与 1.2.6 完全一致（skin.html + ?skin=1）
@@ -737,9 +925,9 @@ ${legacyRoots} {
         controls: 'shared',
         preview: panelOpen ? '1' : '0',
         parentOrigin: location.origin,
-        auto: state.autoCycle ? '1' : '0',
+        auto: cosmicSettings().autoCycle ? '1' : '0',
       });
-      for (const [key, value] of Object.entries(state.p.cosmos || {})) query.set(key, String(value));
+      for (const [key, value] of Object.entries(cosmicSettings().params)) query.set(key, String(value));
       const frame = document.createElement('iframe');
       frame.id = IDS.cosmos;
       pointerSent = null;
@@ -791,6 +979,7 @@ ${legacyRoots} {
     function applySkin() {
       if (!state.enabled) return;
       ensureGlassStyle();
+      updateGlass();
       const skin = skinById(state.skin);
       if (skin.surface === 'ocean') {
         mountOceanFrame();
@@ -805,7 +994,7 @@ ${legacyRoots} {
         mountCosmosFrame();
         setFrameActive(IDS.cosmos, true);
         syncCosmosPreview();
-        postToFrame(IDS.cosmos, { type: 'bs-skin', skin: skin.id, params: { ...state.p.cosmos } });
+        postToFrame(IDS.cosmos, { type: 'bs-skin', skin: skin.id, params: { ...cosmicSettings().params } });
         postToCosmos();
         postToFrame(IDS.cosmos, { type: 'bs-pause', paused: false });
         if (document.getElementById(IDS.frame)) {
@@ -823,7 +1012,8 @@ ${legacyRoots} {
       if (!SKINS.some((skin) => skin.id === id) || id === state.skin) return;
       state.skin = id;
       void save({ skin: id });
-      applySkin();
+      if (state.enabled) applySkin();
+      else syncSkinUi();
     };
 
     const mountUi = () => {
@@ -836,56 +1026,127 @@ ${legacyRoots} {
       const button = document.createElement('button');
       button.id = IDS.button;
       button.type = 'button';
-      button.title = copy.button;
       button.setAttribute('aria-label', copy.button);
       button.setAttribute('aria-controls', IDS.panel);
       button.setAttribute('aria-expanded', 'false');
-      button.innerHTML = WAVE_ICON;
+      button.setAttribute('aria-haspopup', 'dialog');
+      button.innerHTML = `${BLACK_HOLE_ICON}<span class="bs-launcher-tip" aria-hidden="true">${copy.button}</span>`;
 
       const panel = document.createElement('div');
       panel.id = IDS.panel;
       panel.setAttribute('role', 'dialog');
       panel.setAttribute('aria-modal', 'false');
       panel.setAttribute('aria-label', copy.button);
+      panel.setAttribute('aria-hidden', 'true');
+      panel.inert = true;
 
+      const helpButton = (key) => `<button class="bs-help" type="button" data-help="${key}">${HELP_ICON}</button>`;
       const skinRows = (skin) => skin.params.map((param) => `
         <div class="bs-row">
-          <div class="bs-head"><label for="${paramDomId(skin, param)}-range">${paramLabel(copy, skin, param)}</label><output class="bs-value" id="${paramDomId(skin, param)}" for="${paramDomId(skin, param)}-range"></output></div>
+          <div class="bs-head"><span class="bs-label"><label for="${paramDomId(skin, param)}-range">${paramLabel(copy, skin, param)}</label>${helpButton(param.key)}</span><output class="bs-value" id="${paramDomId(skin, param)}" for="${paramDomId(skin, param)}-range"></output></div>
           <input type="range" id="${paramDomId(skin, param)}-range" min="${param.min}" max="${param.max}" step="1" />
         </div>`).join('');
 
       panel.innerHTML = `
-        <div class="bs-title"><span>BACKSPACE <span class="bs-mark">·</span> SKIN</span><button class="bs-close" type="button" aria-label="${copy.close}">×</button></div>
-        <div class="bs-tabs" role="tablist" aria-label="${copy.skinTitle}">${SKINS.map((skin) => `<button class="bs-tab" type="button" role="tab" data-skin="${skin.id}" aria-selected="${skin.id === state.skin}" aria-controls="${IDS.panel}-${skin.surface}">${copy.skins[skin.id]}</button>`).join('')}</div>
-        <div class="bs-scroll">${PARAM_GROUPS.map((skin) => `
-          <section class="bs-skin-group" id="${IDS.panel}-${skin.id}" role="tabpanel" aria-label="${skin.surface === 'cosmos' ? copy.cosmosTitle : copy.skins[skin.id]}"${skin.surface === skinById(state.skin).surface ? '' : ' hidden'}>
-            <div class="bs-group-title">${skin.surface === 'cosmos' ? copy.cosmosTitle : `${copy.skins[skin.id]} · ${copy.ownTitle}`}</div>${skinRows(skin)}
-          </section>`).join('')}
+        <div class="bs-title"><span class="bs-brand">${BLACK_HOLE_ICON}Backspace Skin</span><button class="bs-close" type="button" aria-label="${copy.close}">${CLOSE_ICON}</button></div>
+        <div class="bs-switch bs-skin-heading"><label for="${IDS.panel}-enabled">${copy.skinTitle}</label><input type="checkbox" role="switch" id="${IDS.panel}-enabled" aria-label="${copy.enable}" />${helpButton('skinTitle')}</div>
+        <div class="bs-tabs" role="tablist" aria-label="${copy.skinTitle}">${SKIN_TABS.map((skin) => `<button class="bs-tab" type="button" role="tab" data-skin="${skin.id}" aria-selected="${skin.id === state.skin}" aria-controls="${IDS.panel}-${skin.surface}">${copy.skins[skin.id]}</button>`).join('')}</div>
+        <div class="bs-scroll"><div class="bs-skin-region">${PARAM_GROUPS.map((skin) => `
+          <section class="bs-skin-group" id="${IDS.panel}-${skin.id}" role="tabpanel" aria-label="${copy.skins[skin.surface === 'cosmos' ? state.skin : skin.id]}"${skin.surface === skinById(state.skin).surface ? '' : ' hidden'}>
+            <div class="bs-group-title">${`${copy.skins[skin.surface === 'cosmos' ? state.skin : skin.id]} · ${copy.ownTitle}`}</div><div class="bs-params">${skinRows(skin)}</div>
+            <div class="bs-row bs-switch"><span class="bs-label"><label for="${IDS.panel}-${skin.surface === 'ocean' ? 'cycle' : 'cosmos-cycle'}">${skin.surface === 'ocean' ? copy.autoCycle : copy.cosmicCycle}</label>${helpButton(skin.surface === 'ocean' ? 'autoCycle' : 'cosmicCycle')}</span><input type="checkbox" role="switch" id="${IDS.panel}-${skin.surface === 'ocean' ? 'cycle' : 'cosmos-cycle'}" /></div>
+          </section>`).join('')}</div>
           <section class="bs-group">
             <div class="bs-group-title">${copy.commonTitle}</div>
-            <div class="bs-row"><div class="bs-head"><label for="${IDS.panel}-glass-range">${copy.glass}</label><output class="bs-value" id="${IDS.panel}-glass" for="${IDS.panel}-glass-range"></output></div><input type="range" id="${IDS.panel}-glass-range" min="40" max="90" step="1" /></div>
-            <div class="bs-row bs-switch"><label for="${IDS.panel}-cycle">${copy.autoCycle}</label><input type="checkbox" id="${IDS.panel}-cycle" /></div>
-            <div class="bs-row bs-switch"><label for="${IDS.panel}-chat">${copy.chatCustom}</label><input type="checkbox" id="${IDS.panel}-chat" /></div>
-            <div class="bs-row bs-sub" id="${IDS.panel}-chat-row"><div class="bs-head"><label for="${IDS.panel}-chat-range">${copy.chatOpacity}</label><output class="bs-value" id="${IDS.panel}-chat-value" for="${IDS.panel}-chat-range"></output></div><input type="range" id="${IDS.panel}-chat-range" min="${CHAT_OPACITY_MIN}" max="${CHAT_OPACITY_MAX}" step="1" /></div>
-            <div class="bs-row bs-switch"><label for="${IDS.panel}-enabled">${copy.enable}</label><input type="checkbox" id="${IDS.panel}-enabled" /></div>
+            <div class="bs-row"><div class="bs-head"><span class="bs-label"><label for="${IDS.panel}-glass-range">${copy.glass}</label>${helpButton('glass')}</span><output class="bs-value" id="${IDS.panel}-glass" for="${IDS.panel}-glass-range"></output></div><input type="range" id="${IDS.panel}-glass-range" min="40" max="90" step="1" /></div>
+            <div class="bs-row bs-switch"><span class="bs-label"><label for="${IDS.panel}-chat">${copy.chatCustom}</label>${helpButton('chatCustom')}</span><input type="checkbox" role="switch" id="${IDS.panel}-chat" /></div>
+            <div class="bs-row bs-sub" id="${IDS.panel}-chat-row"><div class="bs-head"><span class="bs-label"><label for="${IDS.panel}-chat-range">${copy.chatOpacity}</label>${helpButton('chatOpacity')}</span><output class="bs-value" id="${IDS.panel}-chat-value" for="${IDS.panel}-chat-range"></output></div><input type="range" id="${IDS.panel}-chat-range" min="${CHAT_OPACITY_MIN}" max="${CHAT_OPACITY_MAX}" step="1" /></div>
           </section>
-          <div class="bs-row"><button type="button" class="bs-reset">${copy.reset}</button></div>
-          <p class="bs-note">${copy.resetNote()}<br>${copy.note}</p>
-        </div>`;
+        </div>
+        <div class="bs-footer"><span class="bs-save-hint">${copy.saveHint}</span><span class="bs-reset-wrap"><button type="button" class="bs-reset" aria-haspopup="dialog" aria-controls="${IDS.panel}-reset-confirm" aria-expanded="false">${copy.reset}</button>${helpButton('reset')}</span></div>
+        <div class="bs-reset-confirm" id="${IDS.panel}-reset-confirm" popover="auto" role="dialog" aria-labelledby="${IDS.panel}-reset-title"><strong id="${IDS.panel}-reset-title"></strong><div class="bs-confirm-actions"><button type="button" class="bs-confirm-cancel" autofocus>${copy.cancel}</button><button type="button" class="bs-confirm-restore">${copy.resetConfirm}</button></div></div>`;
 
       const host = document.body || document.documentElement;
-      host.append(button, panel);
+      const tooltip = document.createElement('div');
+      tooltip.id = `${IDS.panel}-help`;
+      tooltip.className = 'bs-tooltip';
+      tooltip.setAttribute('role', 'tooltip');
+      tooltip.hidden = true;
+      const tooltipContent = document.createElement('div');
+      tooltip.append(tooltipContent);
+      host.append(button, panel, tooltip);
 
       const glassRange = panel.querySelector(`#${IDS.panel}-glass-range`);
       const glassOut = panel.querySelector(`#${IDS.panel}-glass`);
       const enabledBox = panel.querySelector(`#${IDS.panel}-enabled`);
       const cycleBox = panel.querySelector(`#${IDS.panel}-cycle`);
+      const cosmicCycleBox = panel.querySelector(`#${IDS.panel}-cosmos-cycle`);
       const chatBox = panel.querySelector(`#${IDS.panel}-chat`);
       const chatRow = panel.querySelector(`#${IDS.panel}-chat-row`);
       const chatRange = panel.querySelector(`#${IDS.panel}-chat-range`);
       const chatOut = panel.querySelector(`#${IDS.panel}-chat-value`);
       const resetBtn = panel.querySelector('.bs-reset');
+      const resetConfirm = panel.querySelector('.bs-reset-confirm');
+      const cancelResetBtn = panel.querySelector('.bs-confirm-cancel');
+      const confirmResetBtn = panel.querySelector('.bs-confirm-restore');
+      hideResetConfirm = () => {
+        resetConfirm.hidePopover();
+        resetBtn.setAttribute('aria-expanded', 'false');
+      };
+      on(resetConfirm, 'toggle', () => resetBtn.setAttribute('aria-expanded', String(resetConfirm.matches(':popover-open'))));
+      on(cancelResetBtn, 'click', () => { hideResetConfirm(); resetBtn.focus(); });
+      on(resetBtn, 'click', () => {
+        hideHelp();
+        resetConfirm.showPopover();
+        const rect = resetBtn.getBoundingClientRect();
+        resetConfirm.style.left = `${Math.max(12, Math.min(rect.right - resetConfirm.offsetWidth, window.innerWidth - resetConfirm.offsetWidth - 12))}px`;
+        resetConfirm.style.top = `${Math.max(12, rect.top - resetConfirm.offsetHeight - 8)}px`;
+        resetBtn.setAttribute('aria-expanded', 'true');
+        cancelResetBtn.focus();
+      });
+      surfaceCleanups.push(hideResetConfirm);
       const tabs = [...panel.querySelectorAll('.bs-tab')];
+      let helpTarget = null;
+      const helpText = (key) => key === 'reset' ? copy.resetNote : copy.help[key];
+      hideHelp = () => {
+        helpTarget?.removeAttribute('aria-describedby');
+        helpTarget = null;
+        tooltip.hidden = true;
+      };
+      const showHelp = (target) => {
+        hideHelp();
+        helpTarget = target;
+        tooltipContent.textContent = helpText(target.dataset.help);
+        tooltip.hidden = false;
+        const rect = target.getBoundingClientRect();
+        tooltipContent.style.maxHeight = `${Math.max(32, rect.top - 22)}px`;
+        const left = Math.max(12, Math.min(rect.left + rect.width / 2 - tooltip.offsetWidth / 2, window.innerWidth - tooltip.offsetWidth - 12));
+        const top = Math.max(12, rect.top - tooltip.offsetHeight - 8);
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+        target.setAttribute('aria-describedby', tooltip.id);
+      };
+      for (const help of panel.querySelectorAll('.bs-help')) {
+        on(help, 'pointerenter', () => showHelp(help));
+        on(help, 'pointerleave', (event) => { if (!tooltip.contains(event.relatedTarget)) hideHelp(); });
+        on(help, 'focus', () => showHelp(help));
+        on(help, 'blur', hideHelp);
+        on(help, 'click', () => showHelp(help));
+      }
+      on(tooltip, 'pointerleave', (event) => { if (!helpTarget?.contains(event.relatedTarget)) hideHelp(); });
+      on(panel.querySelector('.bs-scroll'), 'scroll', () => {
+        if (helpTarget && document.activeElement === helpTarget) showHelp(helpTarget);
+        else hideHelp();
+      }, { passive: true });
+      surfaceCleanups.push(hideHelp);
+
+      const fillRange = (input) => {
+        const percent = (Number(input.value) - Number(input.min)) / (Number(input.max) - Number(input.min)) * 100;
+        input.style.setProperty('--bs-fill', `${percent}%`);
+      };
+      on(panel, 'input', (event) => {
+        if (event.target.matches('input[type="range"]')) fillRange(event.target);
+      });
 
       const paramInputs = [];
       for (const skin of PARAM_GROUPS) {
@@ -899,39 +1160,98 @@ ${legacyRoots} {
         }
       }
 
-      const paramValue = (skin, param) => (skin.surface === 'ocean' ? state[param.key] : state.p.cosmos[param.key]);
+      const paramValue = (skin, param) => (skin.surface === 'ocean' ? state[param.key] : cosmicSettings().params[param.key]);
 
       const syncParams = () => {
         for (const { skin, param, input, out } of paramInputs) {
           const value = paramValue(skin, param);
           input.value = String(value);
           out.textContent = paramText(copy, param, value);
+          fillRange(input);
         }
       };
 
+      const skinDefaults = () => ({ ...normalizeGeneral(DEFAULTS), ...(state.skin === 'ocean'
+        ? { sea: DEFAULTS.sea, time: DEFAULTS.time, autoCycle: DEFAULTS.autoCycle }
+        : { p: { ...state.p, views: { ...state.p.views, [state.skin]: {
+          params: Object.fromEntries(COSMOS_PARAMS.map(param => [param.key, param.def])), autoCycle: true,
+        } } } }) });
+      const syncReset = () => {
+        resetBtn.disabled = GENERAL_KEYS.every(key => state[key] === DEFAULTS[key]) && (state.skin === 'ocean'
+          ? state.sea === DEFAULTS.sea && state.time === DEFAULTS.time && state.autoCycle === DEFAULTS.autoCycle
+          : COSMOS_PARAMS.every(param => cosmicSettings().params[param.key] === param.def) && cosmicSettings().autoCycle);
+        panel.querySelector(`#${IDS.panel}-reset-title`).textContent = copy.resetTitle(copy.skins[state.skin]);
+      };
       const syncUi = () => {
         glassRange.value = String(state.glass);
         glassOut.textContent = `${state.glass}%`;
         enabledBox.checked = state.enabled;
         cycleBox.checked = state.autoCycle;
+        cosmicCycleBox.checked = cosmicSettings().autoCycle;
         chatBox.checked = state.chatCustom;
         chatRange.value = String(state.chatOpacity);
         chatOut.textContent = `${state.chatOpacity}%`;
         // The slider belongs to the switch: hide it while the conversation
         // follows the workspace glass so the panel keeps one obvious meaning.
         chatRow.hidden = !state.chatCustom;
+        for (const input of [glassRange, chatRange]) fillRange(input);
         syncParams();
+        syncReset();
       };
       syncUi();
 
-      // 切换皮肤只切面板可见块与 iframe，不重建 DOM、不丢焦点
+      const skinRegion = panel.querySelector('.bs-skin-region');
+      const generalRegion = panel.querySelector('.bs-group');
+      let renderedSkin = state.skin;
+      // 内外区域同步伸缩，避免通用配置先跳到目标高度再随外框移动。
       syncSkinUi = () => {
-        for (const tab of tabs) tab.setAttribute('aria-selected', String(tab.dataset.skin === state.skin));
+        hideHelp();
+        hideResetConfirm();
+        const layoutChanged = renderedSkin !== state.skin || chatRow.hidden !== !state.chatCustom;
+        const before = panelOpen && layoutChanged ? {
+          height: getComputedStyle(panel).height, top: getComputedStyle(panel).top,
+          skinHeight: getComputedStyle(skinRegion).height,
+          generalHeight: getComputedStyle(generalRegion).height,
+        } : null;
+        if (before) cancelPanelResize();
+        renderedSkin = state.skin;
+        panel.querySelector('.bs-tabs').style.setProperty('--bs-tab-index', String(tabs.findIndex(tab => tab.dataset.skin === state.skin)));
+        for (const tab of tabs) {
+          tab.setAttribute('aria-selected', String(tab.dataset.skin === state.skin));
+          tab.tabIndex = tab.dataset.skin === state.skin ? 0 : -1;
+        }
         for (const skin of PARAM_GROUPS) {
           const group = panel.querySelector(`#${IDS.panel}-${skin.id}`);
           if (group) group.hidden = skin.surface !== skinById(state.skin).surface;
         }
-        syncParams();
+        const activeGroup = panel.querySelector('.bs-skin-group:not([hidden])');
+        activeGroup.setAttribute('aria-label', copy.skins[state.skin]);
+        activeGroup.querySelector('.bs-group-title').textContent = `${copy.skins[state.skin]} · ${copy.ownTitle}`;
+        syncUi();
+        if (panelOpen) placePanel();
+        if (before && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          const after = {
+            height: getComputedStyle(panel).height, top: panel.style.top,
+            skinHeight: getComputedStyle(skinRegion).height,
+            generalHeight: getComputedStyle(generalRegion).height,
+          };
+          if (Object.keys(before).some(key => before[key] !== after[key])) {
+            const timing = { duration: 220, easing: 'cubic-bezier(.16,1,.3,1)' };
+            panelSizeAnimation = panel.animate([
+              { height: before.height, top: before.top }, { height: after.height, top: after.top },
+            ], timing);
+            for (const [region, key] of [[skinRegion, 'skinHeight'], [generalRegion, 'generalHeight']]) {
+              if (before[key] !== after[key]) sectionSizeAnimations.push(region.animate([
+                { height: before[key], overflow: 'clip' }, { height: after[key], overflow: 'clip' },
+              ], timing));
+            }
+            for (const animation of [panelSizeAnimation, ...sectionSizeAnimations]) animation.startTime = document.timeline.currentTime;
+            panelSizeAnimation.onfinish = () => {
+              cancelPanelResize();
+              placePanel();
+            };
+          }
+        }
       };
       syncSkinUi();
 
@@ -939,28 +1259,40 @@ ${legacyRoots} {
       // directions, without replacing controls or losing focus/listeners.
       const syncLocale = () => {
         copy = selectCopy(options.locale);
-        button.title = copy.button;
+        button.querySelector('.bs-launcher-tip').textContent = copy.button;
         button.setAttribute('aria-label', copy.button);
         panel.setAttribute('aria-label', copy.button);
         panel.querySelector('.bs-close').setAttribute('aria-label', copy.close);
         panel.querySelector('.bs-tabs').setAttribute('aria-label', copy.skinTitle);
+        panel.querySelector('.bs-skin-heading > label').textContent = copy.skinTitle;
+        enabledBox.setAttribute('aria-label', copy.enable);
         for (const tab of tabs) tab.textContent = copy.skins[tab.dataset.skin];
         for (const { skin, param, out } of paramInputs) {
           panel.querySelector(`label[for="${paramDomId(skin, param)}-range"]`).textContent = paramLabel(copy, skin, param);
           out.textContent = paramText(copy, param, paramValue(skin, param));
         }
-        for (const [suffix, key] of [['glass-range', 'glass'], ['enabled', 'enable'], ['cycle', 'autoCycle'], ['chat', 'chatCustom'], ['chat-range', 'chatOpacity']]) {
+        for (const [suffix, key] of [['glass-range', 'glass'], ['cycle', 'autoCycle'], ['cosmos-cycle', 'cosmicCycle'], ['chat', 'chatCustom'], ['chat-range', 'chatOpacity']]) {
           panel.querySelector(`label[for="${IDS.panel}-${suffix}"]`).textContent = copy[key];
         }
         for (const group of panel.querySelectorAll('.bs-group-title')) {
           if (group.parentElement?.classList.contains('bs-skin-group')) {
             const id = group.parentElement.id.slice(`${IDS.panel}-`.length);
-            group.textContent = id === 'cosmos' ? copy.cosmosTitle : `${copy.skins[id]} · ${copy.ownTitle}`;
-            group.parentElement.setAttribute('aria-label', id === 'cosmos' ? copy.cosmosTitle : copy.skins[id]);
+            const skinId = id === 'cosmos' ? (state.skin === 'vortex' ? 'vortex' : 'horizon') : id;
+            group.textContent = `${copy.skins[skinId]} · ${copy.ownTitle}`;
+            group.parentElement.setAttribute('aria-label', copy.skins[skinId]);
           } else group.textContent = copy.commonTitle;
         }
         resetBtn.textContent = copy.reset;
-        panel.querySelector('.bs-note').replaceChildren(copy.resetNote(), document.createElement('br'), copy.note);
+        syncReset();
+        cancelResetBtn.textContent = copy.cancel;
+        confirmResetBtn.textContent = copy.resetConfirm;
+        panel.querySelector('.bs-save-hint').textContent = copy.saveHint;
+        for (const help of panel.querySelectorAll('.bs-help')) {
+          const key = help.dataset.help;
+          help.setAttribute('aria-label', `${copy.params[key] || copy[key]} · ${copy.helpLabel}`);
+        }
+        if (panelOpen) placePanel();
+        if (helpTarget) showHelp(helpTarget);
       };
       syncLocale();
       const localeObserver = new MutationObserver(syncLocale);
@@ -981,21 +1313,34 @@ ${legacyRoots} {
             void save(patch);
             postToOcean();
           } else {
-            state.p.cosmos[param.key] = value;
+            cosmicSettings().params[param.key] = value;
             void save({ p: state.p });
             postToCosmos();
           }
           out.textContent = paramText(copy, param, value);
+          syncReset();
         });
       }
 
-      for (const tab of tabs) on(tab, 'click', () => switchSkin(tab.dataset.skin));
+      for (const [index, tab] of tabs.entries()) {
+        on(tab, 'click', () => switchSkin(tab.dataset.skin));
+        on(tab, 'keydown', (event) => {
+          const next = event.key === 'ArrowRight' ? (index + 1) % tabs.length
+            : event.key === 'ArrowLeft' ? (index + tabs.length - 1) % tabs.length
+            : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : null;
+          if (next === null) return;
+          event.preventDefault();
+          switchSkin(tabs[next].dataset.skin);
+          tabs[next].focus();
+        });
+      }
 
       on(glassRange, 'input', () => {
         state.glass = clamp(glassRange.value, 40, 90, DEFAULTS.glass);
         glassOut.textContent = `${state.glass}%`;
         updateGlass();
         void save({ glass: state.glass });
+        syncReset();
       });
 
       on(enabledBox, 'change', () => {
@@ -1009,12 +1354,18 @@ ${legacyRoots} {
         state.autoCycle = cycleBox.checked;
         void save({ autoCycle: state.autoCycle });
         postToOcean();
+        syncReset();
+      });
+      on(cosmicCycleBox, 'change', () => {
+        cosmicSettings().autoCycle = cosmicCycleBox.checked;
+        void save({ p: state.p });
         postToCosmos();
+        syncReset();
       });
       on(chatBox, 'change', () => {
         state.chatCustom = chatBox.checked;
-        chatRow.hidden = !state.chatCustom;
         void save({ chatCustom: state.chatCustom });
+        syncSkinUi();
         updateGlass();
       });
       on(chatRange, 'input', () => {
@@ -1022,51 +1373,47 @@ ${legacyRoots} {
         chatOut.textContent = `${state.chatOpacity}%`;
         void save({ chatOpacity: state.chatOpacity });
         updateGlass();
+        syncReset();
       });
-      on(resetBtn, 'click', () => {
-        const defaults = {
-          enabled: DEFAULTS.enabled,
-          sea: DEFAULTS.sea,
-          time: DEFAULTS.time,
-          glass: DEFAULTS.glass,
-          autoCycle: DEFAULTS.autoCycle,
-          chatCustom: DEFAULTS.chatCustom,
-          chatOpacity: DEFAULTS.chatOpacity,
-          p: normalizeParams({ ...state.p, cosmos: {} }),
-        };
-        void save(defaults).then(() => {
-          syncUi();
-          syncSkinUi();
-          updateGlass();
-          postToOcean();
-          postToCosmos();
-          applyEnabled();
-        });
+      on(confirmResetBtn, 'click', () => {
+        hideResetConfirm();
+        if (resetBtn.disabled) return;
+        void save(skinDefaults());
+        syncSkinUi();
+        updateGlass();
+        postToOcean();
+        postToCosmos();
+        const currentTab = tabs.find(tab => tab.dataset.skin === state.skin);
+        currentTab?.focus();
       });
 
       on(button, 'click', () => setPanelOpen(!panelOpen));
       on(panel.querySelector('.bs-close'), 'click', () => setPanelOpen(false));
       on(document, 'click', (event) => {
-        if (panelOpen && !panel.contains(event.target) && !button.contains(event.target)) setPanelOpen(false);
+        if (helpTarget && !helpTarget.contains(event.target) && !tooltip.contains(event.target)) hideHelp();
+        if (panelOpen && !panel.contains(event.target) && !button.contains(event.target) && !tooltip.contains(event.target)) setPanelOpen(false);
       });
       on(document, 'keydown', (event) => {
         if (!panelOpen) return;
         if (event.key === 'Escape') {
           event.preventDefault();
+          if (resetConfirm.matches(':popover-open')) { hideResetConfirm(); resetBtn.focus(); return; }
+          if (!tooltip.hidden) { hideHelp(); return; }
           setPanelOpen(false);
           return;
         }
         if (event.key !== 'Tab') return;
         // 只看可见的控件：三张皮肤的配置行里有隐藏块与折叠的对话面板滑块
-        const focusable = [...panel.querySelectorAll('button, input')]
-          .filter((element) => !element.disabled && element.offsetParent !== null);
+        const focusRoot = resetConfirm.matches(':popover-open') ? resetConfirm : panel;
+        const focusable = [...focusRoot.querySelectorAll('button, input')]
+          .filter((element) => !element.disabled && element.tabIndex >= 0 && element.offsetParent !== null);
         if (focusable.length === 0) return;
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
       });
-      on(window, 'resize', () => { if (!panelOpen) schedulePlace(); });
+      on(window, 'resize', () => { hideHelp(); hideResetConfirm(); cancelPanelResize(); schedulePlace(); });
 
       // 宇宙 iframe 的握手 + 回退：ready 前失败一律回海面
       on(window, 'message', (event) => {
@@ -1095,12 +1442,16 @@ ${legacyRoots} {
         schedulePointer();
       }, { passive: true });
       on(document, 'pointerdown', (event) => {
-        if (!state.enabled || event.button !== 0 || skinById(state.skin).surface !== 'cosmos' || state.p.cosmos.pulse === 0) return;
-        if (panel.contains(event.target) || button.contains(event.target)) return;
+        if (!state.enabled || event.button !== 0 || skinById(state.skin).surface !== 'cosmos' || cosmicSettings().params.pulse === 0) return;
+        if (panel.contains(event.target) || button.contains(event.target) || tooltip.contains(event.target)) return;
         const [x, y] = pointerPayload(event);
         postToFrame(IDS.cosmos, { type: 'bs-pulse', x, y });
       }, { passive: true });
 
+      placementResizeObserver = new ResizeObserver(() => {
+        cancelAnimationFrame(placementFrame);
+        placeButton();
+      });
       placementObserver = new MutationObserver((records) => {
         const addedAnchor = records.some(record => [...record.addedNodes].some(node => node instanceof Element
           && (node.matches(anchorSelector) || node.querySelector(anchorSelector))));
@@ -1115,8 +1466,14 @@ ${legacyRoots} {
 
     const unmount = () => {
       panelOpen = false;
+      panelAnimation?.cancel();
+      panelAnimation = null;
+      cancelPanelResize();
       placementObserver?.disconnect();
       placementObserver = null;
+      placementResizeObserver?.disconnect();
+      placementResizeObserver = null;
+      placementTargets = [];
       cancelAnimationFrame(placementFrame);
       placementFrame = 0;
       placementAnchor = null;
@@ -1132,6 +1489,7 @@ ${legacyRoots} {
       }
       document.getElementById(IDS.button)?.remove();
       document.getElementById(IDS.panel)?.remove();
+      document.getElementById(`${IDS.panel}-help`)?.remove();
       document.getElementById(IDS.uiStyle)?.remove();
       ownsSurface = false;
     };
@@ -1175,7 +1533,9 @@ ${legacyRoots} {
         const stored = await options.storage.get(DEFAULTS);
         if (generation !== startGeneration) return;
         state = normalize(stored);
-        if (!isRecord(stored.p?.cosmos)) await save({ p: state.p });
+        if (!isRecord(stored.p?.cosmos)
+          || ['horizon', 'vortex'].some(id => !isRecord(stored.p?.views?.[id]?.params) || typeof stored.p.views[id].autoCycle !== 'boolean')
+          || SKINS.some(({ id }) => !isRecord(stored.p?.general?.[id]) || GENERAL_KEYS.some(key => !Object.hasOwn(stored.p.general[id], key)))) await save({ p: state.p });
       } catch (error) {
         if (generation !== startGeneration) return;
         console.warn('[Backspace] Failed to load settings; using defaults.', error);
@@ -1185,7 +1545,7 @@ ${legacyRoots} {
       if (typeof options.listen === 'function') {
         const dispose = options.listen((patch) => {
           if (generation !== startGeneration) return;
-          state = normalize({ ...state, ...patch });
+          state = mergePatch(patch);
           applyEnabled();
           updateGlass();
           postToOcean();
@@ -1205,7 +1565,7 @@ ${legacyRoots} {
     return Object.freeze({
       start,
       stop,
-      getState: () => ({ ...state, p: normalizeParams(state.p, state.skin) }),
+      getState: () => normalize(state),
       setSkin: (id) => switchSkin(id),
     });
   }

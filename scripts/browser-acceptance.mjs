@@ -45,8 +45,8 @@ async function extensionAcceptance() {
     await panel.waitFor()
     for (const [lang, title, label] of [['zh-CN', 'Backspace 皮肤设置', '波浪大小'], ['en', 'Backspace skin settings', 'Sea state']]) {
       await page.evaluate((lang) => { document.documentElement.lang = lang }, lang)
-      await page.waitForFunction((title) => document.querySelector('#__dsh-backspace-btn__').title === title, title)
-      assert.equal(await panel.locator('label').first().textContent(), label)
+      await page.waitForFunction((title) => document.querySelector('#__dsh-backspace-btn__').getAttribute('aria-label') === title, title)
+      assert.equal(await panel.locator('label[for="__dsh-backspace-panel__-sea-range"]').textContent(), label)
       assert.equal(await panel.getAttribute('aria-label'), title)
       assert.equal(await panel.locator('input:focus').count(), 1)
     }
