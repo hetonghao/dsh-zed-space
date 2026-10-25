@@ -72,7 +72,8 @@
     "test:desktop": "node scripts/desktop-acceptance.mjs && node scripts/official-desktop-acceptance.mjs",
     "test:website": "node scripts/website-acceptance.mjs && node scripts/website-loading-acceptance.mjs",
     "capture": "node scripts/capture-gallery.mjs",
-    "test:video": "node scripts/video-acceptance.mjs && node scripts/video-edge-acceptance.mjs && node scripts/video-paths-acceptance.mjs"
+    "test:video": "node scripts/video-acceptance.mjs && node scripts/video-edge-acceptance.mjs && node scripts/video-paths-acceptance.mjs",
+    "test:transitions": "node scripts/skin-transition-acceptance.mjs"
   },
   "engines": {
     "node": ">=20"

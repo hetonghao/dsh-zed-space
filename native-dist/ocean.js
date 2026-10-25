@@ -26,6 +26,8 @@ const SKIN = new URL(import.meta.url).searchParams.get('skin') === '1';
 // skin prefs come from the page query (set by the host content script) and
 // live updates arrive via postMessage from the injected settings panel.
 const SKIN_QUERY = new URLSearchParams(location.search);
+const MANAGED = SKIN && SKIN_QUERY.get('managed') === '1';
+if (MANAGED) document.documentElement.classList.add('managed');
 const SKIN_SEA = SKIN_QUERY.has('sea') ? Number(SKIN_QUERY.get('sea')) : null;
 const SKIN_TIME = SKIN_QUERY.has('t') ? Number(SKIN_QUERY.get('t')) : null;
 const SKIN_PARENT_ORIGIN = SKIN_QUERY.get('parentOrigin');
@@ -351,6 +353,11 @@ function showUnavailable() {
 
 function showInitError(err) {
   console.error('[BACKSPACE] initialization failed:', err);
+  cancelAnimationFrame(prepareAck);
+  prepareAck = pendingPrepare = 0;
+  hostPaused = true;
+  syncAnimationLoop();
+  if (MANAGED) post({ type: 'bs-surface-error', surface: 'ocean', reason: String(err?.message || err) });
   if (!loader) return;
   loader.classList.add('error');
   loaderTitle.textContent = 'INITIALIZATION FAILED';
@@ -365,22 +372,39 @@ function revealUI() {
   document.body.classList.add('ready'); // skin mode: fades the ocean in
 }
 
+function post(message) {
+  try {
+    window.parent.postMessage(message, SKIN_PARENT_ORIGIN || '*');
+  } catch (error) {
+    console.warn('[Backspace] postMessage failed', error);
+  }
+}
+
+function setOceanParams(data) {
+  manualTimeOfDay = data.auto !== true;
+  const sea = Number(data.sea);
+  const t = Number(data.t);
+  if (Number.isFinite(sea) && sea >= 0 && sea <= 100) uSea.value = 0.25 + (sea / 100) * 1.5;
+  if (Number.isFinite(t) && t >= 0 && t <= 100) applyTimeOfDay(t / 100);
+}
+
 // skin controls: the host page sends 波浪大小/日光 adjustments here
 if (SKIN) {
   window.addEventListener('message', (ev) => {
     if (ev.source !== window.parent) return;
     if (SKIN_PARENT_ORIGIN && ev.origin !== SKIN_PARENT_ORIGIN) return;
     const d = ev.data;
-    if (d && d.type === 'bs-set') {
-      manualTimeOfDay = d.auto !== true;
-      const sea = Number(d.sea);
-      const t = Number(d.t);
-      if (Number.isFinite(sea) && sea >= 0 && sea <= 100) {
-        uSea.value = 0.25 + (sea / 100) * 1.5;
-      }
-      if (Number.isFinite(t) && t >= 0 && t <= 100) {
-        applyTimeOfDay(t / 100);
-      }
+    if (MANAGED && d?.type === 'bs-prepare') {
+      if (!Number.isSafeInteger(d.requestId) || d.requestId <= latestPrepare || d.skin !== 'ocean') return;
+      latestPrepare = pendingPrepare = d.requestId;
+      hostPaused = true;
+      syncAnimationLoop();
+      setOceanParams(d);
+      prepareFrame();
+    } else if (d && d.type === 'bs-set') {
+      setOceanParams(d);
+      if (pendingPrepare) prepareFrame();
+      else if (hostPaused) redraw();
     } else if (d && d.type === 'bs-pause') {
       hostPaused = d.paused !== false;
       syncAnimationLoop();
@@ -423,9 +447,13 @@ let adaptStamp = performance.now();
 let skinTimeWindow = 0;
 let firstFrameShown = false;
 let loopStarted = false;
-let hostPaused = false;
+let hostPaused = MANAGED;
 let loopActive = false;
 let renderedFrames = 0;
+let pendingPrepare = 0;
+let latestPrepare = 0;
+let prepareAck = 0;
+let needsRedraw = false;
 
 let PIXEL_RATIO_CAP = REDUCED_MOTION ? 0.9 : LOW_END_DEVICE ? 1.0 : 1.5;
 let BASE_PIXEL_RATIO = Math.min(window.devicePixelRatio || 1, PIXEL_RATIO_CAP);
@@ -459,6 +487,52 @@ function syncAnimationLoop() {
   renderer.setAnimationLoop(animate);
 }
 
+function drawFrame() {
+  try {
+    postProcessing.render();
+    renderedFrames += 1;
+    needsRedraw = false;
+    if (!firstFrameShown) {
+      firstFrameShown = true;
+      revealUI();
+    }
+    return true;
+  } catch (error) {
+    showInitError(error);
+    return false;
+  }
+}
+
+function redraw() {
+  needsRedraw = true;
+  if (!loopStarted || document.hidden) return false;
+  return drawFrame();
+}
+
+function prepareFrame() {
+  cancelAnimationFrame(prepareAck);
+  prepareAck = 0;
+  if (!pendingPrepare || !redraw()) return;
+  const requestId = pendingPrepare;
+  prepareAck = requestAnimationFrame(() => {
+    prepareAck = requestAnimationFrame(() => {
+      prepareAck = 0;
+      if (pendingPrepare !== requestId || document.hidden) return;
+      pendingPrepare = 0;
+      post({ type: 'bs-frame-ready', requestId, surface: 'ocean' });
+    });
+  });
+}
+
+function syncVisibility() {
+  if (document.hidden) {
+    cancelAnimationFrame(prepareAck);
+    prepareAck = 0;
+  } else if (pendingPrepare) prepareFrame();
+  else if (needsRedraw) redraw();
+  syncAnimationLoop();
+}
+
 function animate(now) {
   if (!loopActive) return;
   // high-resolution timestamp -> delta, clamped so hitches never cause jumps
@@ -472,8 +546,7 @@ function animate(now) {
   if (now - lastRenderAt < FRAME_MS - 0.5) return;
   lastRenderAt = now;
 
-  postProcessing.render();
-  renderedFrames += 1;
+  if (!drawFrame()) return;
 
   // rolling FPS + adaptive resolution (rechecked every 2 s)
   // wall-clock windows: skipped frames must not shrink the meter's time base
@@ -512,11 +585,6 @@ function animate(now) {
     }
   }
 
-  // the loader disappears only after the first successfully rendered frame
-  if (!firstFrameShown) {
-    firstFrameShown = true;
-    revealUI();
-  }
 }
 
 async function boot() {
@@ -629,10 +697,12 @@ async function boot() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       applyResolutionScale(renderScale);
+      if (pendingPrepare) prepareFrame();
+      else if (hostPaused) redraw();
     });
 
     // --- lifecycle: pause when the tab is hidden -------------------------------
-    document.addEventListener('visibilitychange', syncAnimationLoop);
+    document.addEventListener('visibilitychange', syncVisibility);
 
     // --- initialize the GPU and start rendering --------------------------------
     await renderer.init();
@@ -651,6 +721,8 @@ async function boot() {
 
     renderer._animation.stop();
     loopStarted = true;
+    if (pendingPrepare) prepareFrame();
+    else if (needsRedraw) redraw();
     syncAnimationLoop();
   } catch (err) {
     showInitError(err);

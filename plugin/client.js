@@ -223,8 +223,7 @@ window.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {
   const HELP_ICON = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.75" stroke="currentColor" stroke-width="1.25"/><path d="M8 7.2v3.4M8 5.2v.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   const CLOSE_ICON = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 
-  // 宇宙皮肤若在此时限内没有报「首帧成功」，视为加载失败并回退海面。
-  const COSMOS_READY_TIMEOUT = 8000;
+  const SURFACE_READY_TIMEOUT = 8000;
 
   function clamp(value, min, max, fallback) {
     const number = Number(value);
@@ -703,9 +702,13 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
 }`;
   }
 
-  // 隐藏帧缩小以释放大缓冲，并显式暂停它的渲染循环。
-  const FRAME_STYLE_ON = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:0;pointer-events:none;background:transparent;';
+  const FRAME_STYLE = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:0;pointer-events:none;background:transparent;';
+  const FRAME_STYLE_ON = FRAME_STYLE;
   const FRAME_STYLE_OFF = 'position:fixed;left:0;top:0;width:1px;height:1px;border:0;z-index:0;pointer-events:none;opacity:0;background:transparent;';
+  const SURFACES = Object.freeze({
+    ocean: { id: IDS.frame, entry: 'skin.html' },
+    cosmos: { id: IDS.cosmos, entry: 'cosmos.html' },
+  });
 
   function createController(options) {
     if (!options || typeof options.assetUrl !== 'function' || !options.storage) {
@@ -715,6 +718,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     let copy = selectCopy(options.locale);
     let state = normalize(DEFAULTS);
     let ownsSurface = false;
+    let ownsUi = false;
     let startGeneration = 0;
     let panelOpen = false;
     let previousFocus = null;
@@ -723,12 +727,21 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     let placementTargets = [];
     let placementFrame = 0;
     let placementAnchor = null;
+    const frames = new Map();
+    const transitionDuration = matchMedia('(prefers-reduced-motion: reduce)').matches ? 150 : 550;
+    let baseFrame = null;
+    let incomingFrame = null;
+    let transitionAnimation = null;
+    let fadeTarget = 1;
+    let requestSequence = 0;
+    let transitionPhase = 'idle';
+    let transitionRoute = 'initial';
+    let transitionError = '';
     let hideHelp = () => {};
     let hideResetConfirm = () => {};
     let panelAnimation = null;
     let panelSizeAnimation = null;
     let sectionSizeAnimations = [];
-    let readyTimer = 0;
     let pointerFrame = 0;
     let pointerPending = null;
     let pointerSent = null;
@@ -773,22 +786,36 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     };
 
     const updateGlass = () => {
+      if (!ownsUi) return;
       const style = document.getElementById(IDS.glass);
       if (style) style.textContent = glassCss(state.glass, state.chatCustom, state.chatOpacity);
     };
 
+    const frameOrigin = (frame) => {
+      const url = new URL(frame.src);
+      return url.protocol === 'chrome-extension:' ? `${url.protocol}//${url.host}` : url.origin;
+    };
+
     const postToFrame = (id, payload) => {
-      const frame = document.getElementById(id);
-      if (!(frame instanceof HTMLIFrameElement) || !frame.contentWindow) return;
-      let targetOrigin = '*';
-      try { targetOrigin = new URL(frame.src).origin; } catch { /* local test documents may have no absolute base URL */ }
-      frame.contentWindow.postMessage(payload, targetOrigin);
+      for (const record of frames.values()) {
+        if (record.frame.id === id && record.frame.isConnected) {
+          record.frame.contentWindow?.postMessage(payload, record.origin);
+          return;
+        }
+      }
     };
 
     const videoOrigin = frame => {
       const url = new URL(frame.src);
       return url.origin === 'null' ? `${url.protocol}//${url.host}` : url.origin;
     };
+    const setFrameActive = (id, active) => {
+      const frame = document.getElementById(id);
+      if (!(frame instanceof HTMLIFrameElement)) return;
+      const next = active ? FRAME_STYLE_ON : FRAME_STYLE_OFF;
+      if (frame.style.cssText !== next) frame.style.cssText = next;
+    };
+
     const setVideoPaused = paused => {
       const frame = document.getElementById(IDS.video);
       if (frame instanceof HTMLIFrameElement) frame.contentWindow.postMessage({ type: 'bs-video', token: videoToken, action: 'visibility', paused }, videoOrigin(frame));
@@ -893,6 +920,8 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     const cosmicSettings = () => state.p.views[state.skin === 'vortex' ? 'vortex' : 'horizon'];
 
     const postToOcean = () => {
+      const record = frames.get('ocean');
+      if (record && !record.ready) { prepareFrame(record); return; }
       postToFrame(IDS.frame, {
         type: 'bs-set', sea: state.sea, t: state.time, auto: state.autoCycle,
       });
@@ -901,16 +930,18 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     const postToCosmos = () => {
       const skin = skinById(state.skin);
       if (skin.surface !== 'cosmos') return;
+      const record = frames.get('cosmos');
+      if (record && !record.ready) { prepareFrame(record); return; }
       postToFrame(IDS.cosmos, { type: 'bs-set', params: { ...cosmicSettings().params }, auto: cosmicSettings().autoCycle });
       schedulePointer();
     };
 
     const schedulePointer = () => {
-      if (pointerFrame || !pointerPending || !state.enabled || skinById(state.skin).surface !== 'cosmos' || cosmicSettings().params.parallax === 0) return;
+      if (pointerFrame || !pointerPending || !state.enabled || !frames.get('cosmos')?.ready || skinById(state.skin).surface !== 'cosmos' || cosmicSettings().params.parallax === 0) return;
       if (pointerSent && pointerPending.every((value, axis) => value === pointerSent[axis])) return;
       pointerFrame = requestAnimationFrame(() => {
         pointerFrame = 0;
-        if (!pointerPending || !state.enabled || skinById(state.skin).surface !== 'cosmos' || cosmicSettings().params.parallax === 0) return;
+        if (!pointerPending || !state.enabled || !frames.get('cosmos')?.ready || skinById(state.skin).surface !== 'cosmos' || cosmicSettings().params.parallax === 0) return;
         postToFrame(IDS.cosmos, { type: 'bs-pointer', x: pointerPending[0], y: pointerPending[1] });
         pointerSent = pointerPending;
       });
@@ -918,26 +949,170 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
 
     const syncCosmosPreview = () => {
       postToFrame(IDS.cosmos, {
-        type: 'bs-preview', active: state.enabled && panelOpen && skinById(state.skin).surface === 'cosmos',
+        type: 'bs-preview', active: state.enabled && (panelOpen || transitionPhase === 'crossfade') && skinById(state.skin).surface === 'cosmos',
       });
     };
 
-    const releaseInactiveFrame = () => {
-      if (!ownsSurface || panelOpen) return;
-      const surface = state.skin === 'video' ? (videoData.activeId ? 'video' : 'ocean') : skinById(state.skin).surface;
-      if (surface === 'video') document.getElementById(IDS.frame)?.remove();
-      const id = surface === 'ocean' || surface === 'video' ? IDS.cosmos : IDS.frame;
-      if (id === IDS.cosmos) { clearTimeout(readyTimer); readyTimer = 0; }
-      const frame = document.getElementById(id);
-      if (frame instanceof HTMLIFrameElement) { frame.onload = null; frame.remove(); }
-    };
+    function syncSurfaces() {
+      const targetSurface = state.skin === 'video' ? (videoData.activeId ? 'video' : 'ocean') : skinById(state.skin).surface;
+      for (const record of frames.values()) {
+        const active = record.ready && (incomingFrame?.ready ? record.surface === targetSurface : record === baseFrame);
+        postToFrame(record.frame.id, { type: 'bs-pause', paused: !state.enabled || document.hidden || !active });
+      }
+      if (transitionAnimation) {
+        if (document.hidden) transitionAnimation.pause();
+        else transitionAnimation.play();
+      }
+      syncCosmosPreview();
+      if (state.skin !== 'video' && baseFrame?.ready && document.getElementById(IDS.video)) removeVideoFrame();
+    }
 
-    const setFrameActive = (id, active) => {
-      const frame = document.getElementById(id);
-      if (!(frame instanceof HTMLIFrameElement)) return;
-      const next = active ? FRAME_STYLE_ON : FRAME_STYLE_OFF;
-      if (frame.style.cssText !== next) frame.style.cssText = next;
-    };
+    function pauseReadyTimer(record) {
+      if (!record.timer) return;
+      clearTimeout(record.timer);
+      record.timer = 0;
+      record.remaining -= performance.now() - record.waitStarted;
+    }
+
+    function armReadyTimer(record) {
+      pauseReadyTimer(record);
+      if (record.ready || document.hidden) return;
+      record.waitStarted = performance.now();
+      record.timer = setTimeout(() => failFrame(record, '首帧准备超时'), Math.max(0, record.remaining));
+    }
+
+    function removeFrame(record) {
+      if (!record) return;
+      clearTimeout(record.timer);
+      record.frame.onload = null;
+      record.frame.remove();
+      frames.delete(record.surface);
+    }
+
+    function stopTransition() {
+      if (!transitionAnimation) return;
+      incomingFrame.frame.style.opacity = getComputedStyle(incomingFrame.frame).opacity;
+      transitionAnimation.cancel();
+      transitionAnimation = null;
+    }
+
+    function clearSurfaces() {
+      stopTransition();
+      for (const record of frames.values()) removeFrame(record);
+      baseFrame = incomingFrame = null;
+      transitionPhase = 'idle';
+      transitionError = '';
+      pointerSent = null;
+    }
+
+    function finishTransition(target) {
+      if (target === 1) {
+        removeFrame(baseFrame);
+        baseFrame = incomingFrame;
+      } else removeFrame(incomingFrame);
+      incomingFrame = null;
+      baseFrame.frame.style.opacity = '1';
+      transitionAnimation = null;
+      transitionPhase = 'idle';
+      syncSurfaces();
+      schedulePointer();
+    }
+
+    function fadeTo(target) {
+      if (transitionAnimation && fadeTarget === target) { syncSurfaces(); return; }
+      stopTransition();
+      fadeTarget = target;
+      const from = Number(incomingFrame.frame.style.opacity);
+      transitionPhase = 'crossfade';
+      transitionRoute = 'crossfade';
+      if (Math.abs(target - from) < 0.001) { finishTransition(target); return; }
+      const animation = incomingFrame.frame.animate([{ opacity: from }, { opacity: target }], {
+        duration: transitionDuration * Math.abs(target - from),
+        easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards',
+      });
+      transitionAnimation = animation;
+      syncSurfaces();
+      animation.finished.then(() => {
+        if (transitionAnimation !== animation) return;
+        incomingFrame.frame.style.opacity = String(target);
+        animation.cancel();
+        finishTransition(target);
+      }).catch(() => {});
+    }
+
+    function prepareFrame(record) {
+      if (!record.loaded || record.ready || !state.enabled) return;
+      record.requestId = ++requestSequence;
+      postToFrame(record.frame.id, {
+        type: 'bs-prepare', requestId: record.requestId, skin: record.skin,
+        params: { ...state.p.views[record.skin]?.params }, auto: record.surface === 'ocean' ? state.autoCycle : state.p.views[record.skin].autoCycle,
+        sea: state.sea, t: state.time, preview: panelOpen,
+      });
+    }
+
+    function restoreSkin(id) {
+      state.skin = id;
+      void save({ skin: id });
+      updateGlass();
+      syncSkinUi();
+    }
+
+    function failFrame(record, reason) {
+      if (frames.get(record.surface) !== record) return;
+      console.warn('[Backspace] Surface unavailable:', record.surface, reason);
+      transitionError = String(reason || '渲染失败');
+      stopTransition();
+      if (record === incomingFrame) incomingFrame = null;
+      if (record === baseFrame) baseFrame = null;
+      removeFrame(record);
+      if (baseFrame) {
+        restoreSkin(baseFrame.skin);
+        baseFrame.frame.style.opacity = '1';
+        transitionPhase = 'idle';
+        syncSurfaces();
+      } else if (incomingFrame) {
+        if (incomingFrame.ready) {
+          baseFrame = incomingFrame;
+          incomingFrame = null;
+          restoreSkin(baseFrame.skin);
+          baseFrame.frame.style.opacity = '1';
+          transitionPhase = 'idle';
+          syncSurfaces();
+        }
+      } else if (record.surface !== 'ocean') {
+        restoreSkin('ocean');
+        applySkin();
+      } else transitionPhase = 'error';
+    }
+
+    function onSurfaceMessage(event) {
+      const record = [...frames.values()].find(item => item.frame.contentWindow === event.source);
+      if (!record || event.origin !== record.origin) return;
+      const data = event.data;
+      if (!isRecord(data)) return;
+      if (data.type === 'bs-frame-ready' && record.loaded && record.requestId > 0 && Number.isSafeInteger(data.requestId) && data.requestId === record.requestId && data.surface === record.surface && !record.ready) {
+        pauseReadyTimer(record);
+        record.ready = true;
+        if (record === baseFrame) { syncSurfaces(); return; }
+        if (!baseFrame) {
+          baseFrame = record;
+          incomingFrame = null;
+          record.frame.style.opacity = '1';
+          transitionPhase = 'idle';
+          syncSurfaces();
+          schedulePointer();
+        } else fadeTo(1);
+      } else if ((data.type === 'bs-surface-error' && data.surface === record.surface)
+        || (data.type === 'bs-cosmos-error' && record.surface === 'cosmos')) failFrame(record, data.reason);
+    }
+
+    function onSurfaceVisibility() {
+      for (const record of frames.values()) {
+        if (document.hidden) pauseReadyTimer(record);
+        else armReadyTimer(record);
+      }
+      syncSurfaces();
+    }
 
     const anchorSelectors = ['[data-slot="sidebar.settings"] button', '[data-testid="settings-trigger"]', '.VOzbGW_trigger'];
     const anchorSelector = anchorSelectors.join(',');
@@ -1041,7 +1216,6 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         else removeVideoFrame();
       }
       syncCosmosPreview();
-      if (!open) releaseInactiveFrame();
       panel.classList.add('open');
       panel.inert = !open;
       panel.setAttribute('aria-hidden', String(!open));
@@ -1075,65 +1249,47 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       };
     };
 
-    // 海面 iframe：与 1.2.6 完全一致（skin.html + ?skin=1）
-    const mountOceanFrame = () => {
+    const mountFrame = (skin) => {
       const root = document.body || document.documentElement;
-      if (!root || document.getElementById(IDS.frame)) return false;
-      const frame = document.createElement('iframe');
+      const surface = SURFACES[skin.surface];
+      if (!root || document.getElementById(surface.id)) return null;
       const query = new URLSearchParams({
-        skin: '1',
-        sea: String(state.sea),
-        t: String(state.time),
-        auto: state.autoCycle ? '1' : '0',
-        parentOrigin: location.origin,
+        managed: '1', parentOrigin: location.origin, auto: (skin.surface === 'ocean' ? state.autoCycle : state.p.views[skin.id].autoCycle) ? '1' : '0',
       });
-      frame.id = IDS.frame;
-      frame.src = `${options.assetUrl('skin.html')}?${query}`;
-      frame.setAttribute('aria-hidden', 'true');
-      frame.setAttribute('tabindex', '-1');
-      frame.style.cssText = FRAME_STYLE_ON;
-      frame.onload = () => {
-        if (document.getElementById(IDS.frame) !== frame) return;
-        const active = state.enabled && skinById(state.skin).surface === 'ocean';
-        postToFrame(IDS.frame, { type: 'bs-pause', paused: !active });
-        if (active) postToOcean();
-      };
-      root.insertBefore(frame, root.firstChild);
-      ownsSurface = true;
-      return true;
-    };
-
-    // 宇宙 iframe：两张新皮肤共用一块 WebGL2 画布，切换皮肤不用重载页面
-    const mountCosmosFrame = () => {
-      const root = document.body || document.documentElement;
-      if (!root || document.getElementById(IDS.cosmos)) return false;
-      const skin = skinById(state.skin);
-      const query = new URLSearchParams({
-        skin: skin.id,
-        controls: 'shared',
-        preview: panelOpen ? '1' : '0',
-        parentOrigin: location.origin,
-        auto: cosmicSettings().autoCycle ? '1' : '0',
-      });
-      for (const [key, value] of Object.entries(cosmicSettings().params)) query.set(key, String(value));
-      const frame = document.createElement('iframe');
-      frame.id = IDS.cosmos;
-      pointerSent = null;
-      frame.src = `${options.assetUrl('cosmos.html')}?${query}`;
-      frame.setAttribute('aria-hidden', 'true');
-      frame.setAttribute('tabindex', '-1');
-      frame.style.cssText = FRAME_STYLE_ON;
-      frame.onload = () => {
-        if (document.getElementById(IDS.cosmos) !== frame) return;
+      if (skin.surface === 'cosmos') {
+        query.set('skin', skin.id);
+        query.set('controls', 'shared');
+        query.set('preview', panelOpen ? '1' : '0');
+        for (const [key, value] of Object.entries(state.p.views[skin.id].params)) query.set(key, value);
         pointerSent = null;
-        syncCosmosPreview();
-        postToFrame(IDS.cosmos, { type: 'bs-pause', paused: !state.enabled || skinById(state.skin).surface !== 'cosmos' });
-        schedulePointer();
+      } else {
+        query.set('skin', '1');
+        query.set('sea', state.sea);
+        query.set('t', state.time);
+      }
+      const frame = document.createElement('iframe');
+      frame.id = surface.id;
+      frame.src = `${options.assetUrl(surface.entry)}?${query}`;
+      frame.setAttribute('aria-hidden', 'true');
+      frame.setAttribute('tabindex', '-1');
+      frame.style.cssText = `${FRAME_STYLE}opacity:0;`;
+      const record = {
+        frame, surface: skin.surface, skin: skin.id, origin: frameOrigin(frame),
+        ready: false, loaded: false, requestId: 0, timer: 0,
+        remaining: SURFACE_READY_TIMEOUT, waitStarted: 0,
       };
-      root.insertBefore(frame, root.firstChild);
+      frames.set(skin.surface, record);
+      frame.onload = () => {
+        if (frames.get(record.surface) !== record) return;
+        record.loaded = true;
+        record.ready = false;
+        prepareFrame(record);
+      };
+      // 同一背景层用 DOM 次序叠合，不能提升 z-index 遮住宿主工作台。
+      root.insertBefore(frame, baseFrame ? baseFrame.frame.nextSibling : root.firstChild);
       ownsSurface = true;
-      armReadyWatchdog(skin.id);
-      return true;
+      armReadyTimer(record);
+      return record;
     };
 
     const ensureGlassStyle = () => {
@@ -1144,70 +1300,63 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       (document.head || document.documentElement).appendChild(style);
     };
 
-    // 首帧看门狗：宇宙皮肤 8 秒内没报 ready（或直接报错）就回退海面，绝不留白屏
-    function armReadyWatchdog(skinId) {
-      clearTimeout(readyTimer);
-      readyTimer = setTimeout(() => {
-        if (state.skin !== skinId) return;
-        console.warn('[Backspace] Cosmic skin never reported a first frame; falling back to the ocean skin.');
-        fallbackToOcean();
-      }, COSMOS_READY_TIMEOUT);
+    function updateFrameSkin(record, skin) {
+      if (record.skin === skin.id) return;
+      record.skin = skin.id;
+      if (!record.ready) { prepareFrame(record); return; }
+      // 已显示的同类场景沿用自己的插值；先恢复，避免暂停状态把视角直接跳到终点。
+      postToFrame(record.frame.id, { type: 'bs-pause', paused: document.hidden });
+      postToFrame(record.frame.id, { type: 'bs-skin', skin: skin.id, params: { ...cosmicSettings().params } });
+      postToCosmos();
+      transitionRoute = 'native';
     }
 
-    const fallbackToOcean = () => {
-      clearTimeout(readyTimer);
-      if (state.skin === 'ocean') return;
-      state.skin = 'ocean';
-      syncSkinUi();
-      void save({ skin: 'ocean' });
-      applySkin();
-    };
-
-    // 皮肤表面：同一时刻只显示一个 iframe，另一个缩成 1x1 省 GPU
     function applySkin() {
-      if (!state.enabled) return;
+      if (!state.enabled || !ownsUi) return;
+      if (!ownsSurface && Object.values(SURFACES).some(surface => document.getElementById(surface.id))) return;
       ensureGlassStyle();
       updateGlass();
-      const skin = skinById(state.skin);
-      if (skin.surface === 'video' && !document.getElementById(IDS.video)) void videoAction('list');
-      if (skin.surface !== 'video' && document.getElementById(IDS.video)) removeVideoFrame();
-      const surface = skin.surface === 'video' ? (videoData.activeId ? 'video' : 'ocean') : skin.surface;
-      setFrameActive(IDS.video, surface === 'video');
-      setVideoPaused(surface !== 'video');
-      if (surface === 'video') {
-        for (const id of [IDS.frame, IDS.cosmos]) {
-          postToFrame(id, { type: 'bs-pause', paused: true });
-          setFrameActive(id, false);
-        }
-      } else if (surface === 'ocean') {
-        mountOceanFrame();
-        setFrameActive(IDS.frame, true);
-        postToOcean();
-        postToFrame(IDS.frame, { type: 'bs-pause', paused: false });
-        if (document.getElementById(IDS.cosmos)) {
-          postToFrame(IDS.cosmos, { type: 'bs-pause', paused: true });
-          setFrameActive(IDS.cosmos, false);
-        }
-      } else {
-        mountCosmosFrame();
-        setFrameActive(IDS.cosmos, true);
-        syncCosmosPreview();
-        postToFrame(IDS.cosmos, { type: 'bs-skin', skin: skin.id, params: { ...cosmicSettings().params } });
-        postToCosmos();
-        postToFrame(IDS.cosmos, { type: 'bs-pause', paused: false });
-        if (document.getElementById(IDS.frame)) {
-          postToFrame(IDS.frame, { type: 'bs-pause', paused: true });
-          setFrameActive(IDS.frame, false);
-        }
+      const selected = skinById(state.skin);
+      if (selected.surface === 'video' && !document.getElementById(IDS.video)) void videoAction('list');
+      const activeVideo = selected.surface === 'video' && !!videoData.activeId;
+      const heldVideo = selected.surface !== 'video' && !!videoData.activeId && !baseFrame?.ready;
+      setFrameActive(IDS.video, activeVideo || heldVideo);
+      setVideoPaused(!activeVideo);
+      if (activeVideo) {
+        clearSurfaces();
+        transitionRoute = 'video';
+        syncSkinUi();
+        return;
       }
-      releaseInactiveFrame();
+      const skin = selected.surface === 'video' ? skinById('ocean') : selected;
+      transitionError = '';
+      if (incomingFrame && !incomingFrame.ready && incomingFrame.surface !== skin.surface) {
+        removeFrame(incomingFrame);
+        incomingFrame = null;
+      }
+      if (incomingFrame) {
+        const record = incomingFrame.surface === skin.surface ? incomingFrame : baseFrame;
+        updateFrameSkin(record, skin);
+        if (incomingFrame.ready) fadeTo(record === incomingFrame ? 1 : 0);
+        else { transitionPhase = 'preparing'; prepareFrame(incomingFrame); syncSurfaces(); }
+      } else if (baseFrame?.surface === skin.surface) {
+        updateFrameSkin(baseFrame, skin);
+        transitionPhase = 'idle';
+        syncSurfaces();
+        schedulePointer();
+      } else {
+        transitionRoute = baseFrame ? 'crossfade' : 'initial';
+        transitionPhase = 'preparing';
+        incomingFrame = mountFrame(skin);
+        syncSurfaces();
+      }
       syncSkinUi();
     }
 
     let syncSkinUi = () => {};
 
     const switchSkin = (id) => {
-      if (!SKINS.some((skin) => skin.id === id) || id === state.skin) return;
+      if (!SKINS.some((skin) => skin.id === id) || (id === state.skin && transitionPhase !== 'error')) return;
       state.skin = id;
       void save({ skin: id });
       if (state.enabled) applySkin();
@@ -1283,6 +1432,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       const tooltipContent = document.createElement('div');
       tooltip.append(tooltipContent);
       host.append(button, panel, tooltip);
+      ownsUi = true;
 
       const glassRange = panel.querySelector(`#${IDS.panel}-glass-range`);
       const glassOut = panel.querySelector(`#${IDS.panel}-glass`);
@@ -1708,21 +1858,8 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       });
       on(window, 'resize', () => { hideHelp(); hideResetConfirm(); cancelPanelResize(); schedulePlace(); });
 
-      // 宇宙 iframe 的握手 + 回退：ready 前失败一律回海面
-      on(window, 'message', (event) => {
-        if (skinById(state.skin).surface !== 'cosmos') return;
-        const frame = document.getElementById(IDS.cosmos);
-        if (!(frame instanceof HTMLIFrameElement) || event.source !== frame.contentWindow) return;
-        const data = event.data;
-        if (!data || typeof data !== 'object') return;
-        if (data.type === 'bs-cosmos-ready') {
-          clearTimeout(readyTimer);
-          applySkin();
-        } else if (data.type === 'bs-cosmos-error') {
-          console.warn('[Backspace] Cosmic skin unavailable:', data.reason);
-          fallbackToOcean();
-        }
-      });
+      on(window, 'message', onSurfaceMessage);
+      on(document, 'visibilitychange', onSurfaceVisibility);
 
       // 鼠标/点击：iframe 是 pointer-events:none 且 aria-hidden，收不到事件，
       // 所以一律在父页监听再经 postMessage 转发进宇宙 iframe（海面皮肤不需要）。
@@ -1736,7 +1873,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         schedulePointer();
       }, { passive: true });
       on(document, 'pointerdown', (event) => {
-        if (!state.enabled || event.button !== 0 || skinById(state.skin).surface !== 'cosmos' || cosmicSettings().params.pulse === 0) return;
+        if (!state.enabled || event.button !== 0 || !frames.get('cosmos')?.ready || skinById(state.skin).surface !== 'cosmos' || cosmicSettings().params.pulse === 0) return;
         if (panel.contains(event.target) || button.contains(event.target) || tooltip.contains(event.target)) return;
         const [x, y] = pointerPayload(event);
         postToFrame(IDS.cosmos, { type: 'bs-pulse', x, y });
@@ -1775,17 +1912,18 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       cancelAnimationFrame(pointerFrame);
       pointerFrame = 0;
       pointerPending = pointerSent = null;
-      clearTimeout(readyTimer);
+      clearSurfaces();
       while (surfaceCleanups.length > 0) surfaceCleanups.pop()();
       if (ownsSurface) {
-        document.getElementById(IDS.frame)?.remove();
-        document.getElementById(IDS.cosmos)?.remove();
         document.getElementById(IDS.glass)?.remove();
       }
-      document.getElementById(IDS.button)?.remove();
-      document.getElementById(IDS.panel)?.remove();
-      document.getElementById(`${IDS.panel}-help`)?.remove();
-      document.getElementById(IDS.uiStyle)?.remove();
+      if (ownsUi) {
+        document.getElementById(IDS.button)?.remove();
+        document.getElementById(IDS.panel)?.remove();
+        document.getElementById(`${IDS.panel}-help`)?.remove();
+        document.getElementById(IDS.uiStyle)?.remove();
+        ownsUi = false;
+      }
       ownsSurface = false;
     };
 
@@ -1805,19 +1943,15 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         syncVideoUi();
         // Tear down only the surfaces (frames + glass), keeping the
         // button/panel so the skin can be re-enabled from the same page.
-        clearTimeout(readyTimer);
+        clearSurfaces();
         if (ownsSurface) {
-          document.getElementById(IDS.frame)?.remove();
-          document.getElementById(IDS.cosmos)?.remove();
           document.getElementById(IDS.glass)?.remove();
           ownsSurface = false;
         }
         return;
       }
       // The extension and both native paths intentionally share the same ids.
-      // Both surface helpers are idempotent: whichever implementation mounted
-      // first owns the frame, so a second controller neither double-renders nor
-      // replaces it — it only re-sends its own settings.
+      // 首个挂载的控制器拥有背景，重复入口不能替换或销毁它。
       applySkin();
     };
 
@@ -1868,6 +2002,10 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       stop,
       getState: () => normalize(state),
       setSkin: (id) => switchSkin(id),
+      getTransitionState: () => ({
+        phase: transitionPhase, route: transitionRoute, visible: baseFrame?.skin ?? null,
+        requested: state.skin, frameCount: frames.size, duration: transitionDuration, error: transitionError,
+      }),
     });
   }
 

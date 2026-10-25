@@ -114,6 +114,10 @@ try {
         await otherPage.getByRole('button', { name: 'Backspace 皮肤设置', exact: true }).click()
         await ready(otherPage)
         assert.equal(await otherPage.locator('.bs-video-grid img').count(), 0)
+        await otherPage.waitForFunction(() => {
+          const frame = document.getElementById('__dsh-backspace__')
+          return frame && getComputedStyle(frame).opacity === '1'
+        }, null, { timeout: 10000 })
         assert.equal(await otherPage.locator('#__dsh-backspace__').evaluate(frame => getComputedStyle(frame).opacity), '1')
         await otherPage.close()
       }

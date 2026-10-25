@@ -8,7 +8,9 @@
 //     { type: 'bs-pulse',  x, y }            点击脉冲（-1..1，y 向上）
 //     { type: 'bs-preview', active }          设置面板完整预览 / 日常背景帧预算
 //     { type: 'bs-pause',  paused }          暂停/恢复渲染（父页隐藏本帧时）
+//     { type: 'bs-prepare', requestId, skin, params, auto, preview } 原子准备交接帧
 //   本帧 → 父页
+//     { type: 'bs-frame-ready', requestId, surface: 'cosmos' } 对应请求的交接帧已绘制
 //     { type: 'bs-cosmos-ready', skin }      首帧渲染成功（父页据此确认皮肤可用）
 //     { type: 'bs-cosmos-error', reason }    WebGL2 不可用 / 着色器编译失败（父页回退海面）
 //
@@ -24,6 +26,8 @@ const SKINS = new Map([
   [vortex.id, vortex],
 ]);
 const QUERY = new URLSearchParams(location.search);
+const MANAGED = QUERY.get('managed') === '1';
+if (MANAGED) document.documentElement.classList.add('managed');
 const SHARED_CONTROLS = QUERY.get('controls') === 'shared';
 let previewing = QUERY.get('preview') !== '0';
 const TRANSITION_SECONDS = 2.2;
@@ -111,6 +115,7 @@ function post(message) {
 
 if (!gl) {
   post({ type: 'bs-cosmos-error', reason: 'WebGL2 unavailable' });
+  if (MANAGED) post({ type: 'bs-surface-error', surface: 'cosmos', reason: 'WebGL2 unavailable' });
 }
 
 // ---------------------------------------------------------------------------
@@ -239,7 +244,7 @@ function advanceScene(dt) {
 }
 
 let autoCycle = QUERY.get('auto') !== '0';
-let paused = false;
+let paused = MANAGED;
 let pointer = [0, 0];
 let pointerTarget = [0, 0];
 let pulseAt = -1;
@@ -260,13 +265,20 @@ let frameCount = 0;
 let raf = 0;
 let lastFrameCap = previewing ? PREVIEW_FRAME_CAP : BACKGROUND_FRAME_CAP;
 let ready = false;
+let pendingPrepare = 0;
+let latestPrepare = 0;
+let prepareAck = 0;
 
 let errorReported = false;
 function fail(error) {
   console.error('[Backspace] cosmic skin failed:', error);
   if (!errorReported) {
     errorReported = true;
-    post({ type: 'bs-cosmos-error', reason: String(error && error.message ? error.message : error) });
+    cancelAnimationFrame(prepareAck);
+    prepareAck = pendingPrepare = 0;
+    const reason = String(error && error.message ? error.message : error);
+    post({ type: 'bs-cosmos-error', reason });
+    if (MANAGED) post({ type: 'bs-surface-error', surface: 'cosmos', reason });
   }
 }
 
@@ -322,7 +334,7 @@ function render(now) {
   if (cap !== lastFrameCap) {
     lastFrameCap = cap;
     resetFrameStats(now);
-    lastRender = 0;
+    lastRender = -Infinity;
   }
   if (now - lastRender < 1000 / cap - 0.5) return false;
   lastRender = now;
@@ -437,12 +449,31 @@ function stop() {
 
 function redraw() {
   // 暂停时尺寸变化也要补一帧，否则画面会被拉伸
-  lastRender = 0;
+  lastRender = -Infinity;
   lastFrame = performance.now();
   if (!raf) {
     resetFrameStats(lastFrame);
   }
-  render(lastFrame);
+  return render(lastFrame);
+}
+
+function prepareFrame() {
+  cancelAnimationFrame(prepareAck);
+  prepareAck = 0;
+  if (!pendingPrepare || !gl || errorReported || document.hidden) return;
+  paused = true;
+  stop();
+  applySize();
+  if (!redraw()) return;
+  const requestId = pendingPrepare;
+  prepareAck = requestAnimationFrame(() => {
+    prepareAck = requestAnimationFrame(() => {
+      prepareAck = 0;
+      if (pendingPrepare !== requestId || document.hidden) return;
+      pendingPrepare = 0;
+      post({ type: 'bs-frame-ready', requestId, surface: 'cosmos' });
+    });
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -455,7 +486,25 @@ window.addEventListener('message', (event) => {
   const data = event.data;
   if (!data || typeof data !== 'object') return;
 
-  if (data.type === 'bs-skin' && SKINS.has(data.skin)) {
+  if (MANAGED && data.type === 'bs-prepare') {
+    if (!Number.isSafeInteger(data.requestId) || data.requestId <= latestPrepare || !SKINS.has(data.skin)) return;
+    latestPrepare = pendingPrepare = data.requestId;
+    paused = true;
+    stop();
+    if (data.skin !== activeSkin.id) {
+      savedParams.set(activeSkin.id, { ...params });
+      activeSkin = SKINS.get(data.skin);
+      if (!SHARED_CONTROLS) params = savedParams.get(data.skin) || defaultsFor(activeSkin);
+    }
+    updateParams(data.params);
+    targetParams = sceneParams(activeSkin.id, params, SHARED_CONTROLS);
+    paramsFrom = { ...targetParams };
+    viewFrom = viewTarget = activeSkin.id === 'vortex' ? 1 : 0;
+    transitionElapsed = TRANSITION_SECONDS;
+    if (typeof data.auto === 'boolean') autoCycle = data.auto;
+    if (typeof data.preview === 'boolean') previewing = data.preview;
+    prepareFrame();
+  } else if (data.type === 'bs-skin' && SKINS.has(data.skin)) {
     if (data.skin !== activeSkin.id) {
       savedParams.set(activeSkin.id, { ...params });
       paramsFrom = { ...displayedParams };
@@ -468,14 +517,14 @@ window.addEventListener('message', (event) => {
     updateParams(data.params);
     targetParams = sceneParams(activeSkin.id, params, SHARED_CONTROLS);
     if (paused && data.params) paramsFrom = { ...targetParams };
-    redraw();
+    if (pendingPrepare) prepareFrame(); else redraw();
     if (needsAnimation()) start();
   } else if (data.type === 'bs-set') {
     updateParams(data.params);
     targetParams = sceneParams(activeSkin.id, params, SHARED_CONTROLS);
     if (paused && data.params) paramsFrom = { ...targetParams };
     if (data.auto !== undefined) autoCycle = data.auto !== false;
-    if (paused) redraw(); else start();
+    if (pendingPrepare) prepareFrame(); else if (paused) redraw(); else start();
   } else if (data.type === 'bs-preview' && typeof data.active === 'boolean') {
     previewing = data.active;
     start();
@@ -506,11 +555,16 @@ window.addEventListener('message', (event) => {
 window.addEventListener('resize', () => {
   if (!gl) return;
   applySize();
-  redraw();
+  if (pendingPrepare) prepareFrame(); else redraw();
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) stop(); else start();
+  if (document.hidden) {
+    stop();
+    cancelAnimationFrame(prepareAck);
+    prepareAck = 0;
+  } else if (pendingPrepare) prepareFrame();
+  else start();
 });
 
 // 自动化自检用的读数（与 shared/ocean.js 的 __bsState 对应）
