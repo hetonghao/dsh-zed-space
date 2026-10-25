@@ -842,6 +842,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         if (generation !== videoGeneration) return;
         acceptVideoReply(reply);
         if (!reply.ok) videoErrors.push({ code: reply.code });
+        else videoErrors = [];
       } catch (error) {
         if (generation !== videoGeneration) return;
         videoData.activeId = null;

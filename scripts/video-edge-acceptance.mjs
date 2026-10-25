@@ -189,6 +189,41 @@ try {
     await context.close()
     results.push({ scenario: 'reduced-motion-keeps-a-visible-still-frame', result: 'PASS' })
   }
+  for (const replacePlayer of [true, false]) {
+    const { context, page, errors } = await boot()
+    await importFile(page)
+    await importFile(page, { name: 'next.mp4', mimeType: 'video/mp4', buffer: await readFile(sample) })
+    await page.getByRole('checkbox', { name: '启用 sample', exact: true }).check()
+    await ready(page)
+    await page.frameLocator('#__dsh-backspace-video__').locator('body').evaluate(() => {
+      const play = HTMLMediaElement.prototype.play
+      let delay = true
+      HTMLMediaElement.prototype.play = function () {
+        const actual = play.call(this)
+        if (!delay) return actual
+        delay = false
+        actual.catch(() => {})
+        return new Promise((_resolve, reject) => { window.__testRejectStalePlay = name => reject(new DOMException('old playback', name)) })
+      }
+    })
+    const toggle = page.getByRole('switch', { name: '启用 Backspace 皮肤', exact: true })
+    await toggle.uncheck(); await toggle.check()
+    if (replacePlayer) {
+      await page.getByRole('checkbox', { name: '启用 next', exact: true }).check()
+      await ready(page)
+    } else { await toggle.uncheck(); await toggle.check() }
+    await page.frameLocator('#__dsh-backspace-video__').locator('body').evaluate((_body, name) => window.__testRejectStalePlay(name), replacePlayer ? 'AbortError' : 'NotAllowedError')
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    const selected = replacePlayer ? 'next' : 'sample'
+    await page.getByRole('button', { name: `重命名 ${selected}`, exact: true }).click()
+    const name = page.getByRole('textbox', { name: `重命名 ${selected}`, exact: true })
+    await name.fill('保留启用状态'); await name.press('Enter'); await ready(page)
+    assert.equal(await page.getByRole('checkbox', { name: '启用 保留启用状态', exact: true }).isChecked(), true, 'a stale play rejection must not clear the newer selection or playback attempt')
+    assert.equal(await page.frameLocator('#__dsh-backspace-video__').locator('video').evaluate(video => !video.paused), true)
+    assert.deepEqual(errors, [])
+    await context.close()
+    results.push({ scenario: replacePlayer ? 'stale-player-rejection-does-not-stop-new-video' : 'stale-resume-rejection-does-not-clear-new-play-attempt', result: 'PASS' })
+  }
 } finally {
   await writeFile(resolve(output, 'results.json'), JSON.stringify(results, null, 2))
   await browser.close()

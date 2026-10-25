@@ -9,8 +9,10 @@ let activeId = null;
 let hostPaused = true;
 let player;
 let objectUrl;
+let playbackGeneration = 0;
 let queue = Promise.resolve();
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const shouldPause = () => hostPaused || document.hidden || reducedMotion.matches;
 const send = data => parent.postMessage({ type: 'bs-video', token, ...data }, parentOrigin);
 
 function openDatabase() {
@@ -57,6 +59,7 @@ async function snapshot() {
   return { items, activeId };
 }
 function stopPlayer() {
+  playbackGeneration++;
   if (player) { player.onerror = null; player.pause(); player.removeAttribute('src'); player.load(); player.remove(); player = null; }
   if (objectUrl) URL.revokeObjectURL(objectUrl);
   objectUrl = null;
@@ -71,15 +74,24 @@ async function showClip(clip) {
   player.src = objectUrl;
   document.body.append(player);
   await loaded;
-  if (!hostPaused && !document.hidden && !reducedMotion.matches) {
-    try { await player.play(); } catch { throw new Error('playback'); }
+  const current = player;
+  const generation = ++playbackGeneration;
+  if (!shouldPause()) {
+    try { await current.play(); }
+    catch {
+      if (current === player && generation === playbackGeneration && !shouldPause()) throw new Error('playback');
+    }
   }
-  player.onerror = () => { void playbackFailure('decode'); };
+  current.onerror = () => playbackFailure('decode', current, playbackGeneration);
 }
-async function playbackFailure(code) {
-  activeId = null; stopPlayer();
-  try { await saveSelection(null); } catch { /* 保留可见错误，宿主页仍回退海面。 */ }
-  send({ event: 'failure', code });
+function playbackFailure(code, failedPlayer, generation) {
+  // 与选择/移除串行，旧播放器或旧播放尝试的取消不能清除新选择。
+  queue = queue.then(async () => {
+    if (failedPlayer !== player || generation !== playbackGeneration) return;
+    activeId = null; stopPlayer();
+    try { await saveSelection(null); } catch { /* 保留可见错误，宿主页仍回退海面。 */ }
+    send({ event: 'failure', code });
+  });
 }
 async function handle(data) {
   switch (data.action) {
@@ -147,8 +159,10 @@ addEventListener('message', event => {
 });
 const updatePlayback = () => {
   if (!player) return;
-  if (hostPaused || document.hidden || reducedMotion.matches) player.pause();
-  else void player.play().catch(() => playbackFailure('playback'));
+  const current = player;
+  const generation = ++playbackGeneration;
+  if (shouldPause()) current.pause();
+  else void current.play().catch(() => playbackFailure('playback', current, generation));
 };
 document.addEventListener('visibilitychange', updatePlayback);
 reducedMotion.addEventListener('change', updatePlayback);
