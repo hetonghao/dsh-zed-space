@@ -167,4 +167,4 @@ const updatePlayback = () => {
 document.addEventListener('visibilitychange', updatePlayback);
 reducedMotion.addEventListener('change', updatePlayback);
 addEventListener('pagehide', () => { stopPlayer(); database?.close(); });
-if (parent !== window && /^https?:\/\//.test(parentOrigin || '') && /^[a-f\d-]{36}$/i.test(token || '')) send({ event: 'ready' });
+if (parent !== window && (/^https?:\/\//.test(parentOrigin || '') || parentOrigin === 'dsh-app://app') && /^[a-f\d-]{36}$/i.test(token || '')) send({ event: 'ready' });
