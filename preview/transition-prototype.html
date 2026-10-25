@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="data:,">
+  <title>场景交接 · Backspace 原型</title>
+  <style>
+    @font-face { font-family: Geist; src: url('../shared/vendor/fonts/geist-sans-latin-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+    :root { color-scheme: dark; font: 14px/1.55 Geist, 'PingFang SC', sans-serif; color: #f3f1ec; background: #07090c; --surface: #15191e; --line: #3e464e; --muted: #bdc5ce; --accent: #b8d7d0; --space: clamp(20px,3vw,44px); }
+    * { box-sizing: border-box; }
+    body { margin: 0; height: 100dvh; overflow: hidden; }
+    ::selection { color: #11181a; background: var(--accent); }
+    [hidden] { display: none !important; }
+    button, input { font: inherit; }
+    button { color: inherit; background: transparent; border: 1px solid transparent; border-radius: 7px; min-height: 44px; padding: 8px 13px; cursor: pointer; }
+    button:hover { background: #ffffff0d; }
+    button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    button[aria-pressed="true"], button[aria-expanded="true"] { border-color: #65747b; background: #ffffff0c; }
+    #stage { position: fixed; inset: 0; }
+    #artwork { position: fixed; inset: 0; }
+    .heading { position: fixed; top: var(--space); left: var(--space); max-width: calc(100% - 2 * var(--space)); padding: 17px 21px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; box-shadow: 0 8px 28px #0002; }
+    h1 { margin: 0; font-size: 20px; font-weight: 400; letter-spacing: .015em; }
+    .heading p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+    .heading small { font-size: 11px; color: var(--accent); margin-left: 10px; }
+    .toolbar { position: fixed; bottom: calc(var(--space) + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 12px 36px #0003; padding: 8px; }
+    .controls { display: flex; align-items: center; gap: 7px; }
+    .skins { display: flex; gap: 4px; }
+    .tools { display: flex; gap: 2px; border-left: 1px solid var(--line); padding-left: 7px; }
+    .tools button { color: var(--muted); font-size: 12px; }
+    .status { padding: 8px 9px 2px; color: var(--muted); display: flex; gap: 12px; justify-content: space-between; font-size: 11px; font-variant-numeric: tabular-nums; }
+    #route { color: var(--accent); }
+    #settings { position: fixed; right: var(--space); bottom: calc(var(--space) + 112px + env(safe-area-inset-bottom)); width: 320px; max-height: calc(100dvh - 225px); overflow-y: auto; padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 36px #0003; scrollbar-width: thin; scrollbar-color: var(--line) var(--surface); }
+    .settings-title { display: flex; justify-content: space-between; align-items: center; margin: -7px -8px 15px 0; }
+    h2 { font-size: 14px; font-weight: 400; margin: 0; }
+    .settings-title button { font-size: 12px; color: var(--muted); }
+    .parameters { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 20px; }
+    .parameter label { display: flex; gap: 8px; justify-content: space-between; font-size: 12px; }
+    output { color: var(--accent); font-variant-numeric: tabular-nums; }
+    input[type="range"] { display: block; width: 100%; height: 24px; margin: 4px 0 0; accent-color: var(--accent); cursor: pointer; }
+    .checkbox { display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--muted); margin-top: 18px; min-height: 36px; }
+    input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
+    .settings-note { margin: 15px 0 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+    details { position: fixed; top: var(--space); right: var(--space); width: 235px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-size: 11px; }
+    summary { cursor: pointer; padding: 3px 0; }
+    dl { margin-bottom: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; }
+    dt, dd { margin: 0; }
+    dd { text-align: right; color: #f3f1ec; }
+    #error { position: fixed; left: var(--space); right: var(--space); top: 150px; width: fit-content; max-width: calc(100% - 2 * var(--space)); padding: 12px 16px; background: var(--surface); border: 1px solid #a48c77; border-radius: 8px; }
+    #restore { position: fixed; right: var(--space); bottom: var(--space); border-color: var(--line); background: var(--surface); color: var(--muted); font-size: 12px; }
+    @media (max-width: 700px) {
+      .heading { padding: 13px 17px; }
+      .heading p { max-width: 25ch; }
+      details { top: auto; bottom: calc(154px + env(safe-area-inset-bottom)); right: 16px; width: 220px; }
+      .toolbar { bottom: calc(16px + env(safe-area-inset-bottom)); width: calc(100% - 32px); }
+      .controls { display: block; }
+      .skins, .tools { justify-content: center; }
+      .skins button { flex: 1; padding-inline: 6px; }
+      .tools { border-left: 0; padding-left: 0; }
+      .tools button { min-height: 36px; }
+      .status { gap: 6px; }
+      #settings { left: 16px; right: 16px; bottom: calc(160px + env(safe-area-inset-bottom)); width: auto; max-height: calc(100dvh - 290px); }
+      body:has(#settings:not([hidden])) details { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 临时原型：检验一套交叠效果能否衔接真实场景，并让已有同类动画旁路。 -->
+  <div id="stage" aria-hidden="true"></div>
+  <div id="artwork" aria-hidden="true"></div>
+  <main id="interface">
+    <header class="heading">
+      <h1>场景交接<small>交互原型</small></h1>
+      <p>跨场景柔和交叠，黑洞双视角保留原有动画。</p>
+    </header>
+    <details>
+      <summary>查看交接状态</summary>
+      <dl>
+        <dt>当前画面</dt><dd id="visible-state">准备中</dd>
+        <dt>目标画面</dt><dd id="target-state">事件视界</dd>
+        <dt>交接阶段</dt><dd id="phase-state">准备首帧</dd>
+        <dt>驻留场景</dt><dd id="frame-state">0</dd>
+        <dt>动画路径</dt><dd id="route-state">首次加载</dd>
+      </dl>
+    </details>
+    <section id="settings" aria-label="画面参数" hidden>
+      <div class="settings-title"><h2 id="settings-heading">宇宙共享参数</h2><button id="reset" type="button">恢复默认</button></div>
+      <div id="cosmos-parameters" class="parameters"></div>
+      <div id="ocean-parameters" class="parameters" hidden></div>
+      <label class="checkbox" id="cycle-control" hidden><input type="checkbox" id="cycle">海面自动昼夜变化</label>
+      <p class="settings-note">调整立即生效。此原型不保存设置，也不修改桌面配置。</p>
+    </section>
+    <nav class="toolbar" aria-label="皮肤转场预览">
+      <div class="controls">
+        <div class="skins" aria-label="选择皮肤">
+          <button type="button" data-skin="horizon" aria-pressed="true">事件视界</button>
+          <button type="button" data-skin="vortex" aria-pressed="false">吸积涡旋</button>
+          <button type="button" data-skin="ocean" aria-pressed="false">海面</button>
+        </div>
+        <div class="tools">
+          <button id="adjust" type="button" aria-expanded="false" aria-controls="settings">调节</button>
+          <button id="pause" type="button" aria-pressed="false">暂停</button>
+          <button id="hide" type="button">只看画面</button>
+        </div>
+      </div>
+      <div class="status" role="status" aria-live="polite"><span id="status">正在准备事件视界…</span><span id="route">首次加载</span></div>
+    </nav>
+    <p id="error" role="alert" hidden></p>
+  </main>
+  <button id="restore" type="button" hidden>显示控制 · H</button>
+  <script type="module">
+    import { SCENE_PROPS } from '../shared/skins/accretion.js';
+    import { createTransitionPreview } from './transition-prototype.js';
+    const $ = (id) => document.getElementById(id);
+    const names = { horizon: '事件视界', vortex: '吸积涡旋', ocean: '海面' };
+    const initial = new URLSearchParams(location.search).get('skin');
+    const phases = { preparing: '准备首帧', crossfade: '柔和交叠', native: '视角变形', idle: '持续动态', error: '未能加载' };
+    const routes = { initial: '首次加载', crossfade: '通用交叠', native: '场景内动画' };
+    let selected = 'horizon';
+    let paused = false;
+    const cosmos = Object.fromEntries(SCENE_PROPS.map(prop => [prop.key, prop.def]));
+    const ocean = { sea: 50, t: 55, auto: false };
+    const controller = createTransitionPreview({ stage: $('stage'), onChange(state) {
+      selected = state.requested || selected;
+      document.body.dataset.phase = state.phase;
+      document.body.dataset.skin = selected;
+      for (const button of document.querySelectorAll('[data-skin]')) button.setAttribute('aria-pressed', String(button.dataset.skin === selected));
+      $('visible-state').textContent = names[state.visible] || '准备中';
+      $('target-state').textContent = names[selected];
+      $('phase-state').textContent = phases[state.phase] || state.phase;
+      $('frame-state').textContent = String(state.frameCount);
+      $('route-state').textContent = routes[state.route] || '首次加载';
+      $('status').textContent = state.phase === 'idle' ? `${names[selected]} · ${paused ? '已暂停' : '持续动态'}` : `${phases[state.phase] || state.phase} · ${names[selected]}`;
+      $('route').textContent = state.phase === 'crossfade' ? `通用交叠 · ${matchMedia('(prefers-reduced-motion: reduce)').matches ? 150 : 550}ms` : routes[state.route] || '首次加载';
+      $('error').hidden = !state.error;
+      $('error').textContent = state.error || '';
+      $('cosmos-parameters').hidden = selected === 'ocean';
+      $('ocean-parameters').hidden = selected !== 'ocean';
+      $('cycle-control').hidden = selected !== 'ocean';
+      $('settings-heading').textContent = selected === 'ocean' ? '海面参数' : '宇宙共享参数';
+      const url = new URL(location.href);
+      url.searchParams.set('skin', selected);
+      history.replaceState(null, '', url);
+    }});
+    window.__transitionPrototype = controller;
+    function addRange(parent, prop, values, update) {
+      const row = document.createElement('div');
+      row.className = 'parameter';
+      const id = `param-${prop.key}`;
+      row.innerHTML = `<label for="${id}">${prop.label}<output for="${id}">${values[prop.key]}</output></label><input id="${id}" type="range" min="${prop.min}" max="${prop.max}" step="1" value="${values[prop.key]}">`;
+      row.querySelector('input').addEventListener('input', (event) => {
+        values[prop.key] = Number(event.target.value);
+        row.querySelector('output').value = event.target.value;
+        update(values);
+      });
+      parent.append(row);
+    }
+    for (const prop of SCENE_PROPS) addRange($('cosmos-parameters'), prop, cosmos, controller.setCosmos);
+    for (const prop of [{key:'sea',label:'海况',min:0,max:100},{key:'t',label:'日照时刻',min:0,max:100}]) addRange($('ocean-parameters'), prop, ocean, controller.setOcean);
+    $('cycle').onchange = () => { ocean.auto = $('cycle').checked; controller.setOcean(ocean); };
+    for (const button of document.querySelectorAll('[data-skin]')) button.onclick = () => controller.select(button.dataset.skin);
+    function closeSettings() { $('settings').hidden = true; $('adjust').setAttribute('aria-expanded', 'false'); }
+    $('adjust').onclick = () => {
+      const open = $('settings').hidden;
+      $('settings').hidden = !open;
+      $('adjust').setAttribute('aria-expanded', String(open));
+      if (open) $('settings').querySelector(`${selected === 'ocean' ? '#ocean-parameters' : '#cosmos-parameters'} input`).focus();
+    };
+    $('reset').onclick = () => {
+      const values = selected === 'ocean' ? ocean : cosmos;
+      Object.assign(values, selected === 'ocean' ? {sea:50,t:55,auto:false} : Object.fromEntries(SCENE_PROPS.map(prop => [prop.key, prop.def])));
+      for (const input of $(selected === 'ocean' ? 'ocean-parameters' : 'cosmos-parameters').querySelectorAll('input')) {
+        input.value = values[input.id.slice(6)];
+        input.previousElementSibling.querySelector('output').value = input.value;
+      }
+      $('cycle').checked = ocean.auto;
+      (selected === 'ocean' ? controller.setOcean : controller.setCosmos)(values);
+    };
+    $('pause').onclick = () => {
+      paused = !paused;
+      $('pause').textContent = paused ? '继续' : '暂停';
+      $('pause').setAttribute('aria-pressed', String(paused));
+      controller.setPaused(paused);
+    };
+    function toggleInterface() {
+      const hidden = !$('interface').hidden;
+      $('interface').hidden = hidden;
+      $('restore').hidden = !hidden;
+      (hidden ? $('restore') : $('hide')).focus();
+    }
+    $('hide').onclick = toggleInterface;
+    $('restore').onclick = toggleInterface;
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') { closeSettings(); $('adjust').focus(); return; }
+      if (event.metaKey || event.ctrlKey || event.altKey || event.target.matches('input,textarea,[contenteditable]')) return;
+      if (event.key.toLowerCase() === 'h') toggleInterface();
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        const ids = Object.keys(names);
+        controller.select(ids[(ids.indexOf(selected) + (event.key === 'ArrowRight' ? 1 : 2)) % ids.length]);
+      }
+    });
+    const point = event => [event.clientX / innerWidth * 2 - 1, 1 - event.clientY / innerHeight * 2];
+    $('artwork').onpointermove = event => controller.pointer(...point(event));
+    $('artwork').onpointerleave = () => controller.pointer(0, 0);
+    $('artwork').onclick = event => controller.pulse(...point(event));
+    window.addEventListener('pagehide', event => { if (!event.persisted) controller.dispose(); });
+    controller.setCosmos(cosmos);
+    controller.setOcean(ocean);
+    controller.select(Object.hasOwn(names, initial) ? initial : 'horizon');
+  </script>
+</body>
+</html>

@@ -65,7 +65,8 @@
     "test:browser": "node scripts/browser-acceptance.mjs",
     "test:desktop": "node scripts/desktop-acceptance.mjs && node scripts/official-desktop-acceptance.mjs",
     "test:website": "node scripts/website-acceptance.mjs && node scripts/website-loading-acceptance.mjs",
-    "capture": "node scripts/capture-gallery.mjs"
+    "capture": "node scripts/capture-gallery.mjs",
+    "preview:transition": "node scripts/preview-transition.mjs"
   },
   "engines": {
     "node": ">=20"
