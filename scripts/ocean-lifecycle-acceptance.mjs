@@ -83,12 +83,15 @@ try {
 
   await page.evaluate(() => { document.querySelector('#ocean').style.cssText = 'width:720px;height:450px;border:0' })
   await page.waitForTimeout(150)
-  assert.equal((await state(page)).frames, paused.frames, 'paused resize must not restart the ocean')
+  const resized = await state(page)
+  assert.equal(resized.frames, paused.frames + 1, 'paused resize redraws exactly one valid frame')
+  assert.equal(resized.loopActive, false, 'resize must not restart the continuous loop')
+  assert.equal(await rafs(page), pausedRafs, 'single redraw adds no persistent RAF')
   const resumeAt = await page.evaluate(() => {
     document.querySelector('#ocean').contentWindow.postMessage({ type: 'bs-pause', paused: false }, location.origin)
     return performance.now()
   })
-  await page.waitForFunction(frames => document.querySelector('#ocean').contentWindow.__bsState().frames > frames, paused.frames)
+  await page.waitForFunction(frames => document.querySelector('#ocean').contentWindow.__bsState().frames > frames, resized.frames)
   const observation = await page.evaluate(() => ({ state: document.querySelector('#ocean').contentWindow.__bsState(), at: performance.now() }))
   const resumed = observation.state
   const resumeEvidence = { name: 'resume-resize-and-rapid-toggle', resumed, resumeWallSeconds: (observation.at - resumeAt) / 1000 }

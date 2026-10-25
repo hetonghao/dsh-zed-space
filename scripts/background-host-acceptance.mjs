@@ -18,10 +18,17 @@ const buttonId = '__dsh-backspace-btn__'
 const panelId = '__dsh-backspace-panel__'
 const fixture = `<html><body><script>
 window.messages = [];
-addEventListener('message', event => messages.push(event.data));
+addEventListener('message', event => {
+  messages.push(event.data);
+  if (event.data.type === 'bs-prepare') requestAnimationFrame(() => requestAnimationFrame(() => parent.postMessage({
+    type: 'bs-frame-ready', requestId: event.data.requestId,
+    surface: location.pathname.includes('cosmos') ? 'cosmos' : 'ocean',
+  }, location.origin)));
+});
 if (location.pathname.includes('cosmos')) parent.postMessage({ type: 'bs-cosmos-ready' }, location.origin);
 </script></body></html>`
 const messages = (page, id = cosmosId) => page.evaluate(id => document.getElementById(id).contentWindow.messages, id)
+const settled = page => page.waitForFunction(() => controller.getTransitionState().phase === 'idle')
 const clearMessages = (page, id = cosmosId) => page.evaluate(id => { document.getElementById(id).contentWindow.messages.length = 0 }, id)
 const waitMessage = (page, id, type, key, value) => page.waitForFunction(({ id, type, key, value }) =>
   document.getElementById(id)?.contentWindow.messages?.some(message => message.type === type && message[key] === value), { id, type, key, value })
@@ -59,6 +66,7 @@ async function boot(skin = 'horizon', { delayOcean = false, legacyAnchor = false
     })
     await controller.start()
   }, skin)
+  if (!delayOcean) await settled(page)
   return { page, errors, oceanRequested, releaseOcean }
 }
 
@@ -177,6 +185,7 @@ try {
   await page.evaluate(() => controller.setSkin('ocean'))
   await waitMessage(page, oceanId, 'bs-pause', 'paused', false)
   await waitMessage(page, cosmosId, 'bs-pause', 'paused', true)
+  await page.waitForFunction(id => Number(getComputedStyle(document.getElementById(id)).opacity) > 0.2, oceanId)
   const oceanIdentity = await page.locator(`#${oceanId}`).evaluateHandle(frame => frame)
   await clearMessages(page, oceanId)
   await page.evaluate(() => controller.setSkin('horizon'))
@@ -185,18 +194,20 @@ try {
   await page.evaluate(() => controller.setSkin('ocean'))
   await waitMessage(page, oceanId, 'bs-pause', 'paused', false)
   assert.equal(await oceanIdentity.evaluate(frame => frame === document.getElementById('__dsh-backspace__')), true)
-  assert.equal(await page.locator(`#${oceanId}, #${cosmosId}`).count(), 2, 'preview keeps both renderer classes available')
+  assert.equal(await page.locator(`#${oceanId}, #${cosmosId}`).count(), 2, 'reversing an active handoff reuses both layers')
   evidence.push({ scenario: 'inactive-ocean-pause-and-reuse', result: 'PASS' })
   const oldCosmos = await page.locator(`#${cosmosId}`).evaluateHandle(frame => frame)
   const preservedParams = await page.evaluate(() => controller.getState().p.cosmos)
   await page.keyboard.press('Escape')
+  await settled(page)
   assert.equal(await page.locator(`#${cosmosId}`).count(), 0, 'closing ocean preview must release the inactive cosmos renderer')
   assert.equal(await page.locator(`#${oceanId}`).count(), 1)
   assert.equal(await oldCosmos.evaluate(frame => frame.onload), null, 'released frame must not retain its load handler')
   await page.locator(`#${buttonId}`).click()
   await setRange(page.locator(`#${panelId}-sea-range`), 67)
   await page.evaluate(() => controller.setSkin('horizon'))
-  await waitMessage(page, cosmosId, 'bs-skin', 'skin', 'horizon')
+  await waitMessage(page, cosmosId, 'bs-prepare', 'skin', 'horizon')
+  await settled(page)
   assert.equal(await oldCosmos.evaluate(frame => frame === document.getElementById('__dsh-backspace-cosmos__')), false, 'switching back after release creates a fresh renderer')
   assert.deepEqual(await page.evaluate(() => controller.getState().p.cosmos), preservedParams)
   const rebuilt = await page.locator(`#${cosmosId}`).evaluateHandle(frame => frame)
@@ -217,6 +228,7 @@ try {
   assert.equal(new URL(await page.locator(`#${oceanId}`).getAttribute('src'), server.url).searchParams.get('sea'), '67')
   assert.deepEqual(await page.evaluate(() => controller.getState().p.cosmos), preservedParams)
   await page.keyboard.press('Escape')
+  await settled(page)
   assert.equal(await page.locator(`#${oceanId}, #${cosmosId}`).count(), 1)
   evidence.push({ scenario: 'inactive-renderer-release-rebuild-and-parameter-preservation', result: 'PASS' })
   await oceanIdentity.dispose()
@@ -257,12 +269,12 @@ try {
   await late.page.evaluate(() => controller.setSkin('vortex'))
   await waitMessage(late.page, cosmosId, 'bs-preview', 'active', true)
   late.releaseOcean()
-  await waitMessage(late.page, oceanId, 'bs-pause', 'paused', true)
-  const oceanMessages = await messages(late.page, oceanId)
-  assert.equal(oceanMessages.filter(message => message.type === 'bs-pause').at(-1).paused, true)
+  await settled(late.page)
+  assert.equal(await late.page.locator(`#${oceanId}`).count(), 0, 'cancelled cold starts cannot replace the selected scene')
   await clearMessages(late.page)
   await late.page.frameLocator(`#${cosmosId}`).locator('body').evaluate(() => window.parent.postMessage({ type: 'bs-cosmos-ready' }, location.origin))
-  await waitMessage(late.page, cosmosId, 'bs-preview', 'active', true)
+  await late.page.waitForTimeout(30)
+  assert.equal((await messages(late.page)).length, 0, 'legacy ready cannot restart a completed handoff')
   await late.page.keyboard.press('Escape')
   assert.equal(await late.page.locator(`#${oceanId}`).count(), 0)
   assert.equal(await late.page.locator(`#${cosmosId}`).count(), 1)

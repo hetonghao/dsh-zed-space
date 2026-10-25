@@ -9,6 +9,7 @@
   html, body { margin: 0; height: 100%; background: #010102; overflow: hidden; }
   body > canvas { opacity: 0; transition: opacity .6s ease; }
   body.ready > canvas { opacity: 1; }
+  html.managed body > canvas { transition: none; }
   @media (prefers-reduced-motion: reduce) { body > canvas { transition: none; } }
 </style>
 </head>
