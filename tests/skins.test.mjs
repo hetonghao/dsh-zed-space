@@ -25,7 +25,7 @@ async function hostSkins() {
 
 test('宿主宇宙视角共用渲染器的八项参数，海面保持原契约', async () => {
   const skins = await hostSkins();
-  assert.deepEqual([...skins].map(skin => skin.id), ['ocean', ...COSMIC_IDS]);
+  assert.deepEqual([...skins].map(skin => skin.id), ['ocean', ...COSMIC_IDS, 'video']);
   assert.equal(skins[1].params, skins[2].params);
   const props = items => [...items].map(({ key, min, max, def }) => ({ key, min, max, def }));
   assert.deepEqual(props(skins[1].params), props(SCENE_PROPS));
@@ -79,7 +79,7 @@ test('宇宙皮肤是纯代码：没有网络请求、图片和视频', async ()
 
 test('三条安装路径都带上了新皮肤产物', async () => {
   const pkg = JSON.parse(await text('package.json'))
-  for (const entry of ['native-dist/cosmos.html', 'native-dist/cosmos.js', 'native-dist/skins/**/*']) {
+  for (const entry of ['native-dist/cosmos.html', 'native-dist/cosmos.js', 'native-dist/skins/**/*', 'native-dist/video.html', 'native-dist/video.js', 'native-dist/video-media.js']) {
     assert.ok(pkg.files.includes(entry), entry)
   }
   assert.deepEqual(pkg.dependencies ?? {}, {})
@@ -87,11 +87,15 @@ test('三条安装路径都带上了新皮肤产物', async () => {
 
   const manifest = JSON.parse(await text('extension/manifest.json'))
   const resources = manifest.web_accessible_resources[0].resources
-  for (const entry of ['cosmos.html', 'cosmos.js', 'skins/*']) assert.ok(resources.includes(entry), entry)
+  for (const entry of ['cosmos.html', 'cosmos.js', 'skins/*', 'video.html', 'video.js', 'video-media.js']) assert.ok(resources.includes(entry), entry)
 
   const installer = await text('native-dist/install-skin.sh')
   assert.match(installer, /cosmos\.js/)
   assert.match(installer, /skins/)
+  for (const file of ['video.html', 'video.js', 'video-media.js']) {
+    assert.ok(installer.includes(file), file)
+    for (const dir of ['native-dist', 'harness-plugin/assets']) assert.deepEqual(await readFile(resolve(root, `${dir}/${file}`)), await readFile(resolve(root, `extension/${file}`)))
+  }
 
   for (const target of ['extension/cosmos.js', 'native-dist/cosmos.js', 'harness-plugin/assets/cosmos.js']) {
     assert.deepEqual(await readFile(resolve(root, target)), await readFile(resolve(root, 'shared/cosmos.js')), target)

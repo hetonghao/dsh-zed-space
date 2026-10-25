@@ -130,7 +130,7 @@ for dist in "${DISTS[@]}"; do
   rm -rf -- "$dist/dsh-backspace"
   mkdir -p "$dist/dsh-backspace"
   cp "$SKIN_SRC/loader.js" "$SKIN_SRC/skin.html" "$SKIN_SRC/ocean.js" \
-    "$SKIN_SRC/cosmos.html" "$SKIN_SRC/cosmos.js" "$SKIN_SRC/styles.css" "$dist/dsh-backspace/"
+    "$SKIN_SRC/cosmos.html" "$SKIN_SRC/cosmos.js" "$SKIN_SRC/video.html" "$SKIN_SRC/video.js" "$SKIN_SRC/video-media.js" "$SKIN_SRC/styles.css" "$dist/dsh-backspace/"
   cp -R "$SKIN_SRC/vendor" "$dist/dsh-backspace/vendor"
   cp -R "$SKIN_SRC/skins" "$dist/dsh-backspace/skins"
   inject_loader "$index"

@@ -19,6 +19,7 @@ window.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {
   const IDS = Object.freeze({
     frame: '__dsh-backspace__',
     cosmos: '__dsh-backspace-cosmos__',
+    video: '__dsh-backspace-video__',
     glass: '__dsh-backspace-glass__',
     uiStyle: '__dsh-backspace-glass__-ui',
     button: '__dsh-backspace-btn__',
@@ -60,9 +61,10 @@ window.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {
     }),
     Object.freeze({ id: 'horizon', surface: 'cosmos', params: COSMOS_PARAMS }),
     Object.freeze({ id: 'vortex', surface: 'cosmos', params: COSMOS_PARAMS }),
+    Object.freeze({ id: 'video', surface: 'video', params: Object.freeze([]) }),
   ]);
   const PARAM_GROUPS = [SKINS[0], { id: 'cosmos', surface: 'cosmos', params: COSMOS_PARAMS }];
-  const SKIN_TABS = [SKINS[1], SKINS[2], SKINS[0]];
+  const SKIN_TABS = [SKINS[1], SKINS[2], SKINS[0], SKINS[3]];
 
   const skinById = (id) => SKINS.find((skin) => skin.id === id) || SKINS[0];
 
@@ -123,7 +125,23 @@ window.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {
       skinTitle: '皮肤',
       ownTitle: '独立配置',
       commonTitle: '通用配置',
-      skins: { ocean: '海面', horizon: '事件视界', vortex: '吸积涡旋' },
+      skins: { ocean: '海面', horizon: '事件视界', vortex: '吸积涡旋', video: '本地视频' },
+      videoTitle: '我的视频', videoImport: '导入视频', videoHelp: '可多选导入，每次勾选启用一个。',
+      videoEmpty: '导入自己的视频作为背景', videoLimits: 'MP4 / WebM · 每个最长 30 秒 · 最高 1080p · 最大 32 MB',
+      videoLocal: '仅在本机保存，不上传。', videoLoading: '正在读取视频…', videoIdle: '尚未启用，勾选缩略图即可播放。',
+      videoActive: '正在使用：', videoSelected: '已选择：', videoChosen: '已选择', videoPlaying: '启用中', videoEnable: '启用', videoRename: '重命名', videoRemove: '移除',
+      videoErrors: {
+        empty: '文件为空，请重新导出视频。', size: '每个视频不能超过 32 MB，请压缩后再导入。',
+        format: '请导出为 MP4 或 WebM 视频后重试。', codec: '请使用 H.264、VP9 或 AV1 编码，建议导出为 H.264 MP4。',
+        'no-video': '文件没有有效视频轨，请选择带画面的视频。', duration: '视频时长须在 0–30 秒之间，请裁剪后重试。',
+        resolution: '分辨率不能超过 1920×1080（支持竖屏），请缩小后重试。',
+        timeout: '读取视频超时，请重新导出完整视频后重试。', decode: '视频无法解码，请导出为 H.264 MP4 后重试。',
+        playback: '播放被浏览器阻止，已回退海面。请允许自动播放后重新启用。',
+        storage: '本地存储不可用或空间不足，请移除不用的视频或检查浏览器存储权限。',
+        missing: '本机找不到这个视频，已回退海面，请重新导入。',
+        load: '视频模块没有响应，请切换到其他皮肤后重新打开本地视频。',
+        name: '名称须为 1–80 个字符。', request: '操作未完成，请重新打开本地视频后再试。',
+      },
       params: {
         sea: '波浪大小', time: '日光',
         glow: '吸积亮度', ring: '盘体尺度', turb: '气流细节', warm: '气体色温',
@@ -170,7 +188,23 @@ window.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {
       skinTitle: 'Skin',
       ownTitle: 'Skin settings',
       commonTitle: 'General settings',
-      skins: { ocean: 'Ocean', horizon: 'Event Horizon', vortex: 'Accretion Vortex' },
+      skins: { ocean: 'Ocean', horizon: 'Event Horizon', vortex: 'Accretion Vortex', video: 'Local video' },
+      videoTitle: 'My videos', videoImport: 'Import videos', videoHelp: 'Import multiple videos; enable one at a time.',
+      videoEmpty: 'Use your own video as the background', videoLimits: 'MP4 / WebM · Up to 30 seconds, 1080p and 32 MB each',
+      videoLocal: 'Stored only on this device. Never uploaded.', videoLoading: 'Reading video…', videoIdle: 'Select a thumbnail to start playback.',
+      videoActive: 'Playing: ', videoSelected: 'Selected: ', videoChosen: 'Selected', videoPlaying: 'Active', videoEnable: 'Enable', videoRename: 'Rename', videoRemove: 'Remove',
+      videoErrors: {
+        empty: 'This file is empty. Export the video again.', size: 'Each video must be under 32 MB. Compress it and retry.',
+        format: 'Export this file as an MP4 or WebM video.', codec: 'Use H.264, VP9 or AV1 encoding. H.264 MP4 is recommended.',
+        'no-video': 'No valid video track was found. Choose a file with video.', duration: 'Videos must be 0–30 seconds long. Trim the clip and retry.',
+        resolution: 'Maximum resolution is 1920×1080, including portrait. Resize the video and retry.',
+        timeout: 'Reading the video timed out. Export a complete video and retry.', decode: 'This video cannot be decoded. Export it as H.264 MP4.',
+        playback: 'Autoplay was blocked. Ocean is shown instead. Allow autoplay, then enable the clip again.',
+        storage: 'Local storage is unavailable or full. Remove unused clips or check browser storage permissions.',
+        missing: 'This video is missing on this device. Ocean is shown instead. Import it again.',
+        load: 'The video module did not respond. Switch to another skin, then reopen Local video.',
+        name: 'Names must contain 1–80 characters.', request: 'The operation failed. Reopen Local video and retry.',
+      },
       params: {
         sea: 'Sea state', time: 'Daylight',
         glow: 'Accretion brightness', ring: 'Disk size', turb: 'Flow detail', warm: 'Gas temperature',
@@ -581,8 +615,8 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
 #${IDS.panel} .bs-close { display:grid; place-items:center; width:30px; height:30px; padding:0; border:0; border-radius:8px; background:transparent; color:var(--bs-muted); cursor:pointer; }
 #${IDS.panel} .bs-close:hover { color:var(--bs-text); background:var(--bs-inset); }
 #${IDS.panel} .bs-switch.bs-skin-heading { display:flex; align-items:center; justify-content:flex-start; gap:6px; margin:0 0 7px; min-height:24px; font-weight:500; }
-#${IDS.panel} .bs-tabs { position:relative; isolation:isolate; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; padding:4px; border-radius:11px; background:var(--bs-inset); flex:0 0 auto; }
-#${IDS.panel} .bs-tabs::before { content:''; box-sizing:border-box; position:absolute; z-index:-1; top:4px; bottom:4px; left:4px; width:calc((100% - 16px) / 3); border:1px solid var(--bs-line); border-radius:8px; background:var(--bs-surface); box-shadow:0 2px 5px rgba(9,22,30,.08); transform:translateX(calc(var(--bs-tab-index, 0) * 100% + var(--bs-tab-index, 0) * 4px)); transition:transform .24s cubic-bezier(.16,1,.3,1); }
+#${IDS.panel} .bs-tabs { position:relative; isolation:isolate; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; padding:4px; border-radius:11px; background:var(--bs-inset); flex:0 0 auto; }
+#${IDS.panel} .bs-tabs::before { content:''; box-sizing:border-box; position:absolute; z-index:-1; top:4px; bottom:4px; left:4px; width:calc((100% - 20px) / 4); border:1px solid var(--bs-line); border-radius:8px; background:var(--bs-surface); box-shadow:0 2px 5px rgba(9,22,30,.08); transform:translateX(calc(var(--bs-tab-index, 0) * 100% + var(--bs-tab-index, 0) * 4px)); transition:transform .24s cubic-bezier(.16,1,.3,1); }
 #${IDS.panel} .bs-tab {
   min-width:0; padding:8px 3px; border:1px solid transparent; border-radius:8px; cursor:pointer;
   background:transparent; color:var(--bs-muted); font-size:12px; line-height:1.35;
@@ -637,6 +671,33 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
   #${IDS.panel} .bs-footer { align-items:flex-start; }
   #${IDS.panel} #${IDS.panel}-cosmos .bs-params { grid-template-columns:1fr; }
 }
+#${IDS.panel} .bs-video-group[hidden], #${IDS.panel} .bs-video-group [hidden] { display:none !important; }
+#${IDS.panel} .bs-video-group { padding-top:14px; }
+#${IDS.panel} .bs-video-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+#${IDS.panel} .bs-video-title { font-size:14px; font-weight:500; }
+#${IDS.panel} .bs-video-import { border:0; border-radius:8px; padding:8px 12px; background:var(--bs-accent); color:var(--bs-surface); cursor:pointer; font-size:12px; }
+#${IDS.panel} .bs-video-import:disabled { opacity:.55; cursor:wait; }
+#${IDS.panel} .bs-video-help, #${IDS.panel} .bs-video-status, #${IDS.panel} .bs-video-errors { font-size:12px; line-height:1.7; color:var(--bs-muted); margin:8px 0 12px; overflow-wrap:anywhere; }
+#${IDS.panel} .bs-video-errors { color:#a4382d; white-space:pre-line; }
+body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
+#${IDS.panel} .bs-video-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 12px; max-height:310px; overflow-y:auto; padding:3px; scrollbar-width:thin; scrollbar-color:var(--bs-track) transparent; }
+#${IDS.panel} .bs-video-tile { min-width:0; }
+#${IDS.panel} .bs-video-thumb { position:relative; display:block; aspect-ratio:16/9; overflow:hidden; border-radius:8px; outline:1px solid var(--bs-line); background:var(--bs-inset); cursor:pointer; }
+#${IDS.panel} .bs-video-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+#${IDS.panel} .bs-video-thumb input { position:absolute; top:8px; right:8px; width:17px; height:17px; margin:0; accent-color:var(--bs-accent); }
+#${IDS.panel} .bs-video-thumb:focus-within, #${IDS.panel} .bs-video-tile[data-selected=true] .bs-video-thumb { outline:2px solid var(--bs-accent); outline-offset:1px; }
+#${IDS.panel} .bs-video-playing, #${IDS.panel} .bs-video-duration { position:absolute; bottom:6px; padding:2px 5px; border-radius:4px; background:#12252de6; color:#fff; font-size:10px; line-height:1.4; }
+#${IDS.panel} .bs-video-playing { left:6px; } #${IDS.panel} .bs-video-duration { right:6px; font-variant-numeric:tabular-nums; }
+#${IDS.panel} .bs-video-caption { display:flex; align-items:center; gap:3px; min-width:0; height:32px; }
+#${IDS.panel} .bs-video-caption strong { min-width:0; flex:1; font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#${IDS.panel} .bs-video-rename { width:26px; height:26px; flex:none; padding:5px; border:0; border-radius:6px; background:transparent; color:var(--bs-muted); cursor:pointer; }
+#${IDS.panel} .bs-video-rename:hover { color:var(--bs-accent); background:var(--bs-inset); }
+#${IDS.panel} .bs-video-name { min-width:0; width:100%; padding:5px; border:1px solid var(--bs-accent); border-radius:5px; background:var(--bs-surface); color:var(--bs-text); font-size:12px; }
+#${IDS.panel} .bs-video-meta { display:flex; justify-content:space-between; color:var(--bs-muted); font-size:11px; }
+#${IDS.panel} .bs-video-remove { padding:0 1px; border:0; background:transparent; color:var(--bs-muted); font-size:11px; cursor:pointer; }
+#${IDS.panel} .bs-video-remove:hover { color:var(--bs-text); text-decoration:underline; }
+#${IDS.panel} .bs-video-empty { grid-column:1/-1; padding:24px 14px; border:1px dashed var(--bs-line); border-radius:10px; text-align:center; font-size:13px; }
+#${IDS.panel} .bs-video-empty p { color:var(--bs-muted); font-size:12px; line-height:1.7; margin:10px 0 0; }
 @media (prefers-reduced-motion:reduce) {
   #${IDS.button}, #${IDS.button} > svg, #${IDS.panel}, #${IDS.panel} *, #${IDS.panel} .bs-tabs::before { transition:none !important; }
 }`;
@@ -671,6 +732,18 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
     let pointerFrame = 0;
     let pointerPending = null;
     let pointerSent = null;
+    let videoData = { items: [], activeId: null };
+    let videoBusy = false;
+    let videoErrors = [];
+    let videoToken = null;
+    let videoReady = null;
+    let videoReadyResolve;
+    let videoReadyReject;
+    let videoReadyTimer;
+    let videoRequestId = 0;
+    let videoGeneration = 0;
+    let syncVideoUi = () => {};
+    const videoRequests = new Map();
     const surfaceCleanups = [];
     const controllerCleanups = [];
 
@@ -712,6 +785,110 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
       frame.contentWindow.postMessage(payload, targetOrigin);
     };
 
+    const videoOrigin = frame => {
+      const url = new URL(frame.src);
+      return url.origin === 'null' ? `${url.protocol}//${url.host}` : url.origin;
+    };
+    const setVideoPaused = paused => {
+      const frame = document.getElementById(IDS.video);
+      if (frame instanceof HTMLIFrameElement) frame.contentWindow.postMessage({ type: 'bs-video', token: videoToken, action: 'visibility', paused }, videoOrigin(frame));
+    };
+    const removeVideoFrame = () => {
+      videoGeneration++;
+      clearTimeout(videoReadyTimer);
+      videoReadyReject?.(new Error('cancelled'));
+      videoReadyResolve = videoReadyReject = null;
+      for (const pending of videoRequests.values()) { clearTimeout(pending.timer); pending.reject(new Error('cancelled')); }
+      videoRequests.clear();
+      document.getElementById(IDS.video)?.remove();
+      videoReady = null;
+      videoToken = null;
+      videoBusy = false;
+      videoData = { items: [], activeId: null };
+    };
+    const ensureVideoFrame = () => {
+      if (videoReady) return videoReady;
+      const frame = document.createElement('iframe');
+      videoToken = crypto.randomUUID();
+      frame.id = IDS.video;
+      frame.src = `${options.assetUrl('video.html')}?${new URLSearchParams({ parentOrigin: location.origin, token: videoToken })}`;
+      frame.setAttribute('aria-hidden', 'true');
+      frame.setAttribute('tabindex', '-1');
+      frame.setAttribute('allow', 'autoplay');
+      frame.style.cssText = FRAME_STYLE_OFF;
+      videoReady = new Promise((resolve, reject) => {
+        videoReadyResolve = resolve; videoReadyReject = reject;
+        videoReadyTimer = setTimeout(() => reject(new Error('load')), 8000);
+      });
+      (document.body || document.documentElement).prepend(frame);
+      return videoReady;
+    };
+    const requestVideo = async (action, payload = {}) => {
+      await ensureVideoFrame();
+      const frame = document.getElementById(IDS.video);
+      if (!(frame instanceof HTMLIFrameElement)) throw new Error('cancelled');
+      const requestId = ++videoRequestId;
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => { videoRequests.delete(requestId); reject(new Error('load')); }, 10000);
+        videoRequests.set(requestId, { resolve, reject, timer });
+        frame.contentWindow.postMessage({ type: 'bs-video', token: videoToken, requestId, action, paused: !state.enabled, ...payload }, videoOrigin(frame));
+      });
+    };
+    const acceptVideoReply = reply => {
+      videoData = { items: Array.isArray(reply.items) ? reply.items : [], activeId: reply.activeId || null };
+    };
+    const videoAction = async (action, payload = {}) => {
+      if (videoBusy) return;
+      const generation = videoGeneration;
+      videoBusy = true; videoErrors = []; syncVideoUi();
+      try {
+        const reply = await requestVideo(action, payload);
+        if (generation !== videoGeneration) return;
+        acceptVideoReply(reply);
+        if (!reply.ok) videoErrors.push({ code: reply.code });
+      } catch (error) {
+        if (generation !== videoGeneration) return;
+        videoData.activeId = null;
+        videoErrors.push({ code: error.message });
+      } finally {
+        if (generation === videoGeneration) { videoBusy = false; applySkin(); syncVideoUi(); }
+      }
+    };
+    const importVideos = async files => {
+      if (videoBusy || !files.length) return;
+      const generation = videoGeneration;
+      videoBusy = true; videoErrors = []; syncVideoUi();
+      try {
+        for (const file of files) {
+          if (generation !== videoGeneration) break;
+          const reply = await requestVideo('import', { file, name: file.name });
+          if (generation !== videoGeneration) break;
+          acceptVideoReply(reply);
+          if (!reply.ok) videoErrors.push({ code: reply.code, name: file.name });
+          syncVideoUi();
+        }
+      } catch (error) {
+        if (generation === videoGeneration) videoErrors.push({ code: error.message });
+      } finally {
+        if (generation === videoGeneration) { videoBusy = false; applySkin(); syncVideoUi(); }
+      }
+    };
+    const onVideoMessage = event => {
+      const frame = document.getElementById(IDS.video);
+      const data = event.data;
+      if (!(frame instanceof HTMLIFrameElement) || event.source !== frame.contentWindow || event.origin !== videoOrigin(frame)
+        || !data || data.type !== 'bs-video' || data.token !== videoToken) return;
+      if (data.event === 'ready') {
+        clearTimeout(videoReadyTimer); videoReadyResolve?.(); videoReadyResolve = videoReadyReject = null;
+      } else if (data.event === 'failure') {
+        videoData.activeId = null; videoErrors = [{ code: data.code }]; applySkin(); syncVideoUi();
+      } else {
+        const pending = videoRequests.get(data.requestId);
+        if (!pending) return;
+        videoRequests.delete(data.requestId); clearTimeout(pending.timer); pending.resolve(data);
+      }
+    };
+
     const cosmicSettings = () => state.p.views[state.skin === 'vortex' ? 'vortex' : 'horizon'];
 
     const postToOcean = () => {
@@ -746,7 +923,9 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
 
     const releaseInactiveFrame = () => {
       if (!ownsSurface || panelOpen) return;
-      const id = skinById(state.skin).surface === 'ocean' ? IDS.cosmos : IDS.frame;
+      const surface = state.skin === 'video' ? (videoData.activeId ? 'video' : 'ocean') : skinById(state.skin).surface;
+      if (surface === 'video') document.getElementById(IDS.frame)?.remove();
+      const id = surface === 'ocean' || surface === 'video' ? IDS.cosmos : IDS.frame;
       if (id === IDS.cosmos) { clearTimeout(readyTimer); readyTimer = 0; }
       const frame = document.getElementById(id);
       if (frame instanceof HTMLIFrameElement) { frame.onload = null; frame.remove(); }
@@ -856,6 +1035,10 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
       panelAnimation?.cancel();
       panelAnimation = null;
       panelOpen = open;
+      if (state.skin === 'video' && !state.enabled) {
+        if (open) void videoAction('list');
+        else removeVideoFrame();
+      }
       syncCosmosPreview();
       if (!open) releaseInactiveFrame();
       panel.classList.add('open');
@@ -985,7 +1168,17 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
       ensureGlassStyle();
       updateGlass();
       const skin = skinById(state.skin);
-      if (skin.surface === 'ocean') {
+      if (skin.surface === 'video' && !document.getElementById(IDS.video)) void videoAction('list');
+      if (skin.surface !== 'video' && document.getElementById(IDS.video)) removeVideoFrame();
+      const surface = skin.surface === 'video' ? (videoData.activeId ? 'video' : 'ocean') : skin.surface;
+      setFrameActive(IDS.video, surface === 'video');
+      setVideoPaused(surface !== 'video');
+      if (surface === 'video') {
+        for (const id of [IDS.frame, IDS.cosmos]) {
+          postToFrame(id, { type: 'bs-pause', paused: true });
+          setFrameActive(id, false);
+        }
+      } else if (surface === 'ocean') {
         mountOceanFrame();
         setFrameActive(IDS.frame, true);
         postToOcean();
@@ -1017,7 +1210,11 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
       state.skin = id;
       void save({ skin: id });
       if (state.enabled) applySkin();
-      else syncSkinUi();
+      else {
+        syncSkinUi();
+        if (id === 'video' && panelOpen) void videoAction('list');
+        else removeVideoFrame();
+      }
     };
 
     const mountUi = () => {
@@ -1059,7 +1256,13 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
           <section class="bs-skin-group" id="${IDS.panel}-${skin.id}" role="tabpanel" aria-label="${copy.skins[skin.surface === 'cosmos' ? state.skin : skin.id]}"${skin.surface === skinById(state.skin).surface ? '' : ' hidden'}>
             <div class="bs-group-title">${`${copy.skins[skin.surface === 'cosmos' ? state.skin : skin.id]} · ${copy.ownTitle}`}</div><div class="bs-params">${skinRows(skin)}</div>
             <div class="bs-row bs-switch"><span class="bs-label"><label for="${IDS.panel}-${skin.surface === 'ocean' ? 'cycle' : 'cosmos-cycle'}">${skin.surface === 'ocean' ? copy.autoCycle : copy.cosmicCycle}</label>${helpButton(skin.surface === 'ocean' ? 'autoCycle' : 'cosmicCycle')}</span><input type="checkbox" role="switch" id="${IDS.panel}-${skin.surface === 'ocean' ? 'cycle' : 'cosmos-cycle'}" /></div>
-          </section>`).join('')}</div>
+          </section>`).join('')}
+          <section class="bs-skin-group bs-video-group" id="${IDS.panel}-video" role="tabpanel" aria-label="${copy.skins.video}" hidden>
+            <div class="bs-video-head"><strong class="bs-video-title"></strong><button type="button" class="bs-video-import"></button></div>
+            <p class="bs-video-help"></p><div class="bs-video-grid"></div>
+            <p class="bs-video-status" role="status"></p><p class="bs-video-errors" role="alert" hidden></p>
+            <input id="${IDS.panel}-video-files" type="file" accept=".mp4,.webm" multiple hidden>
+          </section></div>
           <section class="bs-group">
             <div class="bs-group-title">${copy.commonTitle}</div>
             <div class="bs-row"><div class="bs-head"><span class="bs-label"><label for="${IDS.panel}-glass-range">${copy.glass}</label>${helpButton('glass')}</span><output class="bs-value" id="${IDS.panel}-glass" for="${IDS.panel}-glass-range"></output></div><input type="range" id="${IDS.panel}-glass-range" min="40" max="90" step="1" /></div>
@@ -1110,6 +1313,89 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
       });
       surfaceCleanups.push(hideResetConfirm);
       const tabs = [...panel.querySelectorAll('.bs-tab')];
+      const videoGroup = panel.querySelector('.bs-video-group');
+      const videoImport = videoGroup.querySelector('.bs-video-import');
+      const videoFiles = videoGroup.querySelector('input[type=file]');
+      let videoFocus = null;
+      on(videoImport, 'click', () => videoFiles.click());
+      on(videoFiles, 'change', () => { const files = [...videoFiles.files]; videoFiles.value = ''; void importVideos(files); });
+      on(window, 'message', onVideoMessage);
+      syncVideoUi = () => {
+        videoGroup.querySelector('.bs-video-title').textContent = `${copy.videoTitle}${videoData.items.length ? ` ${videoData.items.length}` : ''}`;
+        videoImport.textContent = copy.videoImport; videoImport.disabled = videoBusy;
+        videoGroup.querySelector('.bs-video-help').textContent = copy.videoHelp;
+        const grid = videoGroup.querySelector('.bs-video-grid');
+        const scrollTop = grid.scrollTop;
+        grid.replaceChildren();
+        for (const clip of videoData.items) {
+          const tile = document.createElement('article'); tile.className = 'bs-video-tile';
+          tile.innerHTML = '<label class="bs-video-thumb"><img alt=""><input type="checkbox"><span class="bs-video-playing"></span><span class="bs-video-duration"></span></label><div class="bs-video-caption"><strong></strong></div><div class="bs-video-meta"></div>';
+          const image = tile.querySelector('img');
+          if (typeof clip.thumbnail === 'string' && clip.thumbnail.startsWith('data:image/jpeg;base64,')) image.src = clip.thumbnail;
+          const check = tile.querySelector('input'); check.checked = clip.id === videoData.activeId; check.disabled = videoBusy;
+          check.setAttribute('aria-label', `${copy.videoEnable} ${clip.name}`);
+          check.dataset.videoId = clip.id; check.dataset.videoAction = 'select';
+          check.addEventListener('change', () => {
+            videoFocus = { id: clip.id, action: 'select' };
+            void videoAction('select', { id: check.checked ? clip.id : null });
+          });
+          tile.dataset.selected = String(check.checked);
+          const playing = tile.querySelector('.bs-video-playing'); playing.hidden = !check.checked; playing.textContent = state.enabled ? copy.videoPlaying : copy.videoChosen;
+          const seconds = Math.max(0, Math.floor(clip.duration));
+          tile.querySelector('.bs-video-duration').textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+          const title = tile.querySelector('strong'); title.textContent = clip.name; title.title = clip.original;
+          const rename = document.createElement('button'); rename.type = 'button'; rename.className = 'bs-video-rename';
+          rename.innerHTML = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m3 13 9-9 4 4-9 9H3v-4Z" stroke="currentColor" stroke-width="1.4"/><path d="m10.5 5.5 4 4" stroke="currentColor" stroke-width="1.4"/></svg>';
+          rename.setAttribute('aria-label', `${copy.videoRename} ${clip.name}`); rename.title = copy.videoRename; rename.disabled = videoBusy;
+          rename.dataset.videoId = clip.id; rename.dataset.videoAction = 'rename';
+          const caption = tile.querySelector('.bs-video-caption'); caption.append(rename);
+          rename.addEventListener('click', () => {
+            const input = document.createElement('input'); input.className = 'bs-video-name'; input.value = clip.name; input.maxLength = 80;
+            input.setAttribute('aria-label', `${copy.videoRename} ${clip.name}`);
+            caption.replaceChildren(input); input.focus(); input.select();
+            let finished = false;
+            const finish = cancelled => {
+              if (finished) return;
+              finished = true; videoFocus = { id: clip.id, action: 'rename' };
+              const name = input.value.trim();
+              if (cancelled || name === clip.name) { syncVideoUi(); return; }
+              if (!name || name.length > 80) { videoErrors = [{ code: 'name' }]; syncVideoUi(); return; }
+              void videoAction('rename', { id: clip.id, name });
+            };
+            input.addEventListener('keydown', event => {
+              if (event.key === 'Enter' || event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); finish(event.key === 'Escape'); }
+            });
+            input.addEventListener('blur', () => finish(false));
+          });
+          tile.querySelector('.bs-video-meta').textContent = `${(clip.size / 1024 / 1024).toFixed(1)} MB`;
+          const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'bs-video-remove';
+          remove.textContent = copy.videoRemove; remove.setAttribute('aria-label', `${copy.videoRemove} ${clip.name}`); remove.disabled = videoBusy;
+          remove.addEventListener('click', () => {
+            videoFocus = { id: clip.id, action: 'remove' };
+            void videoAction('remove', { id: clip.id });
+          });
+          tile.querySelector('.bs-video-meta').append(remove);
+          grid.append(tile);
+        }
+        if (!videoData.items.length) {
+          const empty = document.createElement('div'); empty.className = 'bs-video-empty';
+          const title = document.createElement('strong'); title.textContent = copy.videoEmpty;
+          const limits = document.createElement('p'); limits.textContent = copy.videoLimits;
+          empty.append(title, limits); grid.append(empty);
+        }
+        const active = videoData.items.find(clip => clip.id === videoData.activeId);
+        videoGroup.querySelector('.bs-video-status').textContent = videoBusy ? copy.videoLoading : active ? (state.enabled ? copy.videoActive : copy.videoSelected) + active.name : videoData.items.length ? copy.videoIdle : copy.videoLocal;
+        const error = videoGroup.querySelector('.bs-video-errors'); error.hidden = videoErrors.length === 0;
+        error.textContent = videoErrors.map(({ code, name }) => `${name ? `${name}: ` : ''}${copy.videoErrors[code] || copy.videoErrors.request}`).join('\n');
+        grid.scrollTop = scrollTop;
+        if (panelOpen && videoErrors.length) error.scrollIntoView({ block: 'nearest' });
+        if (videoFocus && !videoBusy) {
+          const next = [...grid.querySelectorAll('[data-video-action]')].find(element => element.dataset.videoId === videoFocus.id && element.dataset.videoAction === videoFocus.action);
+          (next || videoImport).focus({ preventScroll: true });
+          videoFocus = null;
+        }
+      };
+      syncVideoUi();
       let helpTarget = null;
       const helpText = (key) => key === 'reset' ? copy.resetNote : copy.help[key];
       hideHelp = () => {
@@ -1177,13 +1463,13 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
 
       const skinDefaults = () => ({ ...normalizeGeneral(DEFAULTS), ...(state.skin === 'ocean'
         ? { sea: DEFAULTS.sea, time: DEFAULTS.time, autoCycle: DEFAULTS.autoCycle }
-        : { p: { ...state.p, views: { ...state.p.views, [state.skin]: {
+        : state.skin === 'video' ? {} : { p: { ...state.p, views: { ...state.p.views, [state.skin]: {
           params: Object.fromEntries(COSMOS_PARAMS.map(param => [param.key, param.def])), autoCycle: true,
         } } } }) });
       const syncReset = () => {
         resetBtn.disabled = GENERAL_KEYS.every(key => state[key] === DEFAULTS[key]) && (state.skin === 'ocean'
           ? state.sea === DEFAULTS.sea && state.time === DEFAULTS.time && state.autoCycle === DEFAULTS.autoCycle
-          : COSMOS_PARAMS.every(param => cosmicSettings().params[param.key] === param.def) && cosmicSettings().autoCycle);
+          : state.skin === 'video' || COSMOS_PARAMS.every(param => cosmicSettings().params[param.key] === param.def) && cosmicSettings().autoCycle);
         panel.querySelector(`#${IDS.panel}-reset-title`).textContent = copy.resetTitle(copy.skins[state.skin]);
       };
       const syncUi = () => {
@@ -1228,9 +1514,10 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
           const group = panel.querySelector(`#${IDS.panel}-${skin.id}`);
           if (group) group.hidden = skin.surface !== skinById(state.skin).surface;
         }
+        videoGroup.hidden = state.skin !== 'video';
         const activeGroup = panel.querySelector('.bs-skin-group:not([hidden])');
         activeGroup.setAttribute('aria-label', copy.skins[state.skin]);
-        activeGroup.querySelector('.bs-group-title').textContent = `${copy.skins[state.skin]} · ${copy.ownTitle}`;
+        if (state.skin !== 'video') activeGroup.querySelector('.bs-group-title').textContent = `${copy.skins[state.skin]} · ${copy.ownTitle}`;
         syncUi();
         if (panelOpen) placePanel();
         if (before && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -1291,6 +1578,7 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
         cancelResetBtn.textContent = copy.cancel;
         confirmResetBtn.textContent = copy.resetConfirm;
         panel.querySelector('.bs-save-hint').textContent = copy.saveHint;
+        syncVideoUi();
         for (const help of panel.querySelectorAll('.bs-help')) {
           const key = help.dataset.help;
           help.setAttribute('aria-label', `${copy.params[key] || copy[key]} · ${copy.helpLabel}`);
@@ -1395,7 +1683,7 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
       on(panel.querySelector('.bs-close'), 'click', () => setPanelOpen(false));
       on(document, 'click', (event) => {
         if (helpTarget && !helpTarget.contains(event.target) && !tooltip.contains(event.target)) hideHelp();
-        if (panelOpen && !panel.contains(event.target) && !button.contains(event.target) && !tooltip.contains(event.target)) setPanelOpen(false);
+        if (panelOpen && !event.composedPath().includes(panel) && !button.contains(event.target) && !tooltip.contains(event.target)) setPanelOpen(false);
       });
       on(document, 'keydown', (event) => {
         if (!panelOpen) return;
@@ -1421,6 +1709,7 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
 
       // 宇宙 iframe 的握手 + 回退：ready 前失败一律回海面
       on(window, 'message', (event) => {
+        if (skinById(state.skin).surface !== 'cosmos') return;
         const frame = document.getElementById(IDS.cosmos);
         if (!(frame instanceof HTMLIFrameElement) || event.source !== frame.contentWindow) return;
         const data = event.data;
@@ -1469,6 +1758,7 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
     };
 
     const unmount = () => {
+      removeVideoFrame();
       panelOpen = false;
       panelAnimation?.cancel();
       panelAnimation = null;
@@ -1506,6 +1796,12 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
       // leaving a disabled-after-reload skin with no entry point at all).
       if (!document.getElementById(IDS.button)) mountUi();
       if (!state.enabled) {
+        if (state.skin === 'video' && panelOpen) {
+          if (!document.getElementById(IDS.video)) void videoAction('list');
+          setFrameActive(IDS.video, false);
+          setVideoPaused(true);
+        } else removeVideoFrame();
+        syncVideoUi();
         // Tear down only the surfaces (frames + glass), keeping the
         // button/panel so the skin can be re-enabled from the same page.
         clearTimeout(readyTimer);

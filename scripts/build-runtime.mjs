@@ -69,6 +69,8 @@ emit('shared/cosmos.js', [
   'native-dist/cosmos.js',
   'harness-plugin/assets/cosmos.js',
 ])
+for (const file of ['video.js', 'video-media.js']) emit(`shared/${file}`, ['extension', 'native-dist', 'harness-plugin/assets'].map(dir => `${dir}/${file}`))
+emit('extension/video.html', ['native-dist/video.html', 'harness-plugin/assets/video.html'])
 emitTree('shared/skins', [
   'extension/skins',
   'native-dist/skins',

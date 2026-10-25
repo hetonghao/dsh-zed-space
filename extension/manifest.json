@@ -46,7 +46,10 @@
         "vendor/*",
         "vendor/addons/controls/*",
         "vendor/addons/tsl/display/*",
-        "vendor/fonts/*"
+        "vendor/fonts/*",
+        "video.html",
+        "video.js",
+        "video-media.js"
       ],
       "matches": [
         "http://127.0.0.1/*",

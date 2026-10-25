@@ -43,7 +43,12 @@
     "README.md",
     "README.zh.md",
     "README.en.md",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "native-dist/video.html",
+    "native-dist/video.js",
+    "native-dist/video-media.js",
+    "SECURITY.md",
+    "docs/video-background.md"
   ],
   "dsh": {
     "bundle": {
@@ -66,7 +71,8 @@
     "test:settings": "node scripts/settings-ui-acceptance.mjs",
     "test:desktop": "node scripts/desktop-acceptance.mjs && node scripts/official-desktop-acceptance.mjs",
     "test:website": "node scripts/website-acceptance.mjs && node scripts/website-loading-acceptance.mjs",
-    "capture": "node scripts/capture-gallery.mjs"
+    "capture": "node scripts/capture-gallery.mjs",
+    "test:video": "node scripts/video-acceptance.mjs && node scripts/video-edge-acceptance.mjs && node scripts/video-paths-acceptance.mjs"
   },
   "engines": {
     "node": ">=20"

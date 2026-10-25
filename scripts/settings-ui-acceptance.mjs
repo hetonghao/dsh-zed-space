@@ -28,7 +28,13 @@ await page.route('**/settings-ui-fixture/**', route => route.fulfill({
         type: 'bs-frame-ready', surface: location.pathname.includes('cosmos') ? 'cosmos' : 'ocean', requestId: data.requestId,
       }, location.origin);
     });
-    parent.postMessage({type:'bs-cosmos-ready'}, location.origin);
+    const token = new URLSearchParams(location.search).get('token');
+    if (token) {
+      addEventListener('message', ({ data }) => {
+        if (data.type === 'bs-video') parent.postMessage({ type:'bs-video', token, requestId:data.requestId, ok:true, items:[], activeId:null }, location.origin);
+      });
+      parent.postMessage({type:'bs-video', token, event:'ready'}, location.origin);
+    } else parent.postMessage({type:'bs-cosmos-ready'}, location.origin);
   </script></body></html>`,
 }))
 
@@ -168,7 +174,7 @@ try {
   const opening = await togglePanel()
   await page.locator(`${panel}.open`).waitFor()
   assert.equal((await page.locator(`${panel} .bs-brand`).textContent()).trim(), 'Backspace Skin')
-  assert.deepEqual(await page.locator(`${panel} [role="tab"]`).evaluateAll(tabs => tabs.map(tab => tab.dataset.skin)), ['horizon', 'vortex', 'ocean'])
+  assert.deepEqual(await page.locator(`${panel} [role="tab"]`).evaluateAll(tabs => tabs.map(tab => tab.dataset.skin)), ['horizon', 'vortex', 'ocean', 'video'])
   assert.ok(opening.animations.some(animation => animation.duration > 0), 'opening the panel must animate')
   await finishMotion()
   const heading = page.locator(`${panel} .bs-skin-heading`)
@@ -492,7 +498,8 @@ try {
     ocean: { glass: 63, chatCustom: true, chatOpacity: 84 },
     horizon: { glass: 59, chatCustom: true, chatOpacity: 87 },
     vortex: { glass: 81, chatCustom: true, chatOpacity: 92 },
-  }, 'all three skins save their own general settings')
+    video: { glass: 70, chatCustom: true, chatOpacity: 90 },
+  }, 'all four skins save their own general settings')
   await page.reload()
   await start()
   assert.deepEqual(await page.evaluate(() => controller.getState()), adjusted)
@@ -500,7 +507,7 @@ try {
   evidence.push({ scenario: '键盘调节、对话背景开关、三张皮肤分别保存、默认禁用态、切换与重载持久化', result: 'PASS', adjusted })
 
   await page.locator('[data-skin="ocean"]').click()
-  for (const [key, skin] of [['ArrowRight', 'horizon'], ['ArrowRight', 'vortex'], ['ArrowRight', 'ocean'], ['ArrowLeft', 'vortex'], ['Home', 'horizon'], ['End', 'ocean']]) {
+  for (const [key, skin] of [['ArrowRight', 'video'], ['ArrowRight', 'horizon'], ['ArrowRight', 'vortex'], ['ArrowRight', 'ocean'], ['ArrowLeft', 'vortex'], ['Home', 'horizon'], ['End', 'video']]) {
     await page.keyboard.press(key)
     const selected = page.locator(`[data-skin="${skin}"]`)
     assert.equal(await selected.getAttribute('aria-selected'), 'true')
