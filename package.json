@@ -66,7 +66,8 @@
     "test:settings": "node scripts/settings-ui-acceptance.mjs",
     "test:desktop": "node scripts/desktop-acceptance.mjs && node scripts/official-desktop-acceptance.mjs",
     "test:website": "node scripts/website-acceptance.mjs && node scripts/website-loading-acceptance.mjs",
-    "capture": "node scripts/capture-gallery.mjs"
+    "capture": "node scripts/capture-gallery.mjs",
+    "preview:video": "node scripts/video-prototype.mjs"
   },
   "engines": {
     "node": ">=20"

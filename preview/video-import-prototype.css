@@ -1,0 +1,15 @@
+/* 临时 UI 原型：复用真实面板，三种结构只在本地预览。 */
+#__dsh-backspace-panel__ [hidden]{display:none!important}
+#__dsh-backspace-panel__ .bs-tabs[data-prototype-four=true]::before{display:none}
+#__dsh-backspace-panel__ .bs-tabs[data-prototype-four=true] [aria-selected=true]{background:var(--bs-surface);box-shadow:0 2px 5px #09262b15}
+.details{padding:26px 22px} .details h2{font-size:18px} .details p{color:#4c6270;line-height:1.8} .details pre{white-space:pre-wrap;font-size:12px;line-height:1.7}
+#__dsh-backspace-panel__ .proto-modes{display:flex;gap:6px;margin:0 0 14px}
+.proto-modes button,.proto-action,.proto-link,.proto-disclosure{font:inherit;border:1px solid var(--bs-line);border-radius:8px;padding:8px 12px;background:var(--bs-surface);color:var(--bs-text);cursor:pointer}
+.proto-modes button{flex:1}.proto-modes [aria-pressed=true],.proto-action{background:var(--bs-accent);color:var(--bs-surface);border-color:var(--bs-accent)}
+.proto-disclosure{width:100%;text-align:left;margin:10px 0}.proto-link{border:0;background:transparent;color:var(--bs-muted)}
+.proto-video{padding:18px 0}.proto-upload{padding:25px 18px;border:1px dashed var(--bs-line);border-radius:10px;text-align:center}.proto-upload svg{display:block;margin:0 auto 12px;color:var(--bs-accent)}
+.proto-video h3{font-size:15px;margin:0 0 8px;font-weight:550}.proto-video p{color:var(--bs-muted);line-height:1.7;font-size:12px;margin:8px 0 16px}.proto-video .proto-error{color:#b8493e}.proto-preview{height:110px;display:grid;place-items:center;background:var(--bs-inset);margin-bottom:12px;border-radius:8px;color:var(--bs-muted);font-size:12px}.proto-name{overflow-wrap:anywhere}
+.proto-switcher{position:fixed;z-index:9000;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:16px;background:#17252e;color:#e9f2f5;box-shadow:0 8px 28px #0d1c3933;font:13px system-ui;white-space:nowrap}.proto-switcher button,.proto-switcher select{font:inherit;background:#2b3c47;color:inherit;border:1px solid #526876;border-radius:6px;padding:5px 9px;cursor:pointer}
+.proto-switcher label{display:flex;align-items:center;gap:7px}.proto-switcher option{color:#e9f2f5;background:#17252e}
+@media(max-width:900px){.shell{grid-template-columns:160px 1fr}.details{display:none}.proto-switcher{bottom:6px;gap:6px;font-size:11px;padding:8px}.proto-switcher .theme-label{display:none}.welcome h1{font-size:26px}}
+@media(max-width:560px){.shell{grid-template-columns:70px 1fr;gap:4px;padding:5px}.history,.brand small,.settings span{display:none}.sidebar{padding:10px}.brand{font-size:11px}.conversation{padding:16px}.model{display:none}.proto-switcher label{display:none}}
