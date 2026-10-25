@@ -2,7 +2,7 @@
 
 ## 2026-10-25 进度核对
 
-当前仍为本地候选版本；2026-10-25 查询官方 npm 返回 E404。等待 06 视频导入及集成验收，尚未发布，也不把本机安装视为发布。
+当前仍为本地候选版本；2026-10-25 查询官方 npm 返回 E404。04、06 已完成，发布前集成验收已补齐；尚未执行公开发布，也不把本机安装视为发布。
 
 **What to build:** 让用户能真正装到这一版。
 
@@ -32,13 +32,13 @@
 - `dependencies` 仍为 `{}`，`devDependencies` 只有 playwright
 - `THIRD_PARTY_NOTICES.md` 完整
 
-**Blocked by:** 04（三皮肤完整）、06（导入可用）
+**Blocked by:** None（04、06 均已结票）
 
-**Status:** blocked
+**Status:** ready-for-agent
 
 - [ ] `npm view dsh-backspace version` 返回已发布的版本号，不再是 404
 - [ ] `dsh plugin --profile web add dsh-backspace@<新版本>` 在干净环境装得上
-- [ ] 在 DSH 里能切换 3 个皮肤，每个皮肤有独立配置，公共配置生效
+- [ ] 在 DSH 里能切换 3 个皮肤，每个皮肤有独立配置，各皮肤通用配置独立生效
 - [ ] 在插件商店按名称能搜到并正常下载安装
 - [ ] 文档里的版本号与实际发布一致；按文档从零装一遍能成功
 - [ ] 能力矩阵明确写了 Safari/iOS 支持与否
