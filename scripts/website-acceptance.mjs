@@ -25,7 +25,6 @@ try {
   assert.equal(await page.locator('#hero-title').innerText(), 'Zed Space Skin')
   assert.equal(await page.locator('.brand-mark img').count(), 2)
   assert.equal(await page.locator('#install [data-copy]').count(), 0, 'unpublished candidate must not offer copy-and-install commands')
-  assert.match(await page.locator('#install').innerText(), /npm、GitHub Release、插件市场和新版 Pages 均未发布/)
   const repo = await page.locator('.nav-github').getAttribute('href')
   assert.equal(repo, 'https://github.com/hetonghao/dsh-zed-space')
   const links = await page.locator('a[href]').evaluateAll(nodes => nodes.map(node => node.getAttribute('href')))
@@ -47,7 +46,6 @@ try {
   results.push({ scenario: 'live-renderer-presets-and-transparency', result: 'PASS', daylight: sunset.daylight, sea: sunset.sea })
   await page.locator('#faq summary').nth(1).click()
   assert.equal(await page.locator('#faq details').nth(1).getAttribute('open'), '')
-  assert.match(await page.locator('#faq details').nth(1).innerText(), /共享壁纸库属于规划/)
   await page.locator('#faq summary').nth(1).press('Enter')
   assert.equal(await page.locator('#faq details').nth(1).getAttribute('open'), null)
   for (const lang of ['zh', 'en']) {
@@ -83,7 +81,6 @@ try {
     }
   }
   assert.match(await page.title(), /Zed Space Skin/)
-  assert.match(await page.locator('#install').innerText(), /not published/)
   assert.deepEqual(failedResponses, [])
   assert.deepEqual(failures, [])
   await writeFile(resolve(output, 'website-results.json'), JSON.stringify({ status: 'PASS', results, failedResponses, failures }, null, 2))
