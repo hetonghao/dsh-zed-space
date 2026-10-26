@@ -1,87 +1,47 @@
-# 🖥️ Backspace 中文安装与排错指南
+# Zed Space Skin 安装与排错
 
-[返回项目首页](../README.md#install) · [官网先看效果](https://hetonghao.github.io/dsh-backspace/) · [English](dsh-plugin.md)
+Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤
 
-## 1. 官方客户端：Windows / Mac
+当前 `dsh-zed-space@1.3.0` 是未发布候选版。npm、GitHub Release 与市场条目尚未发布，不能把新包名当作当前可下载版本。现阶段使用经审核的本地 tarball；[发布资料](publishing/README.md)说明后续步骤。
 
-1. 打开 DeepSeek Harness 左侧的 **「插件」**。
-2. 点击 **「添加插件」**。如果看到下拉菜单，选择安装第三方插件。
-3. 输入 `dsh-backspace@1.2.6`。
-4. 中国大陆用户可在「安装源」选择「中国大陆镜像源」，也可以用官方 npm 源。
-5. 点击「安装」，完成后选择「立即启用」。如有重启提示，按客户端提示操作。
-6. 打开左下角的「皮肤设置」，试试 40% 玻璃不透明度。
-7. 想让中间对话区有独立于侧栏的背景？在同一个面板打开「对话面板独立背景调整」，再用出现的拖动条单独设定（40%–100%）；拉到 100% 即 Harness 原生背景，关闭则跟随主玻璃。
+## 迁移与安装
 
-**包名不是终端命令。** 直接填在客户端的输入框里；不需要另装 Node.js、pnpm 或浏览器扩展。
+已安装 Backspace 时，先在同一 profile 卸载 `dsh-backspace`，再安装新包。不要删除 `.dsh`、会话目录或浏览器站点数据；数据边界见[迁移说明](publishing/migration.md)。
 
-| 系统 | 安装入口 | 验证情况 |
-| --- | --- | --- |
-| macOS | 客户端「插件 → 添加插件」 | 官方 0.2.0-rc.2 的隔离配置安装与界面目视验证；npm 官方源与大陆镜像均验证过 |
-| Windows | 相同入口、相同包名 | 官方安装文档支持此入口；Windows 页面结构有回归测试，尚无维护者的 Windows 原生完整安装实测 |
+维护者可在仓库根运行 `npm ci`、`npm run build`、`npm pack` 生成本地候选包。构建完成后仍需安装验收。
 
-截至 2026-10-20，官方最新预发布为 [0.2.1-rc.2](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.2)。已核对该版本的[中文插件管理说明](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.2/packages/client/ui-plugin-manager/README.zh.md)与语义弹窗结构，这不等同于完成该版本的实机兼容测试。
+Harness Web（在运行服务的电脑执行）：
 
-### 插件市场、npm 和浏览器扩展有什么区别？
+```sh
+dsh plugin --profile web add /absolute/path/to/dsh-zed-space-1.3.0.tgz
+```
 
-- **官方客户端添加插件：首选。** 输入 npm 包名，让客户端负责下载和启用。
-- **社区插件市场：可选入口。** 搜索 Backspace，核对仓库 `hetonghao/dsh-backspace` 和版本。市场数据可能滞后；未同步时用官方客户端直接安装。不必先装市场才能装皮肤。
-- **Harness Web：同一个 npm 插件。** 在运行 Web 服务的电脑安装，不是在访问它的另一台电脑上安装。
-- **Chrome / Edge 扩展：另一条路径。** 仅作用于识别到的浏览器 Harness 页面，不能给桌面客户端换肤；不改浏览器主页。
+重启 Web 服务，再刷新页面。Desktop 使用独立的 `desktop` profile；macOS 标准安装路径可完全退出 Desktop 后运行：
 
-同一实例只选一种方式。切换方式时，先停用原来的皮肤集成，避免重复注入。
+```sh
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add /absolute/path/to/dsh-zed-space-1.3.0.tgz
+```
 
-### 更新、停用、卸载
+替换为真实 tarball 路径。[官方插件管理说明](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.0-rc.2/packages/client/ui-plugin-manager/README.md#installing-a-bundle)明确支持 tarball 与绝对本地路径；这些命令是安装指引，不能单凭文档视为本次候选版安装已验收。非标准应用位置请查找 Desktop 内置 CLI；Windows 不复制 macOS 路径。本次未提供 Windows 原生完整安装验证。
 
-- **更新 Backspace：** 先在「插件」中卸载旧版，再输入准确的新版本包名安装。已核对的安装器暂不提供第三方插件原地升级。
-- **临时关闭：** 在皮肤面板关闭海洋，或在「插件」中停用。
-- **卸载：** 在「插件」页找到 Backspace，选择卸载。不要删除整个 `.dsh` 配置或会话目录。
-- **升级 Harness：** 无需例行卸载皮肤。更新后检查明暗模式、设置弹窗与左右栏；如异常，先在「插件」里停用 Backspace，再反馈版本及截图。
+正式发布后，可在 Desktop「插件 → 添加插件」输入 `dsh-zed-space@1.3.0`，或在 Web 使用同版本 npm 包。只有 registry 可查询该版本后，这个入口才成立；选择镜像不会加速 GitHub 链接。
 
-## 2. 常见情况
+## 使用
 
-| 你看到的现象 | 怎么处理 |
+打开左下角「皮肤设置」，选择海洋、事件视界、吸积涡旋或本地视频。两个宇宙入口是同一场景的不同视角。各皮肤分别保存设置；玻璃不透明度与对话面板独立背景可以分别调整。详见[本地视频](video-background.md)。
+
+同一实例只启用一种安装方式。Chrome/Edge 扩展作用于浏览器中的 Harness 页面，不能给 Desktop 换肤。旧 React 源码集成仍只支持海洋。
+
+## 常见情况
+
+| 现象 | 处理 |
 | --- | --- |
-| 「设置 → 内置插件」只有内置条目 | 退出设置，打开左侧「插件」，第三方安装入口在这里 |
-| 下载很慢，日志反复出现 GitHub `HEAD` 请求 | 取消这次安装，改填 `dsh-backspace@1.2.6`，选择合适的 npm 源 |
-| `ERR_PNPM_MISSING_TARBALL_INTEGRITY` | 远程 `.tgz` 的已报告安装问题；改按 npm 包名安装，不要删 lockfile 来碰运气 |
-| 大陆镜像找不到新版本 | 切换官方 npm 源；镜像同步有延迟，不要改成 GitHub URL |
-| 安装后没有海洋 | 先确认已「启用」；按客户端提示重启；检查是否把插件装在 Web 而不是客户端里 |
-| 左右栏深浅不一、设置看不清 | 左右栏与主设置修复在 v1.2.5；广场浮层与二级配置弹窗修复在 v1.2.6。升级后先试玻璃 40%，记录明暗模式、系统、Harness 版本后反馈 |
-| 夕阳时输入框仍是浅色 | 当前昼夜循环控制海面光照；输入框与文字主题跟随 Harness 外观设置，不自动切换明暗模式 |
-| `git ls-remote` 或 SSH 报错 | 使用 npm 包名；若日志指向另一个插件，先解决该依赖的下载问题 |
+| npm 返回 404 | 候选版尚未发布；使用审核过的本地包，不要反复切换镜像 |
+| 安装后没有设置入口 | 核对 profile，确认启用并重启对应实例 |
+| `ERR_PNPM_MISSING_TARBALL_INTEGRITY` | 保留配置和 lockfile，使用已核验的本地 tarball，记录完整错误 |
+| 迁移后视频列表为空 | 核对 origin、profile 和扩展 ID；保留原文件并按需重新导入 |
+| 面板或文字看不清 | 降低背景影响，记录明暗模式、系统、Harness 和插件版本后反馈 |
 
-> 中国大陆镜像只影响 npm 包下载。选择镜像后仍粘贴 GitHub 链接，并不会让 GitHub 下载变快。
+卸载 Web 包用 `dsh plugin --profile web remove dsh-zed-space`；Desktop 在插件页停用或卸载。卸载不保证清理本地视频库；需要清理时在面板逐项移除，原文件不变。
 
-### 下载本地包（备用）
-
-优先使用上面的客户端安装入口。两个 npm 源都不可用时，可[下载 v1.2.6 压缩包](https://github.com/hetonghao/dsh-backspace/releases/download/v1.2.6/dsh-backspace-1.2.6.tgz)。
-
-**macOS：** 保存到「下载」，完全退出客户端，再在终端运行：
-
-```sh
-"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add "$HOME/Downloads/dsh-backspace-1.2.6.tgz"
-```
-
-这是默认 macOS 安装位置的备用命令。Windows 不要复制这条命令；若图形安装入口不可用，请附安装日志反馈，避免猜测客户端运行时路径。
-
-## 3. Harness Web
-
-仅在运行 `dsh web` 的电脑执行，Windows PowerShell 和 macOS 终端通用：
-
-```sh
-dsh plugin --profile web add dsh-backspace@1.2.6
-```
-
-重启正在运行的 `dsh web`，再刷新浏览器。卸载时将 `add dsh-backspace@1.2.6` 换成 `remove dsh-backspace`。
-
-## 4. 给维护者的信息
-
-请提供：Windows / macOS 版本、Harness 版本、Backspace 版本、上述哪种安装方式，以及错误发生时的完整日志或截图。日志请移除令牌和私人对话。
-
-需要核对包校验信息的进阶用户可运行：
-
-```sh
-npm view dsh-backspace@1.2.6 dist.integrity --registry=https://registry.npmjs.org
-```
-
-这条命令读取 registry 公布的完整性信息；安装器负责验证下载内容，并不意味着包已通过独立安全审计。
+新问题提交至 [GitHub Issues](https://github.com/hetonghao/dsh-zed-space/issues)，附安装方式、系统和版本；日志请先移除令牌与私人对话。

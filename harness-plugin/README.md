@@ -1,12 +1,8 @@
-# @deepseek-ai/dsh-client-ui-backspace
+# Zed Space Skin 源码集成
 
-English | [中文](README.zh.md)
+此目录保留旧 React 源码集成，当前仍只接海洋背景。它与根目录的 `dsh-zed-space` DSH bundle 不同，不包含宇宙双视角或本地视频设置。需要多背景时参阅[根目录安装文档](../docs/install.zh.md)。
 
-Native DeepSeek Harness plugin for the Backspace realtime WebGPU background. The Host half registers the `ui-backspace` settings schema and serves self-contained renderer assets at `/dsh-backspace`; the Client half contributes the background through `shell.background`, adds a lower-left quick-control action and a General-settings row, and layers glass values through `ctx.theme.overrideTokens()`.
-
-## Integrate into a Harness checkout
-
-From the Backspace repository:
+## 集成到 Harness 源码
 
 ```sh
 bash harness-plugin/install-into-harness.sh /absolute/path/to/deepseek-harness
@@ -16,31 +12,16 @@ corepack pnpm run build
 corepack pnpm dsh web
 ```
 
-The installer copies this package to `packages/client/ui-backspace` and idempotently adds the required client aggregate reference, Web bundle dependency, Cordis row, settings exposure and layout-owned `shell.background` slot. It also migrates the earlier per-column stacking rule that could place the conversation composer above Settings. It is verified against Harness `0.1.2-alpha.3`, commit `dd6322d60` (2026-08-31); if those integration anchors change upstream, it stops without guessing.
+安装器继续使用 `packages/client/ui-backspace` 目录和 `ui-backspace` 设置域，以沿用既有集成和设置。包名称改为 `dsh-zed-space`，资源路由为 `/dsh-zed-space`。安装器为布局增加 `shell.background` 插槽，并登记 Host、Client 与设置入口。
 
-Use the lower-left **Skin settings** action for sea, daylight and glass controls, or open **Settings → General → Backspace** for every option. Manual daylight input disables the cycle until the cycle checkbox is re-enabled.
+历史集成基线是 Harness `0.1.2-alpha.3`、提交 `dd6322d60`；这不代表新版本 Harness 已验证。上游定位点变化时安装器退出，需重新核对后适配。
 
-## Architecture
+## 功能边界
 
-- `src/index.ts`: Host settings registration plus a traversal-safe static resource route.
-- `src/client/index.ts`: Client plugin assembly, durable settings adoption and reversible theme-token layer.
-- `src/client/BackspaceBackground.tsx`: same-origin background iframe registered through the layout slot.
-- `src/client/BackspaceSettingsRow.tsx`: bilingual, keyboard-accessible General settings contribution.
-- `src/client/BackspaceQuickControls.tsx`: native sidebar action and compact dialog.
-- `assets/`: generated copy of the canonical renderer under the repository's `shared/` directory.
+- 下方快捷设置和「设置 → 通用」调节海洋、光照、玻璃及画质。
+- 海洋 iframe 使用同源资源，设置由 Harness 设置服务保存。
+- 保留旧 DOM 防重复标识；同一实例应只启用一种安装方式。
+- 画质变更会重新加载海洋 iframe；此路径面向 Web，未承诺 Electron/file 协议资产加载。
+- 不增加模型上下文、工具或请求，不修改 KV cache 行为。
 
-The extension and static-dist installers use the same DOM ids (`#__dsh-backspace__`, `#__dsh-backspace-btn__`). The native component checks the shared iframe id before mounting, so enabling more than one installation path never starts a second renderer.
-
-## Model Experience
-
-None. This plugin changes browser presentation and user settings only; it does not add model-visible context, tools, messages or provider requests.
-
-#### KV Cache effect
-
-None; the plugin never assembles or modifies a model request.
-
-## Known Limitations and Deferred Work
-
-- The native package needs one additive `shell.background` slot in `ui-layout`; that integration is automated but remains an upstream source change until Harness ships a background slot itself.
-- Renderer quality changes reload the isolated ocean frame because mesh density and adapter preference are boot-time decisions.
-- The native package currently targets the Web client. Electron/file-protocol asset carriage needs a separate resource provider.
+宇宙、视频和皮肤切换来自根目录 bundle 的共享运行时；不能因 assets 中包含这些文件，就宣称本 React UI 已接入它们。

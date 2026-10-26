@@ -1,6 +1,6 @@
 # Architecture
 
-Backspace has one renderer and three delivery paths. `shared/` is the
+Zed Space Skin has ocean, cosmos and video renderers across bundle, static and extension delivery paths. The legacy React source integration still connects only the ocean renderer. `shared/` is the
 canonical implementation; `npm run build` copies it into the extension,
 static installer, and native Harness package. `site/` is the original
 CDN-backed showcase and is intentionally preserved byte-for-byte.
@@ -23,8 +23,7 @@ are enabled together.
 
 ## Native Harness integration
 
-Harness client plugins are compiled into the Web bundle; there is no runtime
-UI-plugin installation API. `harness-plugin/install-into-harness.sh` therefore
+This legacy React integration compiles its client into the Harness Web bundle. The root npm bundle is a separate runtime plugin installation path. `harness-plugin/install-into-harness.sh` therefore
 copies the package into a source checkout and applies small, idempotent source
 integrations:
 
@@ -47,7 +46,7 @@ The native package contributes:
 - `sidebar.footer.action`: always-available “Skin settings” launcher;
 - `settings.general.item`: full settings row;
 - `ctx.theme.overrideTokens()`: reversible glass palette;
-- Host settings schema and traversal-safe `/dsh-backspace` asset route.
+- Host settings schema and traversal-safe `/dsh-zed-space` asset route.
 
 The background waits for the settings scope to reach `ready` before its first
 render. That prevents a flash of defaults and ensures persisted sea, daylight,

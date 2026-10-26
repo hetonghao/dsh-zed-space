@@ -1,136 +1,17 @@
-# DSH plugin installation
+# DSH bundle 安装
 
-[中文安装与排错指南](install.zh.md) · [Choose your installation](../README.en.md#install)
+根目录是 `dsh-zed-space` 的可安装 DSH bundle，展示名为 Zed Space Skin。`1.3.0` 尚未发布；当前安装方法见[安装与排错](install.zh.md)，旧包迁移见[迁移说明](publishing/migration.md)。
 
-The repository root is a self-contained DeepSeek Harness bundle. It adds one
-Host row (`dsh-backspace`), one Web client module, and a read-only local asset
-route. It does not modify the Harness checkout.
-
-## Install a release
-
-```sh
-dsh plugin --profile web add dsh-backspace@1.2.6
-dsh web
-```
-
-Backspace appears behind the Web UI. The **Skin settings** button at the lower
-left opens the wave, daylight, glass-opacity, and day-cycle controls. Settings
-are saved locally in that browser profile.
-
-**Independent conversation background** is a separate switch in the same
-panel, off by default. Turning it on reveals a slider that sets the center
-conversation column's own opacity from **40% to 100%**; at 100% the column is
-indistinguishable from unthemed Harness, because the paint is derived from
-Harness's own `--dsw-static-neutral-bluish-*` palette and only scaled by
-`color-mix()`. The sidebar and details columns always keep the workspace glass,
-and switching the control off returns the conversation column to that same
-glass. It works on Harness Web, the community desktop wrapper and the official
-Desktop AppFrame.
-
-Use the explicit version above so a stale registry or mirror cannot silently
-select 1.2.3, which lacks the official Desktop glass fix. A mainland China
-mirror may take time to synchronize a new npm release; use the official npm
-registry in the installer if 1.2.6 is not yet available from the mirror.
-
-## DSH Desktop
-
-Official DeepSeek Harness Desktop keeps its own **`desktop` profile**. Updating
-the `web` profile does not update Desktop. The easiest path uses Desktop's own
-plugin manager—no download folder, terminal, or profile editing:
-
-1. Open **Plugins** in the Desktop sidebar, then choose **Add plugin**.
-2. Enter this exact package name and version:
-
-   ```text
-   dsh-backspace@1.2.6
-   ```
-
-3. Choose **Install**, review the package details, then **Enable now**.
-4. In Harness, use the lower-left **Skin settings** control. Set glass opacity
-   to **40%** if you want the ocean to show clearly.
-5. To give the conversation column its own background, enable **Independent
-   conversation background** and move the slider it reveals. Pull it to **100%**
-   for Harness's native look, or lower it to let the ocean show through while
-   the sidebars stay at the glass-opacity setting.
-
-If Backspace 1.2.3 is already installed, uninstall that package in **Plugins**
-before adding 1.2.6. The official `0.2.0-rc.2` Add plugin dialog does not
-perform in-place upgrades. If the selected mainland China mirror has not yet
-synchronized 1.2.6, choose the **official npm registry** in the same dialog.
-The in-app catalog may list an older version; entering the exact package spec
-avoids accidentally reinstalling it.
-
-The package-name path avoids a [reported pnpm 11.7.0 bug](https://github.com/deepseek-ai/deepseek-harness/discussions/8294): a cached remote GitHub `.tgz` can fail with
-`ERR_PNPM_MISSING_TARBALL_INTEGRITY`. Choosing an npm mirror does not redirect
-a GitHub URL. **Do not delete the profile or lockfile** in response to that
-error; the installer restores failed profile changes, and deleting the lockfile
-does not repair a cached URL resolution. The [official plugin manager
-documentation](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.0-rc.2/packages/client/ui-plugin-manager/README.md) describes the package-name and registry controls.
-Native Windows Desktop has not been E2E tested.
-
-The previous `dsh-backspace@1.2.5` package was installed successfully from both
-the official npm registry and the mainland China mirror with the bundled CLI
-in an isolated official macOS Desktop `0.2.0-rc.2` profile. This confirms the
-package and registry paths; the in-app UI flow has not been independently
-completed. Version 1.2.6 adds overlay/dialog browser regressions; this is not a new native Desktop certification.
-
-### Local-package fallback
-
-If both registries are unavailable, [download the v1.2.6 tarball](https://github.com/hetonghao/dsh-backspace/releases/download/v1.2.6/dsh-backspace-1.2.6.tgz)
-to Downloads. Fully quit Desktop, then use the `dsh` executable bundled with
-your Desktop app—not a separate npm CLI. Standard macOS app path:
-
-```sh
-"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add "$HOME/Downloads/dsh-backspace-1.2.6.tgz"
-```
-
-Reopen Desktop afterward. This **local file** install was tested in an isolated
-official macOS Desktop `0.2.0-rc.2` profile and does not reuse the remote URL's
-bad cached integrity entry. For Windows or a nonstandard macOS app location,
-locate the bundled CLI inside the Desktop app rather than guessing a path.
-
-## Verify the package
-
-### Git install fails at `git ls-remote`
-
-Use the npm command above instead of the Git URL. The npm release already
-contains its built assets and does not need a `prepare` build. A failure at
-`git ls-remote` happens before a build starts; the generic `allowBuilds` hint
-does not establish that build permissions caused it. If npm also fails, share
-the complete error output (redact credentials and private paths). Do not
-enable arbitrary dependency build scripts or delete your Harness profile.
-
-
-The install should add an `dsh-backspace` row to the selected profile and load
-these same-origin URLs with HTTP 200 responses:
+bundle 通过 Host、Web client module 和同源只读资源路由加载背景，无需修改 Harness 源码。安装后核对 profile 中只有一个新插件实例，并检查以下资源响应正常：
 
 ```text
-/plugins/dsh-backspace/client.js
-/dsh-backspace/skin.html
-/dsh-backspace/styles.css
-/dsh-backspace/ocean.js
+/plugins/dsh-zed-space/client.js
+/dsh-zed-space/skin.html
+/dsh-zed-space/cosmos.html
+/dsh-zed-space/video.html
+/dsh-zed-space/styles.css
 ```
 
-If the launcher does not appear, confirm the command used the same profile as
-`dsh web`, restart the Web process, then perform one normal page reload.
+安装时使用精确版本或审核过的本地 tarball。Desktop 与 Web 使用不同 profile；在 Web 安装不等于 Desktop 已更新。
 
-## Update or remove
-
-Install a newer published npm version with the same `add` command. To remove
-the package and its profile row:
-
-```sh
-dsh plugin --profile web remove dsh-backspace
-```
-
-Browser appearance values remain local and harmless after removal. Clear the
-`bsEnabled`, `bsSea`, `bsTime`, `bsGlass`, and `bsAutoCycle` local-storage
-keys only if you also want to reset those preferences.
-
-## Other installation paths
-
-Use the static installer when a packaged Harness frontend cannot use DSH
-bundles. Use the source integration only when the complete Backspace section
-must appear inside Harness **Settings → General**. Do not combine installation
-paths; the duplicate guard prevents two renderers, but one path is simpler to
-update and remove.
+旧 `harness-plugin/` React 源码集成是另一条路径，仅接海洋。多背景功能范围以根目录 bundle、静态安装和浏览器扩展的实际验收为准；不要同时启用多条路径。

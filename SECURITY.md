@@ -2,11 +2,11 @@
 
 ## Supported version
 
-Security fixes are applied to the latest tagged release of Backspace.
+Zed Space Skin 1.3.0 is an unpublished candidate. After its first release, security fixes target the latest maintained release; inherited historical tags do not establish a Zed Space Skin release.
 
 ## Reporting a vulnerability
 
-Please use the repository's **Security → Report a vulnerability** form so a
+Please use [the new repository's security page](https://github.com/hetonghao/dsh-zed-space/security) and its **Report a vulnerability** form so a
 report and any proof of concept remain private until a fix is available. If
 private vulnerability reporting is unavailable, open a minimal issue that
 does not include exploit details and ask the maintainer for a private channel.

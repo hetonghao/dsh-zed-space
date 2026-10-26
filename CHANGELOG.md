@@ -1,8 +1,13 @@
 # Changelog
 
-All notable changes to Backspace are documented here.
+本文件记录 Zed Space Skin 及其 Backspace 历史变更。历史版本条目保留原发布主体与状态。
 
-## Unreleased
+## 1.3.0 — 未发布候选版
+
+- 展示名改为 Zed Space Skin；包、插件和新仓库标识为 `dsh-zed-space`。
+- 保留 Open Sea Skin / Backspace 来源与许可，旧存储键和视频数据库名称保持兼容。
+- 以下功能已进入候选源码，不代表 npm、GitHub Release 或社区市场已经发布；壁纸市场仍属规划。
+- 根目录 bundle 提供多背景；旧 React 源码集成仍只接海洋。
 
 ### 本地视频素材列表
 
