@@ -73,7 +73,8 @@
     "test:website": "node scripts/website-acceptance.mjs && node scripts/website-loading-acceptance.mjs",
     "capture": "node scripts/capture-gallery.mjs",
     "test:video": "node scripts/video-acceptance.mjs && node scripts/video-edge-acceptance.mjs && node scripts/video-paths-acceptance.mjs",
-    "test:transitions": "node scripts/skin-transition-acceptance.mjs"
+    "test:transitions": "node scripts/skin-transition-acceptance.mjs",
+    "prototype:market": "node scripts/market-prototype.mjs"
   },
   "engines": {
     "node": ">=20"

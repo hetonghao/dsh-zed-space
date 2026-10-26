@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>原型空视频库</title>
+  </head>
+  <body>
+    <script>
+      const token = new URLSearchParams(location.search).get("token");
+      const send = (data) =>
+        parent.postMessage(
+          { type: "bs-video", token, ...data },
+          location.origin,
+        );
+      addEventListener("message", (e) => {
+        if (
+          e.source === parent &&
+          e.origin === location.origin &&
+          e.data?.type === "bs-video" &&
+          e.data.token === token &&
+          e.data.requestId
+        )
+          send({
+            requestId: e.data.requestId,
+            ok: true,
+            items: [],
+            activeId: null,
+          });
+      });
+      send({ event: "ready" });
+    </script>
+  </body>
+</html>

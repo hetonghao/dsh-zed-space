@@ -1,0 +1,72 @@
+{
+  "timestamp": "2026-10-26T15:40:00.579Z",
+  "purpose": "仅开发原型；不用于生产",
+  "files": [
+    {
+      "path": "scripts/market-prototype.mjs",
+      "sha256": "a80f9cf143a657b564d44791e45175e668a38da749e04c93edd0e7d4f405dee1"
+    },
+    {
+      "path": "package.json",
+      "sha256": "d1e73f6f0baaaa44be5d10cfbc9b2c682505ce99d15b9c4c179a1b15a2c4a8d0"
+    },
+    {
+      "path": ".impeccable/surfaces/market-prototype.md",
+      "sha256": "4cac9a9ee11a2a095cbf5c1182a5f184405f88b65e4e7d3ab6026f11fc3ed7ae"
+    },
+    {
+      "path": "plugin/prototype-market/README.md",
+      "sha256": "b9e2c28bf9c27926b28e15eb2c1168dceed18e3b378fabf9b17a5da27cc8ab9e"
+    },
+    {
+      "path": "plugin/prototype-market/adapter.css",
+      "sha256": "b16b29f83362f9a09d0dade69a6e17f72df88448024471837c6ecbe6216f582e"
+    },
+    {
+      "path": "plugin/prototype-market/adapter.js",
+      "sha256": "455cda164918805959ee3db413c059d43f17326a5b4eb53a684499df0a614a38"
+    },
+    {
+      "path": "plugin/prototype-market/app.js",
+      "sha256": "e70fb885ceae047d3227766e1b512ae6f406d0854e3b34acb56fb657bf629c8f"
+    },
+    {
+      "path": "plugin/prototype-market/empty-surface.html",
+      "sha256": "4a379440ab5d5c321261b5d1bf076b3b4ba37d08261da6dd02400ea2d4dd3987"
+    },
+    {
+      "path": "plugin/prototype-market/empty-video.html",
+      "sha256": "d381c957644f3cd58cdd112ca008d51d29a4b6e108f7060f793f40a0acb7f5ee"
+    },
+    {
+      "path": "plugin/prototype-market/style.css",
+      "sha256": "a79910a4c7f0cd3b78536967ee069ed7e0c10d705c54c5b3d06a883cd1fdc996"
+    }
+  ],
+  "references": [
+    {
+      "path": "plugin/client.js",
+      "sha256": "d19948f2780153b4cb64033905f5beebcb2825bc67aa53a5c5ea645d136b5bd1"
+    },
+    {
+      "path": "shared/skin-core.js",
+      "sha256": "3d11e0015a9cb9ccbf6a1c54a27210b9101113e224fe1251a6d060b553692ac9"
+    },
+    {
+      "path": "tests/fixtures/desktop/index.html",
+      "sha256": "dd79cd7dac24b46eec860737423c039037e87e60c81c10f079719e078ae209dd"
+    },
+    {
+      "path": "../zed-space/apps/website/src/components/market/DownloadButton.tsx",
+      "sha256": "af6d295e9f23c374ebe6b2d3dd4a8f5ce4ffc71bcd1ad26f4939b87a14caf839"
+    },
+    {
+      "path": "../zed-space/apps/website/src/components/market/WallpaperDetail.tsx",
+      "sha256": "5a576427dd5d94132fdfb1417931a403bf8090987c310a74c3240be9307e5f47"
+    },
+    {
+      "path": "../zed-space/apps/website/node_modules/gsap/dist/gsap.min.js",
+      "sha256": "92bb9a96476f983d212a2bc4f54c889039c1696dd4461d40a736860938570fbb"
+    }
+  ]
+}
