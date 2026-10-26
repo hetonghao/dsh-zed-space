@@ -1,12 +1,10 @@
-# @deepseek-ai/dsh-client-ui-backspace
+# Zed Space Skin 源码集成
 
-[中文](README.zh.md) | [English](README.md)
+此目录保留旧 React 源码集成，当前仍只接海洋背景。它与根目录的 `dsh-zed-space` DSH bundle 不同，不包含宇宙双视角或本地视频设置。需要多背景时参阅[根目录安装文档](../docs/install.zh.md)。
 
-Backspace 实时 WebGPU 海洋的 DeepSeek Harness 原生插件。Host 端注册 `ui-backspace` 持久化设置并在 `/dsh-backspace` 提供全本地渲染资源；Client 端通过 `shell.background` slot 挂载背景，在左下角与「通用设置」中注册控件，并通过 `ctx.theme.overrideTokens()` 叠加可逆的玻璃主题令牌。
+当前 1.3.0 为未发布候选版；本次迁移尚未验证完整 Harness 源码编译。
 
-## 接入 Harness 源码
-
-在 Backspace 仓库根目录执行：
+## 集成到 Harness 源码
 
 ```sh
 bash harness-plugin/install-into-harness.sh /absolute/path/to/deepseek-harness
@@ -16,31 +14,16 @@ corepack pnpm run build
 corepack pnpm dsh web
 ```
 
-安装器会把包复制到 `packages/client/ui-backspace`，并幂等地添加 Client TypeScript 聚合引用、Web bundle 依赖、Cordis 启动项、设置 Web 白名单和由 layout 拥有的 `shell.background` slot；也会迁移曾导致聊天输入框盖住设置页的旧层级规则。脚本已在 Harness `0.1.2-alpha.3`、提交 `dd6322d60`（2026-08-31）上验证；若上游接入点变化，脚本会停止并报错，不会猜测修改。
+安装器继续使用 `packages/client/ui-backspace` 目录和 `ui-backspace` 设置域，以沿用既有集成和设置。包名称改为 `dsh-zed-space`，资源路由为 `/dsh-zed-space`。安装器为布局增加 `shell.background` 插槽，并登记 Host、Client 与设置入口。
 
-启动后可用左下角「皮肤设置」快捷面板调波浪、日光与玻璃，也可打开「设置 → 通用设置 → 海洋皮肤」查看所有选项。手动拖动日光滑块后，自动循环会关闭，可通过复选框重新开启。
+历史集成基线是 Harness `0.1.2-alpha.3`、提交 `dd6322d60`；这不代表新版本 Harness 已验证。上游定位点变化时安装器退出，需重新核对后适配。
 
-## 架构
+## 功能边界
 
-- `src/index.ts`：Host 设置注册与防路径穿越的静态资源路由。
-- `src/client/index.ts`：Client 插件组装、持久化设置同步与可逆主题令牌层。
-- `src/client/BackspaceBackground.tsx`：通过 layout slot 注册的同源背景 iframe。
-- `src/client/BackspaceSettingsRow.tsx`：双语、键盘可访问的「通用设置」控件。
-- `src/client/BackspaceQuickControls.tsx`：原生侧栏入口与快捷面板。
-- `assets/`：由仓库 `shared/` 目录的唯一源文件生成。
+- 下方快捷设置和「设置 → 通用」调节海洋、光照、玻璃及画质。
+- 海洋 iframe 使用同源资源，设置由 Harness 设置服务保存。
+- 保留旧 DOM 防重复标识；同一实例应只启用一种安装方式。
+- 画质变更会重新加载海洋 iframe；此路径面向 Web，未承诺 Electron/file 协议资产加载。
+- 不增加模型上下文、工具或请求，不修改 KV cache 行为。
 
-扩展、dist 注入和原生插件共用 `#__dsh-backspace__` / `#__dsh-backspace-btn__` DOM 标记。原生组件在挂载前检查该标记，因此同时安装多条路径也不会启动第二个渲染器。
-
-## 模型体验
-
-无。本插件只修改浏览器展示与用户设置，不会添加模型可见上下文、工具、消息或供应商请求。
-
-#### KV Cache 影响
-
-无；本插件不会组装或修改模型请求。
-
-## 已知限制与待办
-
-- 原生包需要 `ui-layout` 增加一个 `shell.background` slot；目前已自动化，但在 Harness 未原生提供该 slot 前仍属于源码接入修改。
-- 切换渲染质量会重载隔离的海洋 iframe，因为网格密度和 GPU 适配器偏好是启动时决策。
-- 当前原生包面向 Web Client；Electron/file 协议的资源传输需要独立的资源提供器。
+宇宙、视频和皮肤切换来自根目录 bundle 的共享运行时；不能因 assets 中包含这些文件，就宣称本 React UI 已接入它们。
