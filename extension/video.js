@@ -6,6 +6,7 @@ const token = query.get('token');
 let owner;
 let database;
 let activeId = null;
+let selectionLoaded = false;
 let hostPaused = true;
 let player;
 let objectUrl;
@@ -66,23 +67,28 @@ function stopPlayer() {
 }
 async function showClip(clip) {
   if (!clip?.blob || !(clip.blob instanceof Blob)) throw new Error('missing');
-  stopPlayer();
-  player = document.createElement('video');
-  player.muted = true; player.loop = true; player.playsInline = true; player.preload = 'auto';
-  objectUrl = URL.createObjectURL(clip.blob);
-  const loaded = mediaReady(player, 'loadeddata');
-  player.src = objectUrl;
-  document.body.append(player);
-  await loaded;
-  const current = player;
-  const generation = ++playbackGeneration;
-  if (!shouldPause()) {
-    try { await current.play(); }
-    catch {
-      if (current === player && generation === playbackGeneration && !shouldPause()) throw new Error('playback');
+  const candidate = document.createElement('video');
+  const candidateUrl = URL.createObjectURL(clip.blob);
+  candidate.muted = true; candidate.loop = true; candidate.playsInline = true; candidate.preload = 'auto';
+  const loaded = mediaReady(candidate, 'loadeddata');
+  candidate.src = candidateUrl;
+  try {
+    await loaded;
+    if (!shouldPause()) {
+      try { await candidate.play(); }
+      catch { if (!shouldPause()) throw new Error('playback'); }
     }
+    if (shouldPause()) candidate.pause();
+  } catch (error) {
+    candidate.pause(); candidate.removeAttribute('src'); candidate.load();
+    URL.revokeObjectURL(candidateUrl);
+    throw error;
   }
-  current.onerror = () => playbackFailure('decode', current, playbackGeneration);
+  stopPlayer();
+  player = candidate;
+  objectUrl = candidateUrl;
+  document.body.append(player);
+  player.onerror = () => playbackFailure('decode', candidate, playbackGeneration);
 }
 function playbackFailure(code, failedPlayer, generation) {
   // 与选择/移除串行，旧播放器或旧播放尝试的取消不能清除新选择。
@@ -94,6 +100,11 @@ function playbackFailure(code, failedPlayer, generation) {
   });
 }
 async function handle(data) {
+  if (!selectionLoaded) {
+    activeId = await transaction('readonly', (_clips, selection) => { const request = selection.get(owner); return () => request.result || null; });
+    selectionLoaded = true;
+  }
+  let imported;
   switch (data.action) {
     case 'list': {
       const saved = await transaction('readonly', (_clips, selection) => { const request = selection.get(owner); return () => request.result; });
@@ -102,16 +113,54 @@ async function handle(data) {
       break;
     }
     case 'import': {
+      const source = data.source;
+      if (source !== undefined) {
+        if (!source || typeof source !== 'object' || Array.isArray(source)
+          || Object.keys(source).sort().join(',') !== 'assetId,provider,sha256'
+          || source.provider !== 'zed-space' || typeof source.assetId !== 'string'
+          || !source.assetId.trim() || source.assetId.length > 200
+          || typeof source.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(source.sha256)) throw new Error('source');
+        if (!(data.file instanceof Blob) || data.file.size > 32 * 1024 * 1024) throw new Error('size');
+        const digest = await crypto.subtle.digest('SHA-256', await data.file.arrayBuffer());
+        const hash = [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+        if (hash !== source.sha256) throw new Error('hash');
+        const existing = (await snapshot()).items.find(item => item.source?.provider === source.provider
+          && item.source.assetId === source.assetId && item.source.sha256 === source.sha256);
+        if (existing) { imported = { id: existing.id, reused: true }; break; }
+      }
       const media = await inspectVideo(data.file);
       const original = typeof data.name === 'string' ? data.name.slice(0, 255) : 'video';
       const name = original.replace(/\.[^.]+$/, '').trim().slice(0, 80) || 'Video';
-      await transaction('readwrite', clips => { clips.put({ ...media, owner, id: crypto.randomUUID(), name, original, createdAt: Date.now() }); });
+      const id = crypto.randomUUID();
+      imported = await transaction('readwrite', clips => {
+        let result = { id, reused: false };
+        const put = () => clips.put({ ...media, owner, id, name, original, createdAt: Date.now(), ...(source ? { source } : {}) });
+        if (source) {
+          const request = clips.index('owner').getAll(owner);
+          request.onsuccess = () => {
+            const existing = request.result.find(item => item.source?.provider === source.provider
+              && item.source.assetId === source.assetId && item.source.sha256 === source.sha256);
+            if (existing) result = { id: existing.id, reused: true };
+            else put();
+          };
+        } else put();
+        return () => result;
+      });
       break;
     }
     case 'select': {
-      if (data.id === null) { activeId = null; stopPlayer(); }
-      else { await showClip(await readClip(data.id)); activeId = data.id; }
-      await saveSelection(activeId);
+      const previous = activeId;
+      if (data.id === null) { await saveSelection(null); activeId = null; stopPlayer(); }
+      else {
+        await showClip(await readClip(data.id));
+        try { await saveSelection(data.id); }
+        catch (error) {
+          if (previous) await showClip(await readClip(previous));
+          else stopPlayer();
+          throw error;
+        }
+        activeId = data.id;
+      }
       break;
     }
     case 'rename': {
@@ -132,7 +181,7 @@ async function handle(data) {
     }
     default: throw new Error('request');
   }
-  return snapshot();
+  return { ...await snapshot(), ...imported };
 }
 
 addEventListener('message', event => {
@@ -148,7 +197,7 @@ addEventListener('message', event => {
   queue = queue.then(async () => {
     try { send({ requestId: data.requestId, ok: true, ...await handle(data) }); }
     catch (error) {
-      if (['select', 'list'].includes(data.action) || error.message === 'storage') {
+      if (data.action === 'list') {
         activeId = null; stopPlayer();
         try { await saveSelection(null); } catch { /* 原错误通过响应反馈。 */ }
       }

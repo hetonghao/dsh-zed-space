@@ -1,4 +1,4 @@
-// GENERATED from shared/skin-core.js. Run npm run build after editing shared sources.
+// GENERATED from shared/skin-core.js and shared/market-*.js. Run npm run build after editing shared sources.
 window.__ModuleLoader__.load({ id: "dsh-zed-space", factory: (require) => {
   var module = { exports: {} };
   var exports = module.exports;
@@ -674,7 +674,8 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
 #${IDS.panel} .bs-video-group { padding-top:14px; }
 #${IDS.panel} .bs-video-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 #${IDS.panel} .bs-video-title { font-size:14px; font-weight:500; }
-#${IDS.panel} .bs-video-import { border:0; border-radius:8px; padding:8px 12px; background:var(--bs-accent); color:var(--bs-surface); cursor:pointer; font-size:12px; }
+#${IDS.panel} .bs-video-import, #${IDS.panel} .bs-video-discover { border:0; border-radius:8px; padding:8px 12px; background:var(--bs-accent); color:var(--bs-surface); cursor:pointer; font-size:12px; }
+#${IDS.panel} .bs-video-discover { width:100%; min-height:44px; margin-top:8px; }
 #${IDS.panel} .bs-video-import:disabled { opacity:.55; cursor:wait; }
 #${IDS.panel} .bs-video-help, #${IDS.panel} .bs-video-status, #${IDS.panel} .bs-video-errors { font-size:12px; line-height:1.7; color:var(--bs-muted); margin:8px 0 12px; overflow-wrap:anywhere; }
 #${IDS.panel} .bs-video-errors { color:#a4382d; white-space:pre-line; }
@@ -754,6 +755,8 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     let videoReadyReject;
     let videoReadyTimer;
     let videoRequestId = 0;
+    let videoLeases = 0;
+    let stopped = true;
     let videoGeneration = 0;
     let syncVideoUi = () => {};
     const videoRequests = new Map();
@@ -820,7 +823,8 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       const frame = document.getElementById(IDS.video);
       if (frame instanceof HTMLIFrameElement) frame.contentWindow.postMessage({ type: 'bs-video', token: videoToken, action: 'visibility', paused }, videoOrigin(frame));
     };
-    const removeVideoFrame = () => {
+    const removeVideoFrame = (force = false) => {
+      if (videoLeases && !force) return;
       videoGeneration++;
       clearTimeout(videoReadyTimer);
       videoReadyReject?.(new Error('cancelled'));
@@ -834,6 +838,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       videoData = { items: [], activeId: null };
     };
     const ensureVideoFrame = () => {
+      if (stopped || !ownsUi) return Promise.reject(new Error('cancelled'));
       if (videoReady) return videoReady;
       const frame = document.createElement('iframe');
       videoToken = crypto.randomUUID();
@@ -851,22 +856,56 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       return videoReady;
     };
     const requestVideo = async (action, payload = {}) => {
+      const generation = videoGeneration;
       await ensureVideoFrame();
+      if (stopped || generation !== videoGeneration) throw new Error('cancelled');
       const frame = document.getElementById(IDS.video);
       if (!(frame instanceof HTMLIFrameElement)) throw new Error('cancelled');
       const requestId = ++videoRequestId;
       return new Promise((resolve, reject) => {
         const timer = setTimeout(() => { videoRequests.delete(requestId); reject(new Error('load')); }, 10000);
         videoRequests.set(requestId, { resolve, reject, timer });
-        frame.contentWindow.postMessage({ type: 'bs-video', token: videoToken, requestId, action, paused: !state.enabled, ...payload }, videoOrigin(frame));
+        frame.contentWindow.postMessage({ type: 'bs-video', token: videoToken, requestId, action, paused: !state.enabled || state.skin !== 'video', ...payload }, videoOrigin(frame));
       });
     };
     const acceptVideoReply = reply => {
       videoData = { items: Array.isArray(reply.items) ? reply.items : [], activeId: reply.activeId || null };
     };
+    const releaseVideoLease = () => {
+      videoLeases--;
+      if (!videoLeases && !stopped && (state.skin !== 'video' || (!state.enabled && !panelOpen))) removeVideoFrame();
+    };
+    const videoLibrary = Object.freeze({
+      list: () => libraryAction('list'),
+      import: (file, source) => libraryAction('import', { file, name: file?.name, source }),
+      apply: id => libraryAction('select', { id, paused: false }),
+    });
+    const libraryAction = async (action, payload = {}) => {
+      if (stopped || !ownsUi) throw new Error('cancelled');
+      if (action === 'import' && payload.source === undefined) throw new Error('source');
+      if (action === 'select' && (typeof payload.id !== 'string' || !payload.id)) throw new Error('missing');
+      const generation = videoGeneration;
+      videoLeases++;
+      try {
+        const reply = await requestVideo(action, payload);
+        if (stopped || generation !== videoGeneration) throw new Error('cancelled');
+        if (!reply.ok) throw new Error(reply.code || 'load');
+        acceptVideoReply(reply);
+        if (action === 'select') {
+          await save({ enabled: true, skin: 'video' });
+          if (stopped || generation !== videoGeneration) throw new Error('cancelled');
+          applyEnabled();
+        }
+        syncVideoUi();
+        return action === 'import'
+          ? { id: reply.id, items: videoData.items, activeId: videoData.activeId, reused: reply.reused }
+          : { items: videoData.items, activeId: videoData.activeId };
+      } finally { releaseVideoLease(); }
+    };
     const videoAction = async (action, payload = {}) => {
       if (videoBusy) return;
       const generation = videoGeneration;
+      videoLeases++;
       videoBusy = true; videoErrors = []; syncVideoUi();
       try {
         const reply = await requestVideo(action, payload);
@@ -880,11 +919,13 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         videoErrors.push({ code: error.message });
       } finally {
         if (generation === videoGeneration) { videoBusy = false; applySkin(); syncVideoUi(); }
+        releaseVideoLease();
       }
     };
     const importVideos = async files => {
       if (videoBusy || !files.length) return;
       const generation = videoGeneration;
+      videoLeases++;
       videoBusy = true; videoErrors = []; syncVideoUi();
       try {
         for (const file of files) {
@@ -899,6 +940,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         if (generation === videoGeneration) videoErrors.push({ code: error.message });
       } finally {
         if (generation === videoGeneration) { videoBusy = false; applySkin(); syncVideoUi(); }
+        releaseVideoLease();
       }
     };
     const onVideoMessage = event => {
@@ -1408,7 +1450,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
             <div class="bs-row bs-switch"><span class="bs-label"><label for="${IDS.panel}-${skin.surface === 'ocean' ? 'cycle' : 'cosmos-cycle'}">${skin.surface === 'ocean' ? copy.autoCycle : copy.cosmicCycle}</label>${helpButton(skin.surface === 'ocean' ? 'autoCycle' : 'cosmicCycle')}</span><input type="checkbox" role="switch" id="${IDS.panel}-${skin.surface === 'ocean' ? 'cycle' : 'cosmos-cycle'}" /></div>
           </section>`).join('')}
           <section class="bs-skin-group bs-video-group" id="${IDS.panel}-video" role="tabpanel" aria-label="${copy.skins.video}" hidden>
-            <div class="bs-video-head"><strong class="bs-video-title"></strong><button type="button" class="bs-video-import"></button></div>
+            <div class="bs-video-head"><strong class="bs-video-title"></strong><button type="button" class="bs-video-import"></button></div>${typeof options.onDiscoverVideos === 'function' ? '<button type="button" class="bs-video-discover">发现官方精美视频皮肤</button>' : ''}
             <p class="bs-video-help"></p><div class="bs-video-grid"></div>
             <p class="bs-video-status" role="status"></p><p class="bs-video-errors" role="alert" hidden></p>
             <input id="${IDS.panel}-video-files" type="file" accept=".mp4,.webm" multiple hidden>
@@ -1469,6 +1511,8 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       const videoFiles = videoGroup.querySelector('input[type=file]');
       let videoFocus = null;
       on(videoImport, 'click', () => videoFiles.click());
+      const discover = videoGroup.querySelector('.bs-video-discover');
+      if (discover) on(discover, 'click', () => options.onDiscoverVideos());
       on(videoFiles, 'change', () => { const files = [...videoFiles.files]; videoFiles.value = ''; void importVideos(files); });
       on(window, 'message', onVideoMessage);
       syncVideoUi = () => {
@@ -1896,7 +1940,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     };
 
     const unmount = () => {
-      removeVideoFrame();
+      removeVideoFrame(true);
       panelOpen = false;
       panelAnimation?.cancel();
       panelAnimation = null;
@@ -1961,6 +2005,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     });
 
     const start = async () => {
+      stopped = false;
       const generation = ++startGeneration;
       await ready();
       if (generation !== startGeneration) return;
@@ -1992,6 +2037,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     };
 
     const stop = () => {
+      stopped = true;
       startGeneration++;
       unmount();
       while (controllerCleanups.length > 0) controllerCleanups.pop()();
@@ -2000,6 +2046,13 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     return Object.freeze({
       start,
       stop,
+      videoLibrary,
+      focusVideoDiscovery: () => {
+        if (stopped || !ownsUi || typeof options.onDiscoverVideos !== 'function') return;
+        switchSkin('video');
+        setPanelOpen(true);
+        document.getElementById(IDS.panel)?.querySelector('.bs-video-discover')?.focus();
+      },
       getState: () => normalize(state),
       setSkin: (id) => switchSkin(id),
       getTransitionState: () => ({
@@ -2010,6 +2063,242 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
   }
 
   global.BackspaceSkinCore = Object.freeze({ createController, DEFAULTS, IDS, SKINS });
+})(globalThis);
+
+(function (global) {
+  'use strict';
+  const limits = Object.freeze({ maxBytes: 33554432, maxDurationMs: 30000, maxWidth: 1920, maxHeight: 1080 });
+  const fail = (message) => { throw new Error(message); };
+  const positive = value => Number.isSafeInteger(value) && value > 0;
+  async function download({ assetUrl, assetId, sha256, signal, onProgress = () => {}, onPhase = () => {} }) {
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    signal?.addEventListener('abort', cancel, { once: true });
+    if (signal?.aborted) cancel();
+    const timer = setTimeout(cancel, 180000);
+    let reader;
+    try {
+      const options = { signal: controller.signal, redirect: 'error', credentials: 'same-origin', cache: 'no-store' };
+      const response = await fetch(assetUrl('market/catalog'), options);
+      if (!response.ok || !response.body) fail('视频目录暂时不可用，请稍后重试。');
+      reader = response.body.getReader();
+      const catalogChunks = []; let catalogBytes = 0;
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        catalogBytes += value.length;
+        if (catalogBytes > 8388608) fail('视频目录响应异常，请稍后重试。');
+        catalogChunks.push(value);
+      }
+      reader.releaseLock(); reader = null;
+      const catalog = JSON.parse(await new Blob(catalogChunks).text());
+      const matches = Array.isArray(catalog?.wallpapers) ? catalog.wallpapers.filter(row => row?.assetId === assetId) : [];
+      const files = matches.length === 1 && Array.isArray(matches[0].files) ? matches[0].files.filter(file => file?.sha256 === sha256) : [];
+      if (files.length !== 1 || !/^[a-f0-9]{64}$/.test(sha256)) fail('这个视频已更新，请刷新画廊后重试。');
+      const file = files[0]; const media = file.media;
+      if (!positive(file.bytes) || !media || ![media.width, media.height, media.durationMs].every(positive)) fail('视频规格不完整，暂时无法添加。');
+      if (!['video/mp4', 'video/webm'].includes(file.mime) || file.bytes > limits.maxBytes || media.durationMs > limits.maxDurationMs
+        || Math.max(media.width, media.height) > limits.maxWidth || Math.min(media.width, media.height) > limits.maxHeight) fail('此规格仅供预览。请选择 32 MiB、30 秒、1920 × 1080 以内的 MP4 或 WebM 视频。');
+      controller.signal.throwIfAborted();
+      onProgress(0, file.bytes);
+      const mediaResponse = await fetch(assetUrl('market/media') + '?asset=' + encodeURIComponent(assetId) + '&file=' + sha256, options);
+      if (!mediaResponse.ok || !mediaResponse.body) fail('视频下载失败，请稍后重试。');
+      const length = mediaResponse.headers.get('content-length');
+      if ((length !== null && length !== String(file.bytes)) || mediaResponse.headers.get('content-type')?.split(';')[0].trim() !== file.mime) {
+        await mediaResponse.body.cancel(); fail('视频响应与目录不一致，请重新下载。');
+      }
+      reader = mediaResponse.body.getReader();
+      const chunks = []; let received = 0;
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        received += value.length;
+        if (received > file.bytes || received > limits.maxBytes) fail('视频大小超出声明，已停止下载。');
+        chunks.push(value); onProgress(received, file.bytes);
+      }
+      if (received !== file.bytes) fail('视频下载不完整，请重新下载。');
+      reader.releaseLock(); reader = null;
+      controller.signal.throwIfAborted(); onPhase('verifying');
+      const blob = new Blob(chunks, { type: file.mime });
+      const digest = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
+      controller.signal.throwIfAborted();
+      const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+      if (hash !== sha256) fail('视频校验未通过，请重新下载。');
+      const title = typeof matches[0].title === 'string' ? matches[0].title.replace(/[\\/\u0000-\u001f]/g, '').trim().slice(0, 100) : '';
+      return new File([blob], (title || '视频皮肤') + (file.mime === 'video/webm' ? '.webm' : '.mp4'), { type: file.mime });
+    } finally {
+      clearTimeout(timer); signal?.removeEventListener('abort', cancel);
+      if (reader) { await reader.cancel().catch(() => {}); reader.releaseLock(); }
+      controller.abort();
+    }
+  }
+  global.ZedSpaceMarketDownload = Object.freeze({ limits, download });
+})(globalThis);
+
+(function (global) {
+  'use strict';
+  const origin = 'http://127.0.0.1:4173';
+  const channel = 'zed-space-market';
+  const busy = phase => ['downloading', 'verifying', 'importing', 'applying'].includes(phase);
+  const validText = value => typeof value === 'string' && value.trim().length > 0 && value.length <= 200;
+  function createSession({ session, frameWindow, send, onState = () => {}, onClose = () => {}, onReady = () => {}, onNavigate = () => {}, videoLibrary, assetUrl, download = global.ZedSpaceMarketDownload.download }) {
+    let closed = false; let connected = false; let current; let closeRequested = false;
+    const operations = new Map();
+    const post = (type, data = {}) => { if (!closed) send({ channel, version: 1, session, type, ...data }, origin); };
+    function publish(op, patch) {
+      if (closed || current !== op) return;
+      op.state = { ...op.state, ...patch }; onState(op.state); post('state', op.state);
+    }
+    function cancel() {
+      if (!current || !busy(current.state.phase) || current.state.phase === 'applying') return;
+      current.abort.abort();
+      publish(current, { phase: 'cancelled', message: '已取消。若视频已完成保存，副本会保留在“我的视频”。' });
+    }
+    function dispose() { closed = true; current?.abort.abort(); }
+    function requestClose() {
+      if (closed) return;
+      if (current?.state.phase === 'applying') {
+        closeRequested = true;
+        publish(current, { message: '正在应用，完成后返回…' });
+        return;
+      }
+      dispose(); onClose();
+    }
+    async function start(data) {
+      if (!validText(data.requestId) || !validText(data.assetId) || !/^[a-f0-9]{64}$/.test(data.sha256)) return;
+      const known = operations.get(data.requestId);
+      if (known) { if (known.state.assetId === data.assetId && known.state.sha256 === data.sha256) post('state', known.state); return; }
+      if (current && busy(current.state.phase)) return;
+      if (operations.size >= 100) { post('state', { requestId: data.requestId, assetId: data.assetId, sha256: data.sha256, phase: 'error', message: '请返回本地视频后重新打开画廊。' }); return; }
+      const op = { abort: new AbortController(), state: { requestId: data.requestId, assetId: data.assetId, sha256: data.sha256, phase: 'downloading', received: 0 } };
+      current = op; operations.set(data.requestId, op);
+      const active = () => !closed && current === op && !op.abort.signal.aborted;
+      publish(op, {});
+      try {
+        const source = { provider: 'zed-space', assetId: data.assetId, sha256: data.sha256 };
+        const snapshot = await videoLibrary.list();
+        if (!active()) return;
+        const existing = snapshot.items.find(item => item.source?.provider === source.provider && item.source.assetId === source.assetId && item.source.sha256 === source.sha256);
+        if (existing) { op.localId = existing.id; publish(op, { phase: 'ready', message: '已在“我的视频”，可以直接应用。' }); return; }
+        const file = await download({ assetUrl, assetId: data.assetId, sha256: data.sha256, signal: op.abort.signal,
+          onProgress: (received, total) => { if (active()) publish(op, { phase: 'downloading', received, total }); },
+          onPhase: phase => { if (active()) publish(op, { phase }); },
+        });
+        if (!active()) return;
+        publish(op, { phase: 'importing', message: '正在保存到“我的视频”…关闭后，已保存的副本仍会保留。' });
+        const result = await videoLibrary.import(file, source);
+        if (!active()) return;
+        op.localId = result.id;
+        publish(op, { phase: 'ready', message: '已添加到“我的视频”，应用后将返回 DSH。' });
+      } catch (error) {
+        if (!active()) return;
+        publish(op, { phase: 'error', message: error?.name === 'AbortError' ? '下载超时，请重试。' : error instanceof Error && /[\u3400-\u9fff]/.test(error.message) ? error.message.slice(0, 500) : '视频添加失败，请重试；也可以返回本地视频重新打开画廊。' });
+      }
+    }
+    async function apply(requestId) {
+      const op = current;
+      if (closed || !op || op.state.requestId !== requestId || op.state.phase !== 'ready' || !op.localId) return;
+      publish(op, { phase: 'applying', message: '正在应用视频…' });
+      try {
+        await videoLibrary.apply(op.localId);
+        if (closed || current !== op) return;
+        publish(op, { phase: 'applied', message: '已应用视频。' }); requestClose();
+      } catch {
+        if (!closed && current === op) {
+          publish(op, { phase: 'ready', message: '暂时无法应用，请重试；也可以返回“我的视频”选择。' });
+          if (closeRequested) requestClose();
+        }
+      }
+    }
+    function receive(event) {
+      if (closed || event.origin !== origin || event.source !== frameWindow()) return;
+      const data = event.data;
+      if (!data || typeof data !== 'object' || Array.isArray(data) || data.channel !== channel || data.version !== 1 || data.session !== session) return;
+      if (data.type === 'ready') { connected = true; post('welcome', { limits: global.ZedSpaceMarketDownload.limits }); onReady(); if (current) post('state', current.state); return; }
+      if (!connected) return;
+      if (data.type === 'download') void start(data);
+      if (data.type === 'cancel' && data.requestId === current?.state.requestId) cancel();
+      if (data.type === 'apply') void apply(data.requestId);
+      if (data.type === 'close') requestClose();
+      if (data.type === 'navigate' && typeof data.query === 'string' && data.query.length <= 4096) {
+        const input = new URLSearchParams(data.query); const output = new URLSearchParams();
+        for (const key of ['q', 'category', 'feature', 'sort', 'wallpaper']) { const value = input.get(key); if (value && value.length <= 500) output.set(key, value); }
+        onNavigate(output.toString());
+      }
+    }
+    return { receive, cancel, apply, requestClose, dispose };
+  }
+
+  function create({ assetUrl, videoLibrary, onClose = () => {} }) {
+    let disposed = false; let view; let query = '';
+    function close() { view?.session.requestClose(); }
+    function cleanup() {
+      if (!view) return;
+      const old = view; view = null;
+      old.session?.dispose(); clearTimeout(old.timer);
+      window.removeEventListener('message', old.listener);
+      old.frame.remove(); old.dialog.close(); old.dialog.remove();
+      document.body.style.overflow = old.overflow;
+      onClose();
+    }
+    function open() {
+      if (disposed || view) return;
+      const dialog = document.createElement('dialog'); dialog.className = 'zs-market';
+      dialog.setAttribute('aria-label', 'Zed Space 视频皮肤画廊');
+      dialog.innerHTML = `<style>
+.zs-market{--zs-bg:#101719;--zs-surface:#1b272b;--zs-line:#35474c;--zs-text:#edf3f2;--zs-muted:#b5c8c7;--zs-accent:#b4eee1;position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:var(--zs-bg);color:var(--zs-text);font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden;color-scheme:dark}
+.zs-market[open]{display:flex;flex-direction:column;animation:zs-market-in 200ms cubic-bezier(.16,1,.3,1)}.zs-market::backdrop{background:#101719}.zs-market *{box-sizing:border-box}.zs-market [hidden]{display:none!important}.zs-market ::selection{background:#326b60;color:#fff}
+.zs-market-header{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:68px;padding:12px 24px;border-bottom:1px solid var(--zs-line);background:var(--zs-surface)}.zs-market-heading{margin:0;font-size:16px;font-weight:650}.zs-market-heading span{font-weight:400;color:var(--zs-muted);margin-left:12px}
+.zs-market button{min-height:44px;padding:9px 16px;border:1px solid var(--zs-line);border-radius:7px;background:#25363b;color:var(--zs-text);font:inherit;font-weight:600;cursor:pointer;transition:background 180ms}.zs-market button:hover{background:#31494f}.zs-market button:focus-visible{outline:2px solid var(--zs-accent);outline-offset:3px}.zs-market button:disabled{opacity:.5;cursor:default}.zs-market button.zs-primary{background:var(--zs-accent);border-color:var(--zs-accent);color:#15392f}.zs-market button.zs-primary:hover{background:#d4f7ee}
+.zs-market-stage{position:relative;flex:1;min-height:0;display:flex}.zs-market iframe{width:100%;height:100%;border:0;display:block;background:#111}.zs-market-connection{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:24px;text-align:center;background:var(--zs-bg)}.zs-market-connection p{margin:0;max-width:38ch;color:var(--zs-muted)}.zs-market-connection strong{font-size:18px}.zs-market-footer{padding:12px 24px;border-top:1px solid var(--zs-line);background:var(--zs-surface);display:flex;align-items:center;gap:20px}.zs-market-status{flex:1;min-width:0}.zs-market-status p{margin:0;overflow-wrap:anywhere}.zs-market-status small{display:block;color:var(--zs-muted);font-variant-numeric:tabular-nums}.zs-market progress{display:block;width:min(420px,100%);height:4px;margin-top:8px;accent-color:var(--zs-accent)}.zs-market-actions{display:flex;gap:8px;flex-shrink:0}
+@keyframes zs-market-in{from{opacity:.7;clip-path:inset(1% 0 0)}to{opacity:1;clip-path:inset(0)}}@media(prefers-reduced-motion:reduce){.zs-market[open]{animation:none}.zs-market button{transition:none}}@media(max-width:600px){.zs-market-header{padding:10px 14px;gap:10px;min-height:64px}.zs-market-heading{font-size:14px}.zs-market-heading span{display:block;font-size:12px;margin-left:0}.zs-market-header button{padding:8px 12px}.zs-market-footer{padding:12px 14px;align-items:stretch;gap:12px;flex-direction:column}.zs-market-actions{justify-content:flex-end}}
+</style><header class="zs-market-header"><h1 class="zs-market-heading">Zed Space <span>/ 视频皮肤</span></h1><button type="button" data-close>返回本地视频</button></header><div class="zs-market-stage"><iframe title="官方视频皮肤画廊" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer"></iframe><div class="zs-market-connection" role="status"><strong>正在打开视频画廊</strong><p>连接后即可浏览和添加视频皮肤。</p><button type="button" data-retry hidden>重新连接</button></div></div><footer class="zs-market-footer" hidden><div class="zs-market-status"><p role="status" aria-live="polite"></p><small></small><progress hidden aria-label="视频下载进度"></progress></div><div class="zs-market-actions"><button type="button" data-cancel>取消下载</button><button type="button" class="zs-primary" data-apply hidden>应用视频并返回</button></div></footer>`;
+      const frame = dialog.querySelector('iframe'); const connection = dialog.querySelector('.zs-market-connection');
+      const footer = dialog.querySelector('footer'); const status = footer.querySelector('p'); const detail = footer.querySelector('small'); const progress = footer.querySelector('progress');
+      const cancel = dialog.querySelector('[data-cancel]'); const apply = dialog.querySelector('[data-apply]'); const retry = dialog.querySelector('[data-retry]');
+      const current = { dialog, frame, overflow: document.body.style.overflow, state: null }; view = current;
+      function render(state) {
+        current.state = state; footer.hidden = state.phase === 'cancelled';
+        const labels = { downloading: '正在下载视频', verifying: '正在校验视频', importing: '正在保存视频', ready: '视频已准备好', applying: '正在应用视频', applied: '视频已应用', error: '暂时无法添加视频' };
+        status.textContent = state.message || labels[state.phase] || '';
+        detail.textContent = state.phase === 'downloading' && state.total ? `${((state.received || 0) / 1048576).toFixed(1)} / ${(state.total / 1048576).toFixed(1)} MiB` : '';
+        progress.hidden = state.phase !== 'downloading' || !state.total; progress.max = state.total || 1; progress.value = state.received || 0;
+        cancel.hidden = !['downloading', 'verifying', 'importing'].includes(state.phase); cancel.textContent = state.phase === 'importing' ? '停止等待' : '取消下载';
+        apply.hidden = state.phase !== 'ready';
+      }
+      dialog.querySelector('[data-close]').onclick = event => { event.preventDefault(); event.stopPropagation(); close(); };
+      dialog.addEventListener('cancel', event => { event.preventDefault(); event.stopPropagation(); close(); });
+      cancel.onclick = () => current.session.cancel(); apply.onclick = () => current.session.apply(current.state?.requestId);
+      retry.onclick = () => { close(); open(); };
+      const parentOrigin = location.origin === 'null' && location.protocol === 'dsh-app:' && location.hostname === 'app' ? 'dsh-app://app' : location.origin;
+      const originAllowed = parentOrigin === 'dsh-app://app' || /^http:\/\/(localhost|127\.0\.0\.1|\[::1\]):[1-9]\d{0,4}$/.test(parentOrigin);
+      const id = crypto.randomUUID();
+      current.session = createSession({ session: id, frameWindow: () => frame.contentWindow, assetUrl, videoLibrary, onState: render, onClose: cleanup,
+        send: (data, target) => frame.contentWindow?.postMessage(data, target),
+        onNavigate: value => { query = value; },
+        onReady: () => { clearTimeout(current.timer); connection.hidden = true; frame.removeAttribute('aria-hidden'); frame.inert = false; },
+      });
+      current.listener = event => current.session.receive(event); window.addEventListener('message', current.listener);
+      document.body.append(dialog); document.body.style.overflow = 'hidden'; dialog.showModal();
+      dialog.querySelector('[data-close]').focus();
+      frame.setAttribute('aria-hidden', 'true'); frame.inert = true;
+      if (!originAllowed) {
+        connection.querySelector('strong').textContent = '此页面无法连接视频画廊';
+        connection.querySelector('p').textContent = '请从本地 DSH 窗口打开视频皮肤。';
+        return;
+      }
+      const url = new URL('/wallpapers', origin); url.search = query;
+      url.searchParams.set('embed', 'dsh'); url.searchParams.set('parentOrigin', parentOrigin); url.searchParams.set('session', id);
+      current.timer = setTimeout(() => {
+        if (view !== current) return;
+        connection.querySelector('strong').textContent = '暂时无法连接视频画廊';
+        connection.querySelector('p').textContent = '请确认本地视频市场已启动，然后重新连接。'; retry.hidden = false;
+      }, 8000);
+      frame.src = url.href;
+    }
+    return { open, close, dispose() { disposed = true; cleanup(); } };
+  }
+  global.ZedSpaceMarket = Object.freeze({ create, createSession });
 })(globalThis);
 
 
@@ -2044,7 +2333,9 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
   exports.name = 'dsh-zed-space-client';
   exports.inject = [];
   exports.apply = function apply(ctx) {
+    let market;
     const controller = globalThis.BackspaceSkinCore.createController({
+      onDiscoverVideos: () => market.open(),
       assetUrl: (path) => '/dsh-zed-space/' + path,
       storage: {
         get: async (defaults) => ({
@@ -2070,8 +2361,13 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         },
       },
     });
+    market = globalThis.ZedSpaceMarket.create({
+      assetUrl: (path) => '/dsh-zed-space/' + path,
+      videoLibrary: controller.videoLibrary,
+      onClose: () => controller.focusVideoDiscovery(),
+    });
     void controller.start();
-    ctx.effect(() => () => controller.stop(), 'dsh-zed-space: browser surface');
+    ctx.effect(() => () => { market.dispose(); controller.stop(); }, 'dsh-zed-space: browser surface');
   };
 
   return module.exports;

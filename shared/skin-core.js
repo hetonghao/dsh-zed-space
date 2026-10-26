@@ -670,7 +670,8 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
 #${IDS.panel} .bs-video-group { padding-top:14px; }
 #${IDS.panel} .bs-video-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 #${IDS.panel} .bs-video-title { font-size:14px; font-weight:500; }
-#${IDS.panel} .bs-video-import { border:0; border-radius:8px; padding:8px 12px; background:var(--bs-accent); color:var(--bs-surface); cursor:pointer; font-size:12px; }
+#${IDS.panel} .bs-video-import, #${IDS.panel} .bs-video-discover { border:0; border-radius:8px; padding:8px 12px; background:var(--bs-accent); color:var(--bs-surface); cursor:pointer; font-size:12px; }
+#${IDS.panel} .bs-video-discover { width:100%; min-height:44px; margin-top:8px; }
 #${IDS.panel} .bs-video-import:disabled { opacity:.55; cursor:wait; }
 #${IDS.panel} .bs-video-help, #${IDS.panel} .bs-video-status, #${IDS.panel} .bs-video-errors { font-size:12px; line-height:1.7; color:var(--bs-muted); margin:8px 0 12px; overflow-wrap:anywhere; }
 #${IDS.panel} .bs-video-errors { color:#a4382d; white-space:pre-line; }
@@ -750,6 +751,8 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     let videoReadyReject;
     let videoReadyTimer;
     let videoRequestId = 0;
+    let videoLeases = 0;
+    let stopped = true;
     let videoGeneration = 0;
     let syncVideoUi = () => {};
     const videoRequests = new Map();
@@ -816,7 +819,8 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       const frame = document.getElementById(IDS.video);
       if (frame instanceof HTMLIFrameElement) frame.contentWindow.postMessage({ type: 'bs-video', token: videoToken, action: 'visibility', paused }, videoOrigin(frame));
     };
-    const removeVideoFrame = () => {
+    const removeVideoFrame = (force = false) => {
+      if (videoLeases && !force) return;
       videoGeneration++;
       clearTimeout(videoReadyTimer);
       videoReadyReject?.(new Error('cancelled'));
@@ -830,6 +834,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       videoData = { items: [], activeId: null };
     };
     const ensureVideoFrame = () => {
+      if (stopped || !ownsUi) return Promise.reject(new Error('cancelled'));
       if (videoReady) return videoReady;
       const frame = document.createElement('iframe');
       videoToken = crypto.randomUUID();
@@ -847,22 +852,56 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       return videoReady;
     };
     const requestVideo = async (action, payload = {}) => {
+      const generation = videoGeneration;
       await ensureVideoFrame();
+      if (stopped || generation !== videoGeneration) throw new Error('cancelled');
       const frame = document.getElementById(IDS.video);
       if (!(frame instanceof HTMLIFrameElement)) throw new Error('cancelled');
       const requestId = ++videoRequestId;
       return new Promise((resolve, reject) => {
         const timer = setTimeout(() => { videoRequests.delete(requestId); reject(new Error('load')); }, 10000);
         videoRequests.set(requestId, { resolve, reject, timer });
-        frame.contentWindow.postMessage({ type: 'bs-video', token: videoToken, requestId, action, paused: !state.enabled, ...payload }, videoOrigin(frame));
+        frame.contentWindow.postMessage({ type: 'bs-video', token: videoToken, requestId, action, paused: !state.enabled || state.skin !== 'video', ...payload }, videoOrigin(frame));
       });
     };
     const acceptVideoReply = reply => {
       videoData = { items: Array.isArray(reply.items) ? reply.items : [], activeId: reply.activeId || null };
     };
+    const releaseVideoLease = () => {
+      videoLeases--;
+      if (!videoLeases && !stopped && (state.skin !== 'video' || (!state.enabled && !panelOpen))) removeVideoFrame();
+    };
+    const videoLibrary = Object.freeze({
+      list: () => libraryAction('list'),
+      import: (file, source) => libraryAction('import', { file, name: file?.name, source }),
+      apply: id => libraryAction('select', { id, paused: false }),
+    });
+    const libraryAction = async (action, payload = {}) => {
+      if (stopped || !ownsUi) throw new Error('cancelled');
+      if (action === 'import' && payload.source === undefined) throw new Error('source');
+      if (action === 'select' && (typeof payload.id !== 'string' || !payload.id)) throw new Error('missing');
+      const generation = videoGeneration;
+      videoLeases++;
+      try {
+        const reply = await requestVideo(action, payload);
+        if (stopped || generation !== videoGeneration) throw new Error('cancelled');
+        if (!reply.ok) throw new Error(reply.code || 'load');
+        acceptVideoReply(reply);
+        if (action === 'select') {
+          await save({ enabled: true, skin: 'video' });
+          if (stopped || generation !== videoGeneration) throw new Error('cancelled');
+          applyEnabled();
+        }
+        syncVideoUi();
+        return action === 'import'
+          ? { id: reply.id, items: videoData.items, activeId: videoData.activeId, reused: reply.reused }
+          : { items: videoData.items, activeId: videoData.activeId };
+      } finally { releaseVideoLease(); }
+    };
     const videoAction = async (action, payload = {}) => {
       if (videoBusy) return;
       const generation = videoGeneration;
+      videoLeases++;
       videoBusy = true; videoErrors = []; syncVideoUi();
       try {
         const reply = await requestVideo(action, payload);
@@ -876,11 +915,13 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         videoErrors.push({ code: error.message });
       } finally {
         if (generation === videoGeneration) { videoBusy = false; applySkin(); syncVideoUi(); }
+        releaseVideoLease();
       }
     };
     const importVideos = async files => {
       if (videoBusy || !files.length) return;
       const generation = videoGeneration;
+      videoLeases++;
       videoBusy = true; videoErrors = []; syncVideoUi();
       try {
         for (const file of files) {
@@ -895,6 +936,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         if (generation === videoGeneration) videoErrors.push({ code: error.message });
       } finally {
         if (generation === videoGeneration) { videoBusy = false; applySkin(); syncVideoUi(); }
+        releaseVideoLease();
       }
     };
     const onVideoMessage = event => {
@@ -1404,7 +1446,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
             <div class="bs-row bs-switch"><span class="bs-label"><label for="${IDS.panel}-${skin.surface === 'ocean' ? 'cycle' : 'cosmos-cycle'}">${skin.surface === 'ocean' ? copy.autoCycle : copy.cosmicCycle}</label>${helpButton(skin.surface === 'ocean' ? 'autoCycle' : 'cosmicCycle')}</span><input type="checkbox" role="switch" id="${IDS.panel}-${skin.surface === 'ocean' ? 'cycle' : 'cosmos-cycle'}" /></div>
           </section>`).join('')}
           <section class="bs-skin-group bs-video-group" id="${IDS.panel}-video" role="tabpanel" aria-label="${copy.skins.video}" hidden>
-            <div class="bs-video-head"><strong class="bs-video-title"></strong><button type="button" class="bs-video-import"></button></div>
+            <div class="bs-video-head"><strong class="bs-video-title"></strong><button type="button" class="bs-video-import"></button></div>${typeof options.onDiscoverVideos === 'function' ? '<button type="button" class="bs-video-discover">发现官方精美视频皮肤</button>' : ''}
             <p class="bs-video-help"></p><div class="bs-video-grid"></div>
             <p class="bs-video-status" role="status"></p><p class="bs-video-errors" role="alert" hidden></p>
             <input id="${IDS.panel}-video-files" type="file" accept=".mp4,.webm" multiple hidden>
@@ -1465,6 +1507,8 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       const videoFiles = videoGroup.querySelector('input[type=file]');
       let videoFocus = null;
       on(videoImport, 'click', () => videoFiles.click());
+      const discover = videoGroup.querySelector('.bs-video-discover');
+      if (discover) on(discover, 'click', () => options.onDiscoverVideos());
       on(videoFiles, 'change', () => { const files = [...videoFiles.files]; videoFiles.value = ''; void importVideos(files); });
       on(window, 'message', onVideoMessage);
       syncVideoUi = () => {
@@ -1892,7 +1936,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     };
 
     const unmount = () => {
-      removeVideoFrame();
+      removeVideoFrame(true);
       panelOpen = false;
       panelAnimation?.cancel();
       panelAnimation = null;
@@ -1957,6 +2001,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     });
 
     const start = async () => {
+      stopped = false;
       const generation = ++startGeneration;
       await ready();
       if (generation !== startGeneration) return;
@@ -1988,6 +2033,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     };
 
     const stop = () => {
+      stopped = true;
       startGeneration++;
       unmount();
       while (controllerCleanups.length > 0) controllerCleanups.pop()();
@@ -1996,6 +2042,13 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     return Object.freeze({
       start,
       stop,
+      videoLibrary,
+      focusVideoDiscovery: () => {
+        if (stopped || !ownsUi || typeof options.onDiscoverVideos !== 'function') return;
+        switchSkin('video');
+        setPanelOpen(true);
+        document.getElementById(IDS.panel)?.querySelector('.bs-video-discover')?.focus();
+      },
       getState: () => normalize(state),
       setSkin: (id) => switchSkin(id),
       getTransitionState: () => ({

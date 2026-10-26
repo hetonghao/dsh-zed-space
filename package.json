@@ -28,6 +28,7 @@
   },
   "files": [
     "plugin/index.js",
+    "plugin/market-server.js",
     "plugin/client.js",
     "cordis.patch.yml",
     "native-dist/loader.js",
@@ -48,7 +49,8 @@
     "native-dist/video.js",
     "native-dist/video-media.js",
     "SECURITY.md",
-    "docs/video-background.md"
+    "docs/video-background.md",
+    "docs/market-integration.md"
   ],
   "dsh": {
     "bundle": {
@@ -73,8 +75,7 @@
     "test:website": "node scripts/website-acceptance.mjs && node scripts/website-loading-acceptance.mjs",
     "capture": "node scripts/capture-gallery.mjs",
     "test:video": "node scripts/video-acceptance.mjs && node scripts/video-edge-acceptance.mjs && node scripts/video-paths-acceptance.mjs",
-    "test:transitions": "node scripts/skin-transition-acceptance.mjs",
-    "prototype:market": "node scripts/market-prototype.mjs"
+    "test:transitions": "node scripts/skin-transition-acceptance.mjs"
   },
   "engines": {
     "node": ">=20"

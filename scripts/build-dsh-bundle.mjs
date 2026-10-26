@@ -6,6 +6,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const check = process.argv.includes('--check')
 const target = resolve(root, 'plugin/client.js')
 const core = readFileSync(resolve(root, 'shared/skin-core.js'), 'utf8')
+const marketDownload = readFileSync(resolve(root, 'shared/market-download.js'), 'utf8')
+const marketClient = readFileSync(resolve(root, 'shared/market-client.js'), 'utf8')
 
 const adapter = String.raw`
   const KEYS = Object.freeze({
@@ -39,7 +41,9 @@ const adapter = String.raw`
   exports.name = 'dsh-zed-space-client';
   exports.inject = [];
   exports.apply = function apply(ctx) {
+    let market;
     const controller = globalThis.BackspaceSkinCore.createController({
+      onDiscoverVideos: () => market.open(),
       assetUrl: (path) => '/dsh-zed-space/' + path,
       storage: {
         get: async (defaults) => ({
@@ -65,15 +69,20 @@ const adapter = String.raw`
         },
       },
     });
+    market = globalThis.ZedSpaceMarket.create({
+      assetUrl: (path) => '/dsh-zed-space/' + path,
+      videoLibrary: controller.videoLibrary,
+      onClose: () => controller.focusVideoDiscovery(),
+    });
     void controller.start();
-    ctx.effect(() => () => controller.stop(), 'dsh-zed-space: browser surface');
+    ctx.effect(() => () => { market.dispose(); controller.stop(); }, 'dsh-zed-space: browser surface');
   };
 
   return module.exports;
 }});
 `
 
-const expected = `// GENERATED from shared/skin-core.js. Run npm run build after editing shared sources.\nwindow.__ModuleLoader__.load({ id: "dsh-zed-space", factory: (require) => {\n  var module = { exports: {} };\n  var exports = module.exports;\n${core}\n${adapter}`
+const expected = `// GENERATED from shared/skin-core.js and shared/market-*.js. Run npm run build after editing shared sources.\nwindow.__ModuleLoader__.load({ id: "dsh-zed-space", factory: (require) => {\n  var module = { exports: {} };\n  var exports = module.exports;\n${core}\n${marketDownload}\n${marketClient}\n${adapter}`
 
 if (check) {
   if (!existsSync(target) || readFileSync(target, 'utf8') !== expected) {
