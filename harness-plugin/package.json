@@ -1,7 +1,7 @@
 {
   "name": "dsh-zed-space",
   "description": "Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤",
-  "version": "1.3.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",

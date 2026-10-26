@@ -2,7 +2,7 @@
 
 ## Supported version
 
-Zed Space Skin 1.3.0 is an unpublished candidate. After its first release, security fixes target the latest maintained release; inherited historical tags do not establish a Zed Space Skin release.
+Zed Space Skin 1.0.0 is an unpublished candidate. After its first release, security fixes target the latest maintained release; inherited historical tags do not establish a Zed Space Skin release.
 
 ## Reporting a vulnerability
 

@@ -7,7 +7,7 @@
 
 Ocean, two cosmic views, and local videos for your Harness workspace. Each scene keeps its own settings, with smooth transitions between backgrounds.
 
-**Version 1.3.0 is a candidate. The technical package name is `dsh-zed-space`. npm, GitHub Release, the plugin marketplace, and the new Pages site are not published.** The source is available for local build validation; the candidate package name is not an installable release.
+**Version 1.0.0 is a candidate. The technical package name is `dsh-zed-space`. npm, GitHub Release, the plugin marketplace, and the new Pages site are not published.** The source is available for local build validation; the candidate package name is not an installable release.
 
 [Source](https://github.com/hetonghao/dsh-zed-space) · [Pre-release notes](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/dsh-plugin.md) · [Issues](https://github.com/hetonghao/dsh-zed-space/issues)
 
@@ -64,7 +64,7 @@ See [plugin integration](https://github.com/hetonghao/dsh-zed-space/blob/main/do
 
 **Can I install this version from npm or a marketplace?**
 
-Not yet. Version 1.3.0 is unpublished. Installation instructions and downloads will follow publication.
+Not yet. Version 1.0.0 is unpublished. Installation instructions and downloads will follow publication.
 
 **Is there a shared wallpaper marketplace?**
 

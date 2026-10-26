@@ -2,7 +2,7 @@
 
 ## 名称和仓库
 
-展示名改为 **Zed Space Skin**，npm 包、DSH 插件标识和仓库名改为 `dsh-zed-space`。新仓库为 [hetonghao/dsh-zed-space](https://github.com/hetonghao/dsh-zed-space)，`1.3.0` 仍是未发布候选版。
+展示名改为 **Zed Space Skin**，npm 包、DSH 插件标识和仓库名改为 `dsh-zed-space`。新仓库为 [hetonghao/dsh-zed-space](https://github.com/hetonghao/dsh-zed-space)，`1.0.0` 仍是未发布候选版。
 
 新项目从旧项目已提交的多背景代码继续维护；保留 Git 提交、历史分支和 tags。旧仓库继续保留，旧 Issues/PR 不迁移。历史票据的具体链接仍指向 `hetonghao/dsh-backspace`；新反馈请到[新仓库 Issues](https://github.com/hetonghao/dsh-zed-space/issues)。原目录未提交的文档不混入此次源码迁移，`.scratch/` 既有记录保留历史含义。
 
@@ -10,14 +10,14 @@
 
 1. 记录当前 Harness 版本、安装 profile 和已启用背景；保留导入视频的原始文件。
 2. 在当前实例停用并卸载 `dsh-backspace`，确认没有旧插件继续运行。
-3. 安装审核过的本地 `dsh-zed-space-1.3.0.tgz`。正式发布后，才可改用 `dsh-zed-space@1.3.0`。
+3. 安装审核过的本地 `dsh-zed-space-1.0.0.tgz`。正式发布后，才可改用 `dsh-zed-space@1.0.0`。
 4. 重启同一实例，检查背景、玻璃设置、宇宙视角、视频列表与刷新恢复。
 
 Web 的例子（本地 tarball 路径须换成真实文件）：
 
 ```sh
 dsh plugin --profile web remove dsh-backspace
-dsh plugin --profile web add /absolute/path/to/dsh-zed-space-1.3.0.tgz
+dsh plugin --profile web add /absolute/path/to/dsh-zed-space-1.0.0.tgz
 ```
 
 Desktop 使用自己的 `desktop` profile；优先通过其插件页卸载旧包，或使用 Desktop 内置 CLI 安装本地包。不要因迁移删除整个 `.dsh`、会话目录或 lockfile。
@@ -34,7 +34,7 @@ Desktop 使用自己的 `desktop` profile；优先通过其插件页卸载旧包
 
 静态安装用户使用新仓库 `native-dist/install-skin.sh` 的 `--update` 更新；安装器会清理旧名与新名的注入标记，再保留一份新注入。保留同源站点数据，升级后核对只出现一个设置入口。
 
-旧 React 源码集成的私有包与 Cordis id/name 已改为 `dsh-zed-space@1.3.0` / `dsh-zed-space`；安装器原位更新旧包引用和旧 Cordis 标识。继续保留 `packages/client/ui-backspace` 和 `ui-backspace` 设置域，目前仍只接海洋。它不等同于根目录的可安装 DSH bundle，不承诺宇宙和本地视频。需要多背景时，先撤销旧源码集成，再切换到 bundle 安装路径。
+旧 React 源码集成的私有包与 Cordis id/name 已改为 `dsh-zed-space@1.0.0` / `dsh-zed-space`；安装器原位更新旧包引用和旧 Cordis 标识。继续保留 `packages/client/ui-backspace` 和 `ui-backspace` 设置域，目前仍只接海洋。它不等同于根目录的可安装 DSH bundle，不承诺宇宙和本地视频。需要多背景时，先撤销旧源码集成，再切换到 bundle 安装路径。
 
 ## 回退
 

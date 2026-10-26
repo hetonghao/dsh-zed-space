@@ -7,7 +7,7 @@
 
 海洋、宇宙双视角和本地视频，让 Harness 随你的工作场景变化。每个场景单独保存参数，切换时平滑衔接。
 
-**当前为 1.3.0 候选版，技术包名为 `dsh-zed-space`。npm、GitHub Release、插件市场和新版 Pages 均未发布。** 仓库代码可用于本地构建验收，请勿把候选包名当成已发布的安装入口。
+**当前为 1.0.0 候选版，技术包名为 `dsh-zed-space`。npm、GitHub Release、插件市场和新版 Pages 均未发布。** 仓库代码可用于本地构建验收，请勿把候选包名当成已发布的安装入口。
 
 [源代码](https://github.com/hetonghao/dsh-zed-space) · [发布前说明](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md) · [问题反馈](https://github.com/hetonghao/dsh-zed-space/issues)
 
@@ -64,7 +64,7 @@ npm test
 
 **现在能从 npm 或市场安装新版吗？**
 
-不能。1.3.0 尚未发布；发布后会更新安装说明和下载入口。
+不能。1.0.0 尚未发布；发布后会更新安装说明和下载入口。
 
 **有共享壁纸市场吗？**
 

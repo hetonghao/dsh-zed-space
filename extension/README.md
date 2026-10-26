@@ -5,7 +5,7 @@
 半透明玻璃。扩展不会接管新标签页、修改浏览器主页或影响用户已有的新标签页扩展，
 也不会修改其他本地网站。此扩展作用于浏览器中的 Harness，不能给 Desktop 换肤。
 
-仓库与技术名为 `dsh-zed-space`，当前 `1.3.0` 是未发布候选版；npm、GitHub Release 与市场条目尚未发布。请 clone [新仓库](https://github.com/hetonghao/dsh-zed-space) 后加载本地目录。正式远程安装入口须在发布审核通过后启用，不能将候选版当作商店已上架版本。
+仓库与技术名为 `dsh-zed-space`，当前 `1.0.0` 是未发布候选版；npm、GitHub Release 与市场条目尚未发布。请 clone [新仓库](https://github.com/hetonghao/dsh-zed-space) 后加载本地目录。正式远程安装入口须在发布审核通过后启用，不能将候选版当作商店已上架版本。
 
 ## 安装本地候选版
 

@@ -2,12 +2,12 @@
 
 ## 当前状态与包信息
 
-`1.3.0` 是未发布的待审候选版本，尚未执行 `npm publish`。产品名称为 **Zed Space Skin**，定义为“Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤”。
+`1.0.0` 是未发布的待审候选版本，尚未执行 `npm publish`。产品名称为 **Zed Space Skin**，定义为“Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤”。
 
 | 字段 | 候选值 |
 | --- | --- |
 | `name` | `dsh-zed-space` |
-| `version` | `1.3.0` |
+| `version` | `1.0.0` |
 | `description` | Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤 |
 | `repository.url` | `git+https://github.com/hetonghao/dsh-zed-space.git` |
 | `homepage` | `https://github.com/hetonghao/dsh-zed-space` |
@@ -18,6 +18,8 @@
 | Node.js | `>=20` |
 
 包名和版本由 npm 标识具体制品，展示名不作为安装参数。npm 必填的 `name`、`version` 及随包文件规则见 [package.json 文档](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/)。
+
+Zed Space Skin 使用独立版本序列，首发候选版为 `1.0.0`。Backspace 的历史 tags 和 `1.3.0-rc.*` 本地记录保留原版本号，不是新包的发布记录。
 
 ## 发布前验收
 
@@ -48,18 +50,18 @@ README 的图片使用新仓库可读取的绝对 HTTPS 地址，文档链接也
 
 ```sh
 npm whoami --registry=https://registry.npmjs.org
-npm view dsh-zed-space@1.3.0 version --registry=https://registry.npmjs.org
-npm publish /absolute/path/to/review/dsh-zed-space-1.3.0.tgz --access public --registry=https://registry.npmjs.org
+npm view dsh-zed-space@1.0.0 version --registry=https://registry.npmjs.org
+npm publish /absolute/path/to/review/dsh-zed-space-1.0.0.tgz --access public --registry=https://registry.npmjs.org
 ```
 
 `npm view` 返回 404 只说明此刻官方源取不到目标，不保证名字可注册。成功发布过的 `name@version` 不能复用；若发布后验证失败，应修复并增加版本，不能删除后重发同一版本。若改为预发布版本，显式使用 `--tag next`，避免覆盖 `latest`。[npm publish 规则](https://docs.npmjs.com/cli/v11/commands/npm-publish/)
 
 ## 发布后核验（尚未执行）
 
-从官方 registry 下载对应 tarball，核对 `dist.integrity` 与本地审核制品；再验证精确版本安装。GitHub Release 若随后获批，上传与 registry 字节一致的 `dsh-zed-space-1.3.0.tgz` 和 `dsh-zed-space.tgz`，不另行重新打包。工作流必须手动触发且使用已核准 tag；本轮不触发。
+从官方 registry 下载对应 tarball，核对 `dist.integrity` 与本地审核制品；再验证精确版本安装。GitHub Release 若随后获批，上传与 registry 字节一致的 `dsh-zed-space-1.0.0.tgz` 和 `dsh-zed-space.tgz`，不另行重新打包。工作流必须手动触发且使用已核准 tag；本轮不触发。
 
 ```sh
-npm view dsh-zed-space@1.3.0 name version repository dist --json --registry=https://registry.npmjs.org
+npm view dsh-zed-space@1.0.0 name version repository dist --json --registry=https://registry.npmjs.org
 node scripts/verify-release.mjs github.tgz registry.tgz dist.json
 ```
 
