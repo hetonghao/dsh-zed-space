@@ -1,6 +1,6 @@
 # DeepSeek Harness bundle layer. Installing this repository with
-# `dsh plugin --profile web add github:hetonghao/dsh-backspace` adds the Host
+# `dsh plugin --profile web add github:hetonghao/dsh-zed-space` adds the Host
 # route and the matching browser module without modifying Harness source.
 - insert:
-    - id: dsh-backspace
-      name: dsh-backspace
+    - id: dsh-zed-space
+      name: dsh-zed-space

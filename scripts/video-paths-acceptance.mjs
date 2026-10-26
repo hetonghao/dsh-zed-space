@@ -35,9 +35,9 @@ async function pluginServer(withPlugin) {
   apply({ effect: factory => factory(), webServer: { register: value => { route = value; return () => {} } } })
   const client = await readFile(resolve(root, 'plugin/client.js'))
   const server = createServer(async (request, response) => {
-    if (request.url.startsWith('/dsh-backspace/')) { await route.handler(request, response); return }
+    if (request.url.startsWith('/dsh-zed-space/')) { await route.handler(request, response); return }
     if (request.url === '/client.js') { response.writeHead(200, { 'content-type': 'text/javascript' }); response.end(client); return }
-    const bootstrap = withPlugin ? '<script>window.__ModuleLoader__={load:({factory})=>factory(()=>{}).apply({effect:()=>{}})};</script><script src="/client.js"></script>' : ''
+    const bootstrap = withPlugin ? '<script>window.__ModuleLoader__={load:({id,factory})=>{if(id!=="dsh-zed-space")throw new Error("unexpected plugin identity");factory(()=>{}).apply({effect:()=>{}})}};</script><script src="/client.js"></script>' : ''
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); response.end(fixture.replace('</body>', bootstrap + '</body>'))
   })
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
@@ -64,7 +64,7 @@ try {
       context = await launch()
       let page = context.pages()[0]
       await page.goto(server.url)
-      await page.getByRole('button', { name: 'Backspace 皮肤设置', exact: true }).click()
+      await page.getByRole('button', { name: 'Zed Space Skin 皮肤设置', exact: true }).click()
       await page.getByRole('tab', { name: '本地视频', exact: true }).click()
       await ready(page)
       await page.locator('#__dsh-backspace-panel__-video-files').setInputFiles(largeSample)
@@ -93,7 +93,7 @@ try {
       context = await launch()
       page = context.pages()[0]
       await page.goto(server.url)
-      await page.getByRole('button', { name: 'Backspace 皮肤设置', exact: true }).click()
+      await page.getByRole('button', { name: 'Zed Space Skin 皮肤设置', exact: true }).click()
       await page.getByRole('checkbox', { name: '启用 跨路径视频', exact: true }).waitFor()
       await ready(page)
       assert.equal(await page.getByRole('checkbox', { name: '启用 跨路径视频', exact: true }).isChecked(), true)
@@ -111,7 +111,7 @@ try {
         other = await pluginServer(false)
         const otherPage = await context.newPage()
         await otherPage.goto(other.url)
-        await otherPage.getByRole('button', { name: 'Backspace 皮肤设置', exact: true }).click()
+        await otherPage.getByRole('button', { name: 'Zed Space Skin 皮肤设置', exact: true }).click()
         await ready(otherPage)
         assert.equal(await otherPage.locator('.bs-video-grid img').count(), 0)
         await otherPage.waitForFunction(() => {
@@ -125,7 +125,7 @@ try {
       await ready(page)
       assert.equal(await page.locator('.bs-video-grid img').count(), 0)
       await page.reload()
-      await page.getByRole('button', { name: 'Backspace 皮肤设置', exact: true }).click()
+      await page.getByRole('button', { name: 'Zed Space Skin 皮肤设置', exact: true }).click()
       await ready(page)
       assert.equal(await page.locator('.bs-video-grid img').count(), 0)
       results.push({ scenario: adapter, result: 'PASS', ...proof, processRestart: true, renameAndAppearancePersisted: true, builtinSettingsPersistedIndependently: true, removed: true })

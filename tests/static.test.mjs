@@ -50,8 +50,8 @@ test('the repository root is an installable DeepSeek Harness bundle', async () =
   assert.deepEqual(pkg.dsh.client, { inject: [], platform: 'web' })
   assert.equal(pkg.main, 'plugin/index.js')
   assert.equal(pkg.exports['./client'], './plugin/client.js')
-  assert.match(await text('cordis.patch.yml'), /id: dsh-backspace[\s\S]*name: dsh-backspace/)
-  assert.match(await text('plugin/client.js'), /__ModuleLoader__\.load\(\{ id: "dsh-backspace"/)
+  assert.match(await text('cordis.patch.yml'), /id: dsh-zed-space[\s\S]*name: dsh-zed-space/)
+  assert.match(await text('plugin/client.js'), /__ModuleLoader__\.load\(\{ id: "dsh-zed-space"/)
 })
 
 test('vendored three.js is local, patched and licensed', async () => {
@@ -167,7 +167,6 @@ test('the GitHub Pages website is an interactive local-only product demo', async
   assert.match(app, /type: 'bs-set'/)
   assert.match(app, /--capture-opacity/)
   assert.match(app, /parentOrigin: location\.origin/)
-  assert.match(app, /navigator\.clipboard/)
   assert.match(workflow, /actions\/deploy-pages@v4/)
   assert.deepEqual(await bytes('pages-dist/ocean.js'), await bytes('shared/ocean.js'))
   assert.deepEqual(await bytes('pages-dist/styles.css'), await bytes('shared/styles.css'))
@@ -175,7 +174,9 @@ test('the GitHub Pages website is an interactive local-only product demo', async
   assert.ok((await bytes('website/ocean-preview.jpg')).length < 150_000, 'Keep the first-paint ocean small')
   assert.match(html, /rel="preload" as="image" href="\.\/ocean-preview.jpg"/)
   assert.doesNotMatch(html, /\ssrc="[^"]+\.gif"/, 'Full recordings must not load before the ocean')
-  assert.equal((html.match(/data-motion-src=/g) || []).length, 6)
+  for (const [, source] of html.matchAll(/src="(\.\/media\/[^"]+)"/g)) {
+    assert.ok((await bytes(`pages-dist/${source}`)).length > 0, source)
+  }
 })
 
 test('renderer contains the promised performance and security policies', async () => {

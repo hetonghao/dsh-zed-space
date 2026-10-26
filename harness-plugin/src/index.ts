@@ -1,7 +1,7 @@
 /**
  * Native Backspace Host half: registers durable preferences and serves the
- * self-contained WebGPU scene under `/dsh-backspace`.
- * @module @deepseek-ai/dsh-client-ui-backspace
+ * self-contained WebGPU scene under `/dsh-zed-space`.
+ * @module dsh-zed-space
  */
 import { readFile } from 'node:fs/promises'
 import { extname, resolve, sep } from 'node:path'
@@ -22,9 +22,9 @@ export {
 } from './settings-contract.ts'
 
 /** Stable Cordis plugin name. */
-export const name = 'client-ui-backspace'
+export const name = 'dsh-zed-space'
 
-const ROUTE = '/dsh-backspace'
+const ROUTE = '/dsh-zed-space'
 // Normalize away URL's trailing slash so the containment check adds exactly
 // one platform separator on macOS, Linux and Windows.
 const ASSET_ROOT = resolve(fileURLToPath(new URL('../assets/', import.meta.url)))

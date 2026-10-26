@@ -84,7 +84,7 @@ async function help(key) {
 
 async function setLocale(locale) {
   await page.evaluate(locale => { document.documentElement.lang = locale }, locale)
-  const title = locale === 'zh-CN' ? 'Backspace 皮肤设置' : 'Backspace skin settings'
+  const title = locale === 'zh-CN' ? 'Zed Space Skin 皮肤设置' : 'Zed Space Skin settings'
   await page.waitForFunction(({ trigger, title }) => document.querySelector(trigger).getAttribute('aria-label') === title, { trigger, title })
 }
 
@@ -173,14 +173,14 @@ try {
   evidence.push({ scenario: '黑洞入口提示向上显示、移开立即隐藏且无重复系统提示', result: 'PASS' })
   const opening = await togglePanel()
   await page.locator(`${panel}.open`).waitFor()
-  assert.equal((await page.locator(`${panel} .bs-brand`).textContent()).trim(), 'Backspace Skin')
+  assert.equal((await page.locator(`${panel} .bs-brand`).textContent()).trim(), 'Zed Space Skin')
   assert.deepEqual(await page.locator(`${panel} [role="tab"]`).evaluateAll(tabs => tabs.map(tab => tab.dataset.skin)), ['horizon', 'vortex', 'ocean', 'video'])
   assert.ok(opening.animations.some(animation => animation.duration > 0), 'opening the panel must animate')
   await finishMotion()
   const heading = page.locator(`${panel} .bs-skin-heading`)
   const enabled = page.locator(`${panel}-enabled`)
   assert.equal(await page.locator(`${panel} .bs-reset`).isDisabled(), true, 'a skin already at built-in defaults cannot reset')
-  assert.equal(await enabled.getAttribute('aria-label'), '启用 Backspace 皮肤')
+  assert.equal(await enabled.getAttribute('aria-label'), '启用 Zed Space Skin 皮肤')
   const headingLabelBox = await heading.locator('label').boundingBox()
   const enabledBox = await enabled.boundingBox()
   assert.ok(enabledBox.x >= headingLabelBox.x + headingLabelBox.width && enabledBox.x - headingLabelBox.x - headingLabelBox.width <= 12,
@@ -192,7 +192,7 @@ try {
   const skinHelp = heading.locator('[data-help="skinTitle"]')
   const idleHelpColor = await skinHelp.evaluate(element => getComputedStyle(element).color)
   await help('skinTitle')
-  assert.equal(await page.locator(tooltipSelector).textContent(), '可控制完全开/关 Backspace Skin')
+  assert.equal(await page.locator(tooltipSelector).textContent(), '可控制完全开/关 Zed Space Skin')
   assert.equal(await page.locator(`${panel} .bs-group > .bs-group-title`).textContent(), '通用配置')
   assert.notEqual(await skinHelp.evaluate(element => getComputedStyle(element).color), idleHelpColor,
     'hover must visibly highlight the help icon')

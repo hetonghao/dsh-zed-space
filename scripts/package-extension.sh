@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="$(node -p "require('${ROOT}/extension/manifest.json').version")"
-OUT="${ROOT}/release/dsh-backspace-extension-v${VERSION}.zip"
+OUT="${ROOT}/release/dsh-zed-space-extension-v${VERSION}.zip"
 
 mkdir -p "${ROOT}/release"
 rm -f "$OUT"

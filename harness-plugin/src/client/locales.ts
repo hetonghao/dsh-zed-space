@@ -2,8 +2,8 @@
 
 /** Simplified Chinese dictionary and key-set authority. */
 export const zh = {
-  'title': 'Backspace',
-  'enabled': '启用 Backspace',
+  'title': 'Zed Space Skin',
+  'enabled': '启用 Zed Space Skin',
   'enabled.description': '在 Harness 界面背后显示 WebGPU 实时海洋',
   'sea': '波浪大小',
   'time': '日光',
@@ -25,8 +25,8 @@ export type BackspaceLocaleKey = keyof typeof zh
 
 /** English dictionary checked against the Chinese key set. */
 export const en = {
-  'title': 'Backspace',
-  'enabled': 'Enable Backspace',
+  'title': 'Zed Space Skin',
+  'enabled': 'Enable Zed Space Skin',
   'enabled.description': 'Show the realtime WebGPU ocean behind the Harness interface',
   'sea': 'Sea state',
   'time': 'Daylight',

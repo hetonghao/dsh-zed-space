@@ -1,8 +1,20 @@
 {
-  "extensionName": { "message": "Backspace" },
-  "extensionDescription": { "message": "A realtime WebGPU ocean background exclusively for local DeepSeek Harness pages. Adaptive quality, local assets, no data collection." },
-  "tagline": { "message": "Realtime WebGPU ocean · UI skin" },
-  "toggleLabel": { "message": "Ocean background" },
-  "toggleDescription": { "message": "DeepSeek Harness on 127.0.0.1 or localhost" },
-  "note": { "message": "Only verified DeepSeek Harness pages are changed. New tabs and other local websites stay untouched." }
+  "extensionName": {
+    "message": "Zed Space Skin"
+  },
+  "extensionDescription": {
+    "message": "Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤"
+  },
+  "tagline": {
+    "message": "Realtime WebGPU ocean · UI skin"
+  },
+  "toggleLabel": {
+    "message": "Ocean background"
+  },
+  "toggleDescription": {
+    "message": "DeepSeek Harness on 127.0.0.1 or localhost"
+  },
+  "note": {
+    "message": "Only verified DeepSeek Harness pages are changed. New tabs and other local websites stay untouched."
+  }
 }

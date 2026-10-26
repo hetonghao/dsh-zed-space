@@ -18,7 +18,7 @@ import { BackspaceQuickControls } from './BackspaceQuickControls.tsx'
 import { createBackspaceStore } from './store.ts'
 import { en, zh, type BackspaceLocaleKey } from './locales.ts'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-client-ui-backspace'
+const PACKAGE_NAME = 'dsh-zed-space'
 const SETTINGS_NS = 'settings.backspace'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
@@ -119,7 +119,7 @@ export function apply(ctx: ClientContext): void {
   }
   ctx.slots.inject('settings.general.item', () => ctx.slots.register({
     name: 'settings.general.item',
-    id: 'dsh-backspace',
+    id: 'dsh-zed-space',
     order: 30,
     store,
     locale: SETTINGS_NS,
@@ -127,7 +127,7 @@ export function apply(ctx: ClientContext): void {
   }, BackspaceSettingsRow))
   ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({
     name: 'sidebar.footer.action',
-    id: 'dsh-backspace-controls',
+    id: 'dsh-zed-space-controls',
     order: 20,
     store,
     locale: SETTINGS_NS,

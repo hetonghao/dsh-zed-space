@@ -40,11 +40,11 @@ function runBootstrap(archive, cwd, ...args) {
 }
 
 async function createSourceArchive(fixture) {
-  const archiveRoot = resolve(fixture, 'archive/dsh-backspace-1.2.0')
+  const archiveRoot = resolve(fixture, 'archive/dsh-zed-space-1.2.0')
   await mkdir(archiveRoot, { recursive: true })
   await cp(resolve(root, 'native-dist'), resolve(archiveRoot, 'native-dist'), { recursive: true })
-  const archive = resolve(fixture, 'dsh-backspace.tar.gz')
-  const result = spawnSync('tar', ['-czf', archive, '-C', resolve(fixture, 'archive'), 'dsh-backspace-1.2.0'], {
+  const archive = resolve(fixture, 'dsh-zed-space.tar.gz')
+  const result = spawnSync('tar', ['-czf', archive, '-C', resolve(fixture, 'archive'), 'dsh-zed-space-1.2.0'], {
     encoding: 'utf8',
   })
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`)
@@ -60,26 +60,26 @@ test('static installer is repeatable and preserves unrelated Harness updates', a
 
   run('--dist', dist)
   let html = await readFile(index, 'utf8')
-  assert.equal((html.match(/dsh-backspace:begin/g) || []).length, 1)
-  assert.match(html, /\/dsh-backspace\/loader\.js/)
-  await stat(resolve(dist, 'dsh-backspace/vendor/three.webgpu.js'))
+  assert.equal((html.match(/dsh-zed-space:begin/g) || []).length, 1)
+  assert.match(html, /\/dsh-zed-space\/loader\.js/)
+  await stat(resolve(dist, 'dsh-zed-space/vendor/three.webgpu.js'))
   await stat(`${index}.bs-backup`)
 
   html = html.replace('<title>Harness</title>', '<title>Harness upgraded</title><meta name="fixture" content="preserve">')
   await writeFile(index, html)
   run('--update', '--dist', dist)
   html = await readFile(index, 'utf8')
-  assert.equal((html.match(/dsh-backspace:begin/g) || []).length, 1)
+  assert.equal((html.match(/dsh-zed-space:begin/g) || []).length, 1)
   assert.match(html, /Harness upgraded/)
   assert.match(html, /name="fixture"/)
 
   const uninstallOutput = run('--uninstall', '--dist', dist)
   assert.match(uninstallOutput, /Restart Harness/)
   html = await readFile(index, 'utf8')
-  assert.doesNotMatch(html, /dsh-backspace/)
+  assert.doesNotMatch(html, /dsh-zed-space/)
   assert.match(html, /Harness upgraded/)
   assert.match(html, /name="fixture"/)
-  await assert.rejects(stat(resolve(dist, 'dsh-backspace')))
+  await assert.rejects(stat(resolve(dist, 'dsh-zed-space')))
 })
 
 test('dry-run discovers an explicit dist without changing it', async () => {
@@ -101,14 +101,14 @@ test('GitHub bootstrap works from an unrelated directory and forwards installer 
   const archive = await createSourceArchive(fixture)
 
   const output = runBootstrap(archive, unrelatedCwd, '--dist', dist)
-  assert.match(output, /Backspace is installed/)
-  await stat(resolve(dist, 'dsh-backspace/loader.js'))
-  assert.match(await readFile(resolve(dist, 'index.html'), 'utf8'), /dsh-backspace:begin/)
+  assert.match(output, /Zed Space Skin is installed/)
+  await stat(resolve(dist, 'dsh-zed-space/loader.js'))
+  assert.match(await readFile(resolve(dist, 'index.html'), 'utf8'), /dsh-zed-space:begin/)
 
   const uninstallOutput = runBootstrap(archive, unrelatedCwd, '--uninstall', '--dist', dist)
   assert.match(uninstallOutput, /Start Harness again/)
-  await assert.rejects(stat(resolve(dist, 'dsh-backspace')))
-  assert.doesNotMatch(await readFile(resolve(dist, 'index.html'), 'utf8'), /dsh-backspace/)
+  await assert.rejects(stat(resolve(dist, 'dsh-zed-space')))
+  assert.doesNotMatch(await readFile(resolve(dist, 'index.html'), 'utf8'), /dsh-zed-space/)
 })
 
 test('native source installer is repeatable and preserves overlay stacking', async () => {
@@ -130,7 +130,17 @@ test('native source installer is repeatable and preserves overlay stacking', asy
   }
 
   runSourceInstaller(harness)
+  for (const relative of ['packages/client/ui-backspace/package.json', 'packages/bundle/web-app/package.json', 'packages/bundle/web-app/cordis.patch.yml']) {
+    const path = resolve(harness, relative)
+    await writeFile(path, (await readFile(path, 'utf8')).replaceAll('dsh-zed-space', '@deepseek-ai/dsh-client-ui-backspace').replace('id: @deepseek-ai/dsh-client-ui-backspace', 'id: ui-backspace'))
+  }
   runSourceInstaller(harness)
+  for (const relative of ['packages/client/ui-backspace/package.json', 'packages/bundle/web-app/package.json', 'packages/bundle/web-app/cordis.patch.yml']) {
+    const content = await readFile(resolve(harness, relative), 'utf8')
+    assert.doesNotMatch(content, /@deepseek-ai\/dsh-client-ui-backspace/)
+    assert.match(content, /dsh-zed-space/)
+    if (relative.endsWith('.yml')) assert.equal((content.match(/id: dsh-zed-space/g) || []).length, 1)
+  }
 
   const frame = await readFile(resolve(harness, 'packages/client/ui-layout/src/client/AppFrame.tsx'), 'utf8')
   assert.equal((frame.match(/renderSlot\('shell\.background'/g) || []).length, 1)
@@ -171,3 +181,20 @@ test('native source installer supports Harness 0.1.2 split client services', asy
   const tsconfig = JSON.parse(await readFile(resolve(harness, 'packages/client/ui-backspace/tsconfig.json'), 'utf8'))
   assert.ok(!tsconfig.references.some(reference => reference.path === '../runtime'))
 })
+
+for (const legacy of ['<!-- dsh-backspace:begin --><script src="/dsh-backspace/loader.js" defer></script><!-- dsh-backspace:end -->', '<!-- dsh-backspace:installed --><script type="module" src="/dsh-backspace/loader.js"></script>']) {
+  test('upgrade removes legacy static loader and assets: ' + legacy, async () => {
+    const dist = await mkdtemp(resolve(tmpdir(), 'zed-upgrade-'))
+    await mkdir(resolve(dist, 'dsh-backspace'))
+    await writeFile(resolve(dist, 'dsh-backspace/loader.js'), 'legacy')
+    await writeFile(resolve(dist, 'index.html'), `<html><head>${legacy}</head><body>keep app</body></html>`)
+    run('--update', '--dist', dist)
+    const html = await readFile(resolve(dist, 'index.html'), 'utf8')
+    assert.doesNotMatch(html, /dsh-backspace/)
+    assert.equal((html.match(/loader\.js/g) || []).length, 1)
+    assert.match(html, /dsh-zed-space\/loader\.js/)
+    assert.match(html, /keep app/)
+    await assert.rejects(stat(resolve(dist, 'dsh-backspace')))
+    await stat(resolve(dist, 'dsh-zed-space/loader.js'))
+  })
+}

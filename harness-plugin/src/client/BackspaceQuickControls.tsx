@@ -1,4 +1,4 @@
-/** Sidebar-foot launcher and compact controls for the native Backspace skin. */
+/** Sidebar-foot launcher and compact controls for the native Zed Space Skin. */
 import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ChangeEvent, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { useEffect, useId, useRef, useState } from 'react'
@@ -99,7 +99,7 @@ export function BackspaceQuickControls({
         >
           <div className={css.panelHead}>
             <div>
-              <div className={css.eyebrow}>BACKSPACE</div>
+              <div className={css.eyebrow}>ZED SPACE SKIN</div>
               <div className={css.panelTitle}>{t('quick.description')}</div>
             </div>
             <button className={css.close} type="button" aria-label={t('quick.close')} onClick={() => { setOpen(false); triggerRef.current?.focus() }}>×</button>

@@ -16,7 +16,7 @@ function source(state: BackspaceState): string {
     quality: state.quality,
     parentOrigin: location.origin,
   })
-  return `/dsh-backspace/skin.html?${query}`
+  return `/dsh-zed-space/skin.html?${query}`
 }
 
 /** Props derived from the layout slot and shared Backspace store. */

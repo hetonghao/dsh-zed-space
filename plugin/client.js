@@ -1,5 +1,5 @@
 // GENERATED from shared/skin-core.js. Run npm run build after editing shared sources.
-window.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {
+window.__ModuleLoader__.load({ id: "dsh-zed-space", factory: (require) => {
   var module = { exports: {} };
   var exports = module.exports;
 // Backspace shared host-page controller.
@@ -86,12 +86,12 @@ window.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {
 
   const COPY = Object.freeze({
     zh: {
-      button: 'Backspace 皮肤设置',
+      button: 'Zed Space Skin 皮肤设置',
       close: '关闭',
       sea: '波浪大小',
       time: '日光',
       glass: '玻璃不透明度',
-      enable: '启用 Backspace 皮肤',
+      enable: '启用 Zed Space Skin 皮肤',
       autoCycle: '自动昼夜变化',
       cosmicCycle: '自动光影变化',
       chatCustom: '对话面板独立调整',
@@ -104,7 +104,7 @@ window.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {
       helpLabel: '说明',
       saveHint: '即时生效 · 自动保存',
       help: {
-        skinTitle: '可控制完全开/关 Backspace Skin',
+        skinTitle: '可控制完全开/关 Zed Space Skin',
         sea: '调整海面波浪的大小。海面参数独立保存，不影响宇宙皮肤。',
         time: '调整海面的日光。手动调节会停止自动昼夜变化，可通过下方开关重新开启。',
         glow: '调整吸积盘的发光亮度，仅影响当前皮肤。',
@@ -149,12 +149,12 @@ window.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {
       },
     },
     en: {
-      button: 'Backspace skin settings',
+      button: 'Zed Space Skin settings',
       close: 'Close',
       sea: 'Sea state',
       time: 'Daylight',
       glass: 'Glass opacity',
-      enable: 'Enable Backspace skin',
+      enable: 'Enable Zed Space Skin',
       autoCycle: 'Automatic day cycle',
       cosmicCycle: 'Automatic light variation',
       chatCustom: 'Independent conversation settings',
@@ -167,7 +167,7 @@ window.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {
       helpLabel: 'Help',
       saveHint: 'Applies instantly · Saves automatically',
       help: {
-        skinTitle: 'Turn Backspace Skin completely on or off.',
+        skinTitle: 'Turn Zed Space Skin completely on or off.',
         sea: 'Adjust the size of the ocean waves. Ocean settings are saved separately from the cosmic skins.',
         time: 'Adjust ocean daylight. Manual changes stop the automatic day cycle; use the switch below to turn it back on.',
         glow: 'Adjust the brightness of the accretion disk. Only affects this skin.',
@@ -1399,7 +1399,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         </div>`).join('');
 
       panel.innerHTML = `
-        <div class="bs-title"><span class="bs-brand">${BLACK_HOLE_ICON}Backspace Skin</span><button class="bs-close" type="button" aria-label="${copy.close}">${CLOSE_ICON}</button></div>
+        <div class="bs-title"><span class="bs-brand">${BLACK_HOLE_ICON}Zed Space Skin</span><button class="bs-close" type="button" aria-label="${copy.close}">${CLOSE_ICON}</button></div>
         <div class="bs-switch bs-skin-heading"><label for="${IDS.panel}-enabled">${copy.skinTitle}</label><input type="checkbox" role="switch" id="${IDS.panel}-enabled" aria-label="${copy.enable}" />${helpButton('skinTitle')}</div>
         <div class="bs-tabs" role="tablist" aria-label="${copy.skinTitle}">${SKIN_TABS.map((skin) => `<button class="bs-tab" type="button" role="tab" data-skin="${skin.id}" aria-selected="${skin.id === state.skin}" aria-controls="${IDS.panel}-${skin.surface}">${copy.skins[skin.id]}</button>`).join('')}</div>
         <div class="bs-scroll"><div class="bs-skin-region">${PARAM_GROUPS.map((skin) => `
@@ -2041,11 +2041,11 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     }
   }
 
-  exports.name = 'dsh-backspace-client';
+  exports.name = 'dsh-zed-space-client';
   exports.inject = [];
   exports.apply = function apply(ctx) {
     const controller = globalThis.BackspaceSkinCore.createController({
-      assetUrl: (path) => '/dsh-backspace/' + path,
+      assetUrl: (path) => '/dsh-zed-space/' + path,
       storage: {
         get: async (defaults) => ({
           enabled: readSetting('enabled', defaults.enabled),
@@ -2071,7 +2071,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       },
     });
     void controller.start();
-    ctx.effect(() => () => controller.stop(), 'dsh-backspace: browser surface');
+    ctx.effect(() => () => controller.stop(), 'dsh-zed-space: browser surface');
   };
 
   return module.exports;

@@ -2,8 +2,8 @@
 # Download a pinned Backspace source archive and run the static Harness installer.
 set -euo pipefail
 
-BACKSPACE_VERSION="${BACKSPACE_VERSION:-v1.2.6}"
-BACKSPACE_ARCHIVE_URL="${BACKSPACE_ARCHIVE_URL:-https://github.com/hetonghao/dsh-backspace/archive/refs/tags/${BACKSPACE_VERSION}.tar.gz}"
+BACKSPACE_VERSION="${BACKSPACE_VERSION:-v1.3.0}"
+BACKSPACE_ARCHIVE_URL="${BACKSPACE_ARCHIVE_URL:-https://github.com/hetonghao/dsh-zed-space/archive/refs/tags/${BACKSPACE_VERSION}.tar.gz}"
 
 REQUESTED_MODE="install"
 SHOW_RUNTIME_NOTICE=1
@@ -26,20 +26,20 @@ for required_command in curl tar mktemp; do
   fi
 done
 
-TEMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/dsh-backspace-bootstrap.XXXXXX")"
+TEMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/dsh-zed-space-bootstrap.XXXXXX")"
 cleanup() {
   rm -rf -- "$TEMP_ROOT"
 }
 trap cleanup EXIT INT TERM
 
-ARCHIVE_PATH="$TEMP_ROOT/dsh-backspace.tar.gz"
+ARCHIVE_PATH="$TEMP_ROOT/dsh-zed-space.tar.gz"
 SOURCE_ROOT="$TEMP_ROOT/source"
 mkdir -p "$SOURCE_ROOT"
 
 if [ -n "${BACKSPACE_ARCHIVE_FILE:-}" ]; then
   cp "$BACKSPACE_ARCHIVE_FILE" "$ARCHIVE_PATH"
 else
-  echo "→ Downloading Backspace ${BACKSPACE_VERSION}"
+  echo "→ Downloading Zed Space Skin ${BACKSPACE_VERSION}"
   curl --proto '=https' --tlsv1.2 -fsSL "$BACKSPACE_ARCHIVE_URL" -o "$ARCHIVE_PATH"
 fi
 
@@ -54,7 +54,7 @@ bash "$INSTALLER" "$@"
 
 if [ "$SHOW_RUNTIME_NOTICE" -eq 1 ]; then
   if [ "$REQUESTED_MODE" = "uninstall" ]; then
-    echo "ℹ Backspace is removed. Start Harness again (CLI: dsh web), keep that process running, then reload the browser."
+    echo "ℹ Zed Space Skin is removed. Start Harness again (CLI: dsh web), keep that process running, then reload the browser."
   else
     echo "ℹ Start Harness again (CLI: dsh web), keep that process running, then reload the browser."
   fi

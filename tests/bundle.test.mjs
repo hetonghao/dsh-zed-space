@@ -38,26 +38,26 @@ function captureRoute() {
 test('DSH Host bundle serves only local Backspace assets', async () => {
   const route = captureRoute()
   assert.equal(route.kind, 'prefix')
-  assert.equal(route.path, '/dsh-backspace')
+  assert.equal(route.path, '/dsh-zed-space')
 
   const page = createResponse()
-  await route.handler({ method: 'GET', url: '/dsh-backspace/skin.html' }, page)
+  await route.handler({ method: 'GET', url: '/dsh-zed-space/skin.html' }, page)
   assert.equal(page.status, 200)
   assert.equal(page.headers['content-type'], 'text/html; charset=utf-8')
-  assert.match(page.body.toString(), /Backspace/)
+  assert.match(page.body.toString(), /src="\.\/ocean\.js\?skin=1"/)
 
   const head = createResponse()
-  await route.handler({ method: 'HEAD', url: '/dsh-backspace/styles.css' }, head)
+  await route.handler({ method: 'HEAD', url: '/dsh-zed-space/styles.css' }, head)
   assert.equal(head.status, 200)
   assert.equal(head.body, undefined)
   assert.ok(Number(head.headers['content-length']) > 0)
 
   const traversal = createResponse()
-  await route.handler({ method: 'GET', url: '/dsh-backspace/%2e%2e%2fpackage.json' }, traversal)
+  await route.handler({ method: 'GET', url: '/dsh-zed-space/%2e%2e%2fpackage.json' }, traversal)
   assert.equal(traversal.status, 403)
 
   const method = createResponse()
-  await route.handler({ method: 'POST', url: '/dsh-backspace/skin.html' }, method)
+  await route.handler({ method: 'POST', url: '/dsh-zed-space/skin.html' }, method)
   assert.equal(method.status, 405)
   assert.equal(method.headers.allow, 'GET, HEAD')
 })

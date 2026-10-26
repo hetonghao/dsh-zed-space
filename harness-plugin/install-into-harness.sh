@@ -14,7 +14,7 @@ HARNESS_ROOT="$(cd "$HARNESS_ROOT" && pwd)"
 TARGET="$HARNESS_ROOT/packages/client/ui-backspace"
 
 if [ -e "$TARGET" ]; then
-  if [ ! -f "$TARGET/package.json" ] || ! grep -qF 'dsh-client-ui-backspace' "$TARGET/package.json"; then
+  if [ ! -f "$TARGET/package.json" ] || ! grep -qE 'dsh-client-ui-backspace|dsh-zed-space' "$TARGET/package.json"; then
     echo "✗ Refusing to replace unexpected directory: $TARGET" >&2
     exit 1
   fi

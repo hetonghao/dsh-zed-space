@@ -15,5 +15,5 @@ test('release verification checks exact bytes and registry integrity', () => {
 
 test('publish workflow uses an explicit local tarball path, not GitHub shorthand', () => {
   const workflow = readFileSync(new URL('../.github/workflows/npm-publish.yml', import.meta.url), 'utf8');
-  assert.match(workflow, /npm publish \.\/release-audit\/dsh-backspace\.tgz/);
+  assert.match(workflow, /npm publish \.\/release-audit\/dsh-zed-space\.tgz/);
 });

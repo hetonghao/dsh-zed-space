@@ -21,8 +21,8 @@ async function boot(fault) {
   page.setDefaultTimeout(6000)
   const errors = []
   page.on('pageerror', error => errors.push(String(error)))
-  await page.route('**/dsh-backspace/**', async route => {
-    const path = new URL(route.request().url()).pathname.replace('/dsh-backspace/', 'native-dist/')
+  await page.route('**/dsh-zed-space/**', async route => {
+    const path = new URL(route.request().url()).pathname.replace('/dsh-zed-space/', 'native-dist/')
     let body = await readFile(resolve(root, path))
     // 在 iframe 实际文档加载模块之前注入浏览器故障，避开初始 about:blank 的时序。
     if (fault && path.endsWith('/video.html')) body = Buffer.from(body.toString().replace('<head>', `<head><script>(${fault.toString()})()</script>`))
@@ -31,7 +31,7 @@ async function boot(fault) {
   await page.goto(`${server.url}/tests/fixtures/harness/index.html`)
   await page.evaluate(() => { document.documentElement.lang = 'zh-CN' })
   await page.addScriptTag({ content: loader })
-  await page.getByRole('button', { name: 'Backspace 皮肤设置', exact: true }).click()
+  await page.getByRole('button', { name: 'Zed Space Skin 皮肤设置', exact: true }).click()
   await page.getByRole('tab', { name: '本地视频', exact: true }).click()
   await ready(page)
   return { context, page, errors }
@@ -139,15 +139,15 @@ try {
   {
     const { context, page, errors } = await boot()
     await importFile(page)
-    await page.getByRole('switch', { name: '启用 Backspace 皮肤', exact: true }).uncheck()
+    await page.getByRole('switch', { name: '启用 Zed Space Skin 皮肤', exact: true }).uncheck()
     await ready(page)
     await importFile(page, { name: 'while-disabled.mp4', mimeType: 'video/mp4', buffer: await readFile(sample) })
     await page.getByRole('checkbox', { name: '启用 while-disabled', exact: true }).check()
     await ready(page)
     assert.equal(await page.frameLocator('#__dsh-backspace-video__').locator('video').evaluate(video => video.paused), true, 'the global switch must prevent playback even while managing files')
-    await page.getByRole('switch', { name: '启用 Backspace 皮肤', exact: true }).check()
+    await page.getByRole('switch', { name: '启用 Zed Space Skin 皮肤', exact: true }).check()
     await page.waitForFunction(() => !document.querySelector('#__dsh-backspace-video__').contentDocument.querySelector('video').paused)
-    await page.getByRole('switch', { name: '启用 Backspace 皮肤', exact: true }).uncheck()
+    await page.getByRole('switch', { name: '启用 Zed Space Skin 皮肤', exact: true }).uncheck()
     await page.getByRole('button', { name: '关闭', exact: true }).click()
     assert.equal(await page.locator('#__dsh-backspace-video__').count(), 0)
     assert.deepEqual(errors, [])
@@ -169,7 +169,7 @@ try {
     await page.reload()
     await page.evaluate(() => { document.documentElement.lang = 'zh-CN' })
     await page.addScriptTag({ content: loader })
-    await page.getByRole('button', { name: 'Backspace 皮肤设置', exact: true }).click()
+    await page.getByRole('button', { name: 'Zed Space Skin 皮肤设置', exact: true }).click()
     await page.getByRole('checkbox', { name: '启用 sample', exact: true }).check()
     await ready(page)
     assert.equal(await page.frameLocator('#__dsh-backspace-video__').locator('video').evaluate(video => !video.paused), true)
@@ -206,7 +206,7 @@ try {
         return new Promise((_resolve, reject) => { window.__testRejectStalePlay = name => reject(new DOMException('old playback', name)) })
       }
     })
-    const toggle = page.getByRole('switch', { name: '启用 Backspace 皮肤', exact: true })
+    const toggle = page.getByRole('switch', { name: '启用 Zed Space Skin 皮肤', exact: true })
     await toggle.uncheck(); await toggle.check()
     if (replacePlayer) {
       await page.getByRole('checkbox', { name: '启用 next', exact: true }).check()

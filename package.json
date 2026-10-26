@@ -1,17 +1,17 @@
 {
-  "name": "dsh-backspace",
-  "version": "1.2.6",
+  "name": "dsh-zed-space",
+  "version": "1.3.0",
   "type": "module",
-  "description": "DeepSeek Harness 实时海面与宇宙背景皮肤，支持共享参数和双视角平滑切换",
+  "description": "Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hetonghao/dsh-backspace.git"
+    "url": "git+https://github.com/hetonghao/dsh-zed-space.git"
   },
-  "homepage": "https://hetonghao.github.io/dsh-backspace/",
+  "homepage": "https://github.com/hetonghao/dsh-zed-space",
   "publishConfig": {
     "access": "public"
   },
-  "bugs": "https://github.com/hetonghao/dsh-backspace/issues",
+  "bugs": "https://github.com/hetonghao/dsh-zed-space/issues",
   "keywords": [
     "deepseek-harness",
     "dsh-plugin",

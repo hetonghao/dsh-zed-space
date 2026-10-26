@@ -1,13 +1,13 @@
-/** Package-owned invariant companion. @module @deepseek-ai/dsh-client-ui-backspace/invariant */
+/** Package-owned invariant companion. @module dsh-zed-space/invariant */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-client-ui-backspace'
+const PACKAGE_NAME = 'dsh-zed-space'
 
 /** Cordis companion plugin name. */
-export const name = 'client-ui-backspace-invariant'
+export const name = 'dsh-zed-space-invariant'
 /** Service required before the companion can reserve package ownership. */
 export const inject = ['invariants']
 

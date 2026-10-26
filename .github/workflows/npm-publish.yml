@@ -6,7 +6,6 @@ on:
       tag:
         description: Git tag whose package version should be published
         required: true
-        default: v1.2.6
 
 permissions:
   contents: write
@@ -32,6 +31,8 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
           cache: npm
+      - name: Refuse historical package identity
+        run: node -e 'if (require("./package.json").name !== "dsh-zed-space") process.exit(1)'
       - run: npm ci
       - name: Verify release version
         env:
@@ -45,8 +46,8 @@ jobs:
         run: |
           mkdir -p release-audit
           npm pack --ignore-scripts --pack-destination release-audit --json > release-audit/pack.json
-          node -e 'const fs=require("fs"); const p=require("./release-audit/pack.json")[0]; fs.copyFileSync("release-audit/"+p.filename,"release-audit/dsh-backspace.tgz")'
-          npm publish ./release-audit/dsh-backspace.tgz --ignore-scripts --access public
+          node -e 'const fs=require("fs"); const p=require("./release-audit/pack.json")[0]; fs.copyFileSync("release-audit/"+p.filename,"release-audit/dsh-zed-space.tgz")'
+          npm publish ./release-audit/dsh-zed-space.tgz --ignore-scripts --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Verify registry bytes before attaching GitHub assets
@@ -55,12 +56,12 @@ jobs:
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
           VERSION=$(node -p 'require("./package.json").version')
-          npm view "dsh-backspace@$VERSION" dist --json --registry=https://registry.npmjs.org > release-audit/dist.json
+          npm view "dsh-zed-space@$VERSION" dist --json --registry=https://registry.npmjs.org > release-audit/dist.json
           URL=$(node -p 'require("./release-audit/dist.json").tarball')
           curl --fail --location --retry 5 "$URL" -o release-audit/registry.tgz
-          node release-tooling/scripts/verify-release.mjs release-audit/dsh-backspace.tgz release-audit/registry.tgz release-audit/dist.json
-          (cd release-audit && sha256sum "dsh-backspace-$VERSION.tgz" dsh-backspace.tgz > SHA256SUMS)
-          gh release upload "$RELEASE_TAG" "release-audit/dsh-backspace-$VERSION.tgz" release-audit/dsh-backspace.tgz release-audit/SHA256SUMS
+          node release-tooling/scripts/verify-release.mjs release-audit/dsh-zed-space.tgz release-audit/registry.tgz release-audit/dist.json
+          (cd release-audit && sha256sum "dsh-zed-space-$VERSION.tgz" dsh-zed-space.tgz > SHA256SUMS)
+          gh release upload "$RELEASE_TAG" "release-audit/dsh-zed-space-$VERSION.tgz" release-audit/dsh-zed-space.tgz release-audit/SHA256SUMS
       - uses: actions/upload-artifact@v4
         if: always()
         with:

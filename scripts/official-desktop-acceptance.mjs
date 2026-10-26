@@ -15,9 +15,9 @@ const browser = await chromium.launch({
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
   const failures = watchPageErrors(page, 'official desktop')
-  await page.route('**/dsh-backspace/**', async route => {
+  await page.route('**/dsh-zed-space/**', async route => {
     const url = new URL(route.request().url())
-    const response = await route.fetch({ url: `${server.url}/extension/${url.pathname.split('/dsh-backspace/')[1]}${url.search}` })
+    const response = await route.fetch({ url: `${server.url}/extension/${url.pathname.split('/dsh-zed-space/')[1]}${url.search}` })
     await route.fulfill({ response })
   })
   await page.goto(`${server.url}/tests/fixtures/official-desktop/index.html`)

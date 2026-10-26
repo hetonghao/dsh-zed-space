@@ -100,17 +100,17 @@ edit('tsconfig.client.json', text => insertOnce(
 ))
 
 edit('packages/bundle/web-app/cordis.patch.yml', text => insertOnce(
-  text,
-  '    - id: ui-backspace',
+  text.replace('    - id: ui-backspace', '    - id: dsh-zed-space'),
+  '    - id: dsh-zed-space',
   "    - id: ui-layout\n      name: '@deepseek-ai/dsh-client-ui-layout'",
-  `    - id: ui-layout\n      name: '@deepseek-ai/dsh-client-ui-layout'\n\n    - id: ui-backspace\n      name: '@deepseek-ai/dsh-client-ui-backspace'`,
+  `    - id: ui-layout\n      name: '@deepseek-ai/dsh-client-ui-layout'\n\n    - id: dsh-zed-space\n      name: 'dsh-zed-space'`,
   'packages/bundle/web-app/cordis.patch.yml',
-))
+).replaceAll('@deepseek-ai/dsh-client-ui-backspace', 'dsh-zed-space'))
 
 edit('packages/bundle/web-app/package.json', text => {
   const manifest = JSON.parse(text)
-  const name = '@deepseek-ai/dsh-client-ui-backspace'
-  if (manifest.dependencies[name] === 'workspace:^') return text
+  const name = 'dsh-zed-space'
+  delete manifest.dependencies['@deepseek-ai/dsh-client-ui-backspace']
   manifest.dependencies[name] = 'workspace:^'
   manifest.dependencies = Object.fromEntries(Object.entries(manifest.dependencies).sort(([a], [b]) => a.localeCompare(b)))
   return `${JSON.stringify(manifest, null, 2)}\n`

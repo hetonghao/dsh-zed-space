@@ -43,7 +43,7 @@ async function extensionAcceptance() {
     await page.locator('#__dsh-backspace-btn__').click()
     const panel = page.locator('#__dsh-backspace-panel__.open')
     await panel.waitFor()
-    for (const [lang, title, label] of [['zh-CN', 'Backspace 皮肤设置', '波浪大小'], ['en', 'Backspace skin settings', 'Sea state']]) {
+    for (const [lang, title, label] of [['zh-CN', 'Zed Space Skin 皮肤设置', '波浪大小'], ['en', 'Zed Space Skin settings', 'Sea state']]) {
       await page.evaluate((lang) => { document.documentElement.lang = lang }, lang)
       await page.waitForFunction((title) => document.querySelector('#__dsh-backspace-btn__').getAttribute('aria-label') === title, title)
       assert.equal(await panel.locator('label[for="__dsh-backspace-panel__-sea-range"]').textContent(), label)
@@ -132,7 +132,7 @@ async function staticDistAcceptance() {
     cwd: root, encoding: 'utf8',
   })
   assert.equal(uninstall.status, 0, `${uninstall.stdout}\n${uninstall.stderr}`)
-  assert.doesNotMatch(await readFile(resolve(dist, 'index.html'), 'utf8'), /dsh-backspace/)
+  assert.doesNotMatch(await readFile(resolve(dist, 'index.html'), 'utf8'), /dsh-zed-space/)
   await rm(temp, { recursive: true, force: true })
 }
 

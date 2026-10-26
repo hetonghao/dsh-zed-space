@@ -85,10 +85,12 @@ import sys
 path = Path(sys.argv[1])
 text = path.read_text(encoding='utf-8')
 text = re.sub(
-    r'\s*<!-- dsh-backspace:begin -->.*?<!-- dsh-backspace:end -->\s*',
+    r'\s*<!-- (dsh-backspace|dsh-zed-space):begin -->.*?<!-- \1:end -->\s*',
     '\n', text, flags=re.DOTALL,
 )
 # Upgrade from the original one-tag installer without preserving its stale marker.
+text = text.replace('<script type="module" src="/dsh-zed-space/loader.js"></script>', '')
+text = text.replace('<!-- dsh-zed-space:installed -->', '')
 text = text.replace('<script type="module" src="/dsh-backspace/loader.js"></script>', '')
 text = text.replace('<!-- dsh-backspace:installed -->', '')
 path.write_text(text, encoding='utf-8')
@@ -102,9 +104,9 @@ import sys
 
 path = Path(sys.argv[1])
 text = path.read_text(encoding='utf-8')
-block = '''<!-- dsh-backspace:begin -->
-<script src="/dsh-backspace/loader.js" defer></script>
-<!-- dsh-backspace:end -->'''
+block = '''<!-- dsh-zed-space:begin -->
+<script src="/dsh-zed-space/loader.js" defer></script>
+<!-- dsh-zed-space:end -->'''
 anchor = '</head>'
 if anchor not in text:
     raise SystemExit('✗ index.html has no </head> injection anchor')
@@ -118,21 +120,22 @@ for dist in "${DISTS[@]}"; do
 
   index="$dist/index.html"
   strip_loader "$index"
+  rm -rf -- "$dist/dsh-backspace"
 
   if [ "$MODE" = "uninstall" ]; then
-    rm -rf -- "$dist/dsh-backspace"
+    rm -rf -- "$dist/dsh-zed-space"
     rm -f -- "$index.bs-backup"
     echo "  Removed the injected loader block and skin assets."
     continue
   fi
 
   cp "$index" "$index.bs-backup"
-  rm -rf -- "$dist/dsh-backspace"
-  mkdir -p "$dist/dsh-backspace"
+  rm -rf -- "$dist/dsh-zed-space"
+  mkdir -p "$dist/dsh-zed-space"
   cp "$SKIN_SRC/loader.js" "$SKIN_SRC/skin.html" "$SKIN_SRC/ocean.js" \
-    "$SKIN_SRC/cosmos.html" "$SKIN_SRC/cosmos.js" "$SKIN_SRC/video.html" "$SKIN_SRC/video.js" "$SKIN_SRC/video-media.js" "$SKIN_SRC/styles.css" "$dist/dsh-backspace/"
-  cp -R "$SKIN_SRC/vendor" "$dist/dsh-backspace/vendor"
-  cp -R "$SKIN_SRC/skins" "$dist/dsh-backspace/skins"
+    "$SKIN_SRC/cosmos.html" "$SKIN_SRC/cosmos.js" "$SKIN_SRC/video.html" "$SKIN_SRC/video.js" "$SKIN_SRC/video-media.js" "$SKIN_SRC/styles.css" "$dist/dsh-zed-space/"
+  cp -R "$SKIN_SRC/vendor" "$dist/dsh-zed-space/vendor"
+  cp -R "$SKIN_SRC/skins" "$dist/dsh-zed-space/skins"
   inject_loader "$index"
   echo "  Installed assets and loader; backup: $index.bs-backup"
 done
@@ -140,8 +143,8 @@ done
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "✓ Dry run complete; no files changed."
 elif [ "$MODE" = "uninstall" ]; then
-  echo "✓ Backspace was removed. Restart Harness, keep its server running, then reload the browser."
+  echo "✓ Zed Space Skin was removed. Restart Harness, keep its server running, then reload the browser."
 else
-  echo "✓ Backspace is installed. Restart Harness, keep its server running, then reload the browser."
+  echo "✓ Zed Space Skin is installed. Restart Harness, keep its server running, then reload the browser."
   echo "  Run with --update after Harness upgrades."
 fi

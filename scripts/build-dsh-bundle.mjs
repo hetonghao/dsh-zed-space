@@ -36,11 +36,11 @@ const adapter = String.raw`
     }
   }
 
-  exports.name = 'dsh-backspace-client';
+  exports.name = 'dsh-zed-space-client';
   exports.inject = [];
   exports.apply = function apply(ctx) {
     const controller = globalThis.BackspaceSkinCore.createController({
-      assetUrl: (path) => '/dsh-backspace/' + path,
+      assetUrl: (path) => '/dsh-zed-space/' + path,
       storage: {
         get: async (defaults) => ({
           enabled: readSetting('enabled', defaults.enabled),
@@ -66,14 +66,14 @@ const adapter = String.raw`
       },
     });
     void controller.start();
-    ctx.effect(() => () => controller.stop(), 'dsh-backspace: browser surface');
+    ctx.effect(() => () => controller.stop(), 'dsh-zed-space: browser surface');
   };
 
   return module.exports;
 }});
 `
 
-const expected = `// GENERATED from shared/skin-core.js. Run npm run build after editing shared sources.\nwindow.__ModuleLoader__.load({ id: "dsh-backspace", factory: (require) => {\n  var module = { exports: {} };\n  var exports = module.exports;\n${core}\n${adapter}`
+const expected = `// GENERATED from shared/skin-core.js. Run npm run build after editing shared sources.\nwindow.__ModuleLoader__.load({ id: "dsh-zed-space", factory: (require) => {\n  var module = { exports: {} };\n  var exports = module.exports;\n${core}\n${adapter}`
 
 if (check) {
   if (!existsSync(target) || readFileSync(target, 'utf8') !== expected) {

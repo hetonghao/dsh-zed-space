@@ -19,15 +19,15 @@ const results = []
 const errors = []
 page.on('pageerror', error => errors.push(String(error)))
 try {
-  await page.route('**/dsh-backspace/**', async route => {
-    const path = new URL(route.request().url()).pathname.replace('/dsh-backspace/', 'native-dist/')
+  await page.route('**/dsh-zed-space/**', async route => {
+    const path = new URL(route.request().url()).pathname.replace('/dsh-zed-space/', 'native-dist/')
     const body = await readFile(resolve(root, path))
     await route.fulfill({ body, contentType: path.endsWith('.html') ? 'text/html' : path.endsWith('.css') ? 'text/css' : 'text/javascript' })
   })
   await page.goto(`${server.url}/tests/fixtures/harness/index.html`)
   await page.evaluate(() => { document.documentElement.lang = 'zh-CN' })
   await page.addScriptTag({ content: await readFile(resolve(root, 'native-dist/loader.js'), 'utf8') })
-  await page.getByRole('button', { name: 'Backspace 皮肤设置', exact: true }).click()
+  await page.getByRole('button', { name: 'Zed Space Skin 皮肤设置', exact: true }).click()
   await page.getByRole('tab', { name: '本地视频', exact: true }).click()
   await page.waitForFunction(() => {
     const button = document.querySelector('.bs-video-import')
@@ -56,7 +56,7 @@ try {
   await page.reload()
   await page.evaluate(() => { document.documentElement.lang = 'zh-CN' })
   await page.addScriptTag({ content: await readFile(resolve(root, 'native-dist/loader.js'), 'utf8') })
-  await page.getByRole('button', { name: 'Backspace 皮肤设置', exact: true }).click()
+  await page.getByRole('button', { name: 'Zed Space Skin 皮肤设置', exact: true }).click()
   await page.getByRole('checkbox', { name: `启用 ${renamed}`, exact: true }).waitFor()
   assert.equal(await page.getByRole('checkbox', { name: `启用 ${renamed}`, exact: true }).isChecked(), true)
   assert.equal(await page.locator('.bs-video-grid img').count(), 2)
@@ -72,7 +72,7 @@ try {
   await page.reload()
   await page.evaluate(() => { document.documentElement.lang = 'zh-CN' })
   await page.addScriptTag({ content: await readFile(resolve(root, 'native-dist/loader.js'), 'utf8') })
-  await page.getByRole('button', { name: 'Backspace 皮肤设置', exact: true }).click()
+  await page.getByRole('button', { name: 'Zed Space Skin 皮肤设置', exact: true }).click()
   await page.getByRole('checkbox', { name: '启用 sample', exact: true }).waitFor()
   assert.equal(await page.locator('.bs-video-grid img').count(), 1)
   assert.equal(await page.getByRole('checkbox', { name: '启用 sample', exact: true }).isChecked(), false)

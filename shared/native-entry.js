@@ -26,7 +26,7 @@
     } catch { return fallback; }
   };
   const controller = globalThis.BackspaceSkinCore.createController({
-    assetUrl: (path) => `/dsh-backspace/${path}`,
+    assetUrl: (path) => `/dsh-zed-space/${path}`,
     storage: {
       get: async (defaults) => ({
         enabled: read('enabled', defaults.enabled),

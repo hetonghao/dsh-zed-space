@@ -1,16 +1,16 @@
 /**
  * Installable DeepSeek Harness Host plugin for Backspace.
- * Serves the self-contained renderer under /dsh-backspace without patching
+ * Serves the self-contained renderer under /dsh-zed-space without patching
  * the Harness checkout.
  */
 import { readFile } from 'node:fs/promises'
 import { extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-export const name = 'dsh-backspace'
+export const name = 'dsh-zed-space'
 export const inject = ['webServer']
 
-const ROUTE = '/dsh-backspace'
+const ROUTE = '/dsh-zed-space'
 const ASSET_ROOT = resolve(fileURLToPath(new URL('../native-dist/', import.meta.url)))
 const MIME = Object.freeze({
   '.css': 'text/css; charset=utf-8',
@@ -75,5 +75,5 @@ export function apply(ctx) {
     kind: 'prefix',
     path: ROUTE,
     handler: serveAsset,
-  }), 'dsh-backspace: static renderer route')
+  }), 'dsh-zed-space: static renderer route')
 }
