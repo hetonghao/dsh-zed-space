@@ -27,23 +27,29 @@
 
 ## 场景展示
 
-以下截图使用真实插件代码，在项目自带的**隔离验收界面**中渲染。它们用于展示当前场景和设置，**不是原生 Harness 实拍**；视频示例使用程序生成的测试素材。
+以下五张截图来自 **DeepSeek Harness Web 0.2.1-rc.3** 的真实运行界面，安装的是 `dsh-zed-space@1.0.0`。截图使用独立临时 profile；[截图环境、参数与素材来源](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/screenshots/README.md)均有记录。
 
-### 宇宙 · 地平线
+### 黑洞 · 事件视界
 
-![Zed Space Skin 宇宙地平线及设置，隔离验收界面](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/zed-horizon.png)
+![事件视界在 DeepSeek Harness Web 中的真实运行截图](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/harness-event-horizon.png)
 
-### 宇宙 · 漩涡
+### 黑洞 · 吸积涡旋
 
-![Zed Space Skin 宇宙漩涡及设置，隔离验收界面](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/zed-vortex.png)
+![吸积涡旋在 DeepSeek Harness Web 中的真实运行截图](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/harness-accretion-vortex.png)
 
-### 海洋 · 波浪与日光
+### 海面 · 金色时刻
 
-![Zed Space Skin 海洋及设置，隔离验收界面](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/zed-ocean.png)
+![浅色界面下海面背景在 DeepSeek Harness Web 中的真实运行截图](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/harness-ocean.png)
 
-### 本地视频 · 素材管理
+### 本地视频 · 云海日出
 
-![Zed Space Skin 本地视频导入与播放，隔离验收界面](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/zed-video.png)
+![云海日出视频壁纸在 DeepSeek Harness Web 中的真实运行截图](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/harness-video-clouds.png)
+
+### 本地视频 · 深蓝潜行
+
+![深蓝潜行视频壁纸在 DeepSeek Harness Web 中的真实运行截图](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/harness-video-deep-dive.png)
+
+两段视频通过「本地视频」导入并实际播放，仅作效果展示，不随插件分发。
 
 ## 本地构建与预览
 

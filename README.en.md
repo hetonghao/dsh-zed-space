@@ -27,23 +27,29 @@ Each video is limited to **32 MiB, 30 seconds, and 1080p**. See [local video bac
 
 ## Scene gallery
 
-These screenshots run the real plugin code in the project's **isolated test interface**. They show current scenes and settings, **not native Harness captures**. The video example uses a programmatically generated test clip.
+These five screenshots were captured in the real **DeepSeek Harness Web 0.2.1-rc.3** application with `dsh-zed-space@1.0.0` installed in a separate temporary profile. See the [capture environment, settings, and media sources](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/screenshots/README.md).
 
-### Cosmos · horizon
+### Black hole · event horizon
 
-![Zed Space Skin horizon and settings in an isolated test interface](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/zed-horizon.png)
+![Event horizon running in DeepSeek Harness Web](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/harness-event-horizon.png)
 
-### Cosmos · vortex
+### Black hole · accretion vortex
 
-![Zed Space Skin vortex and settings in an isolated test interface](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/zed-vortex.png)
+![Accretion vortex running in DeepSeek Harness Web](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/harness-accretion-vortex.png)
 
-### Ocean · waves and daylight
+### Ocean · golden hour
 
-![Zed Space Skin ocean and settings in an isolated test interface](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/zed-ocean.png)
+![Ocean background running in the light theme of DeepSeek Harness Web](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/harness-ocean.png)
 
-### Local video · library
+### Local video · sea of clouds
 
-![Zed Space Skin local video import and playback in an isolated test interface](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/zed-video.png)
+![Sea of clouds video wallpaper playing in DeepSeek Harness Web](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/harness-video-clouds.png)
+
+### Local video · deep dive
+
+![Deep dive video wallpaper playing in DeepSeek Harness Web](https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/docs/screenshots/harness-video-deep-dive.png)
+
+Both videos were imported through the local video library and played in the application. They are demonstration media and are not included with the plugin.
 
 ## Build and preview locally
 

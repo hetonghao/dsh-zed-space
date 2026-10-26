@@ -1,14 +1,38 @@
-# Screenshot set
+# README 运行截图
 
-Committed README media:
+这五张图拍摄于 2026 年 10 月 26 日，来自真实的 DeepSeek Harness Web 界面。
 
-- `harness-dark-overview-40.gif` — native Harness dark-mode overview.
-- `harness-light-overview-40.gif` — native Harness light-mode overview.
-- `harness-wave-control-40.gif` — wave-size control from calm to high sea.
-- `harness-daylight-sunset-40.gif` — daylight control from midday to dusk.
+## 拍摄环境
 
-Regenerate the complete set with `npm run capture`. Capture uses Chrome for
-Testing, a 1440×900 Harness viewport, local assets, and deterministic settings.
-All four GIFs use 40% glass opacity and are palette-optimized to 1160px with
-FFmpeg. Review every animation visually before publishing; WebGPU rendering
-may vary slightly between hardware and SwiftShader.
+- macOS；本机 DeepSeek Harness 自带 CLI，版本 `0.2.1-rc.3`。
+- 独立 `DSH_HOME`，从官方 `web` 模板建立临时 `readme` profile；服务只监听 `127.0.0.1`。
+- 使用正常的 `dsh plugin --profile readme add <本地 tarball>` 安装 `dsh-zed-space@1.0.0`。
+- 独立 Chrome profile，视口统一为 **1440 × 900**。
+- 截图为新建会话页，不含私人对话。背景通过插件设置面板选择，视频通过文件导入入口添加。
+- 图片直接保存浏览器截图，没有替换页面内容、拼接壁纸或后期调色。
+
+## 五个场景
+
+所有场景的玻璃不透明度为 40%，关闭「对话面板独立调整」，让背景清晰可见。
+
+| 图片 | 场景与设置 |
+| --- | --- |
+| [事件视界](harness-event-horizon.png) | 深色界面；吸积亮度 82，盘体尺度 62，关闭自动光影变化；其余参数为默认值。 |
+| [吸积涡旋](harness-accretion-vortex.png) | 深色界面；吸积亮度 86，盘体尺度 58，气体色温 72，关闭自动光影变化；其余参数为默认值。 |
+| [海面](harness-ocean.png) | 浅色界面；波浪大小 62，日光 23（金色时刻），关闭自动昼夜变化。 |
+| [云海日出](harness-video-clouds.png) | 深色界面；导入并启用 `sea-of-clouds.mp4`，静音循环播放。 |
+| [深蓝潜行](harness-video-deep-dive.png) | 深色界面；导入并启用 `astronaut-deep-dive.mp4`，静音循环播放。 |
+
+两个黑洞画面分别是插件中「事件视界」与「吸积涡旋」的实时渲染视角。
+
+## 视频素材
+
+选用现有 Zed Space 项目的本地样例，资产 ID 分别为 `sea-of-clouds`、`astronaut-deep-dive`。两段均为 1920 × 1080、H.264、无音轨；时长分别为 15 秒和约 25.17 秒，大小分别约 4.9 MiB 和 4.5 MiB。
+
+视频通过正常导入和播放流程取图，仅用于展示本地视频壁纸效果，不随插件或本仓库分发。截图也不表示插件已提供在线壁纸市场。
+
+## 验证范围
+
+已核对 Harness 提供的海面、宇宙和视频运行资源与候选包逐字节一致，并确认两个视频在截图时均已解码、静音且正在播放。截图只证明上述 Web 界面与场景，不作为原生 Desktop 或模型对话流程的验收结论。
+
+拍摄后清理独立测试 profile、浏览器 profile、临时视频副本及测试服务，保留截图与取图记录。
