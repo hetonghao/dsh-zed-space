@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-26T15:40:00.579Z",
+  "timestamp": "2026-10-26T15:48:35.879Z",
   "purpose": "仅开发原型；不用于生产",
   "files": [
     {
@@ -32,7 +32,7 @@
     },
     {
       "path": "plugin/prototype-market/empty-surface.html",
-      "sha256": "4a379440ab5d5c321261b5d1bf076b3b4ba37d08261da6dd02400ea2d4dd3987"
+      "sha256": "e7d847453b7d6c99a9ec45b77106af826b0fc1926641ddd3abe4ecef159be8f8"
     },
     {
       "path": "plugin/prototype-market/empty-video.html",
