@@ -1,24 +1,32 @@
-# Backspace — WebGPU 实时海洋皮肤（Chrome / Edge 扩展）
+# Zed Space Skin（Chrome / Edge 扩展）
 
-只为 DeepSeek Harness 添加「Backspace」实时海洋背景：在本机 Harness 界面
-（`http://127.0.0.1/*`、`http://localhost/*`）背后渲染海洋，并把界面面板变成
+为 DeepSeek Harness 提供海洋、事件视界、吸积涡旋和本地视频背景；两个宇宙入口是同一场景的不同视角。在本机 Harness 界面
+（`http://127.0.0.1/*`、`http://localhost/*`）背后渲染背景，并把界面面板变成
 半透明玻璃。扩展不会接管新标签页、修改浏览器主页或影响用户已有的新标签页扩展，
-也不会修改其他本地网站。
+也不会修改其他本地网站。此扩展作用于浏览器中的 Harness，不能给 Desktop 换肤。
 
-## 安装（直接启用）
+仓库与技术名为 `dsh-zed-space`，当前 `1.3.0` 是未发布候选版；npm、GitHub Release 与市场条目尚未发布。请 clone [新仓库](https://github.com/hetonghao/dsh-zed-space) 后加载本地目录。正式远程安装入口须在发布审核通过后启用，不能将候选版当作商店已上架版本。
+
+## 安装本地候选版
 
 1. 打开 Chrome/Edge：地址栏输入 `chrome://extensions`（Edge 是 `edge://extensions`）。
 2. 右上角打开 **开发者模式**。
-3. 点 **加载已解压的扩展程序**，选择本仓库的 `extension` 文件夹。
+3. 点 **加载已解压的扩展程序**，选择 clone 后的 `dsh-zed-space/extension` 文件夹。
 4. 完成。打开或刷新 `127.0.0.1:3080` 的 DeepSeek Harness 即可看到背景皮肤。
 
-关闭皮肤：点工具栏的扩展图标 → 弹窗里关掉「界面海洋背景」。
+打开页面左下角「皮肤设置」切换背景。关闭皮肤：点工具栏的扩展图标 → 弹窗里关掉「界面海洋背景」（当前开关标签）。同一实例只启用一种安装方式。
 
 扩展虽然需要覆盖 `127.0.0.1` 和 `localhost` 的不同端口，但注入前会验证 Harness
 标题、`#root` 节点和服务端注入的 `window.__DSH_BOOT__` 标记。三项同时满足才会
-启动海洋，因此普通本地开发页面保持原样。
+启动皮肤，因此普通本地开发页面保持原样。扩展资源使用扩展自身的 origin；静态安装方式的 `/dsh-zed-space/` 路径不适用于这里。
+
+## 更新与数据边界
+
+设置继续使用既有 `bs*`、`skin*` 键，本地视频库仍名为 `backspace-videos`。保留名称不代表能跨 origin 或浏览器 profile 读取数据。扩展重装或更换 ID 可能改变扩展 origin，不能承诺旧视频自动保留；迁移前保留原文件，必要时重新导入。视频没有跨扩展迁移或云同步功能。详见[迁移说明](../docs/publishing/migration.md)。
 
 ## 与原始站点版的区别（占用优化）
+
+以下保留 Backspace 海洋实现的历史对比，仅描述海洋；旧实测数据不是本次候选版或宇宙、视频背景的性能验证。
 
 | 项目 | 原始 `site/` | 本扩展 |
 | --- | --- | --- |
@@ -43,6 +51,8 @@
 ## 文件说明
 
 - `skin.html` — 无 UI 背景页（皮肤 iframe）
+- `cosmos.html` / `cosmos.js` / `skins/` — 宇宙场景与视角
+- `video.html` / `video.js` / `video-media.js` — 本地视频背景与存储
 - `ocean.js` — 共享优化引擎（`?skin=1` 切换皮肤模式）
 - `styles.css` — 共享样式（字体已本地化，零网络请求）
 - `content.js` — Harness 身份校验与皮肤注入（玻璃令牌覆盖 + iframe）
@@ -50,3 +60,5 @@
 - `vendor/` — 本地化并压缩过的 three.js 0.178（webgpu/tsl/addons）+ Geist 字体
 
 原始网站版本保留在 `../site/`，未做任何改动。
+
+Zed Space Skin 延续 Backspace 的代码与历史；改名不改变既有版权和第三方许可，见 [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md)。
