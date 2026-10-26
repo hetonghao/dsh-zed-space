@@ -14,15 +14,12 @@ cpSync(resolve(root, 'shared/ocean.js'), resolve(output, 'ocean.js'))
 cpSync(resolve(root, 'shared/styles.css'), resolve(output, 'styles.css'))
 cpSync(resolve(root, 'shared/vendor'), resolve(output, 'vendor'), { recursive: true })
 cpSync(resolve(root, 'extension/icons/icon48.png'), resolve(output, 'icon48.png'))
-cpSync(resolve(root, 'docs/marketplace/backspace-harness-cover.png'), resolve(output, 'og.png'))
+cpSync(resolve(root, 'docs/marketplace/zed-space-skin-cover.png'), resolve(output, 'og.png'))
 
 const media = resolve(output, 'media')
 mkdirSync(media, { recursive: true })
 for (const name of [
-  'harness-dark-overview-40.gif',
-  'harness-light-overview-40.gif',
-  'harness-wave-control-40.gif',
-  'harness-daylight-sunset-40.gif',
+  'zed-ocean.png', 'zed-horizon.png', 'zed-horizon-light.png', 'zed-vortex.png', 'zed-video.png',
 ]) {
   cpSync(resolve(root, 'docs/screenshots', name), resolve(media, name))
 }

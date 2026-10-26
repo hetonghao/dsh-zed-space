@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#061116">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'">
-  <meta name="description" content="Backspace：为 DeepSeek Harness 打造的可调节 WebGPU 实时海洋皮肤。">
+  <meta name="description" content="Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤。海洋、宇宙双视角、本地视频库与平滑切换。1.3.0 候选版，尚未发布。">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Backspace · DeepSeek Harness 海洋皮肤">
-  <meta property="og:description" content="亲手调节波浪、日光与界面通透度，体验真正运行的 WebGPU 海洋皮肤。">
-  <meta property="og:image" content="https://hetonghao.github.io/dsh-backspace/og.png">
-  <meta property="og:url" content="https://hetonghao.github.io/dsh-backspace/">
+  <meta property="og:title" content="Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤">
+  <meta property="og:description" content="海洋、宇宙双视角与本地视频库。1.3.0 候选版，尚未发布。">
+  <meta property="og:image" content="https://hetonghao.github.io/dsh-zed-space/og.png">
+  <meta property="og:url" content="https://hetonghao.github.io/dsh-zed-space/">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Backspace · DeepSeek Harness 海洋皮肤">
-  <meta name="twitter:description" content="亲手调节波浪、日光与界面通透度。">
-  <meta name="twitter:image" content="https://hetonghao.github.io/dsh-backspace/og.png">
-  <title>Backspace · DeepSeek Harness 海洋皮肤</title>
+  <meta name="twitter:title" content="Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤">
+  <meta name="twitter:description" content="海洋、宇宙双视角与本地视频库。">
+  <meta name="twitter:image" content="https://hetonghao.github.io/dsh-zed-space/og.png">
+  <title>Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤</title>
   <link rel="icon" href="./icon48.png" type="image/png">
   <link rel="stylesheet" href="./site.css">
   <link rel="preload" as="image" href="./ocean-preview.jpg" fetchpriority="high">
@@ -24,25 +24,21 @@
   <a class="skip-link" href="#main" data-i18n="skip">跳到主要内容</a>
 
   <header class="site-nav" aria-label="Main navigation">
-    <a class="brand" href="#top" aria-label="Backspace home">
+    <a class="brand" href="#top" aria-label="Zed Space Skin home">
       <span class="brand-mark" aria-hidden="true">
-        <svg class="brand-symbol" viewBox="0 0 48 48" focusable="false">
-          <path d="M10 17.5c4.5-4 9-4 13.5 0s9 4 14.5 0"></path>
-          <path d="M10 24c4.5-4 9-4 13.5 0s9 4 14.5 0"></path>
-          <path d="M10 30.5c4.5-4 9-4 13.5 0s9 4 14.5 0"></path>
-        </svg>
+        <img class="brand-symbol" src="./brand/zed-space-mark.png" alt="" width="48" height="48">
       </span>
-      <span>BACKSPACE</span>
+      <span>ZED SPACE SKIN</span>
       <small>FOR HARNESS</small>
     </a>
     <nav class="nav-links" aria-label="Page sections">
       <a href="#features" data-i18n="navFeatures">特色</a>
-      <a href="#gallery" data-i18n="navGallery">实拍</a>
-      <a href="#install" data-i18n="navInstall">安装</a>
+      <a href="#gallery" data-i18n="navGallery">场景</a>
+      <a href="#install" data-i18n="navInstall">候选版</a>
     </nav>
     <div class="nav-actions">
       <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch language">EN</button>
-      <a class="nav-github" href="https://github.com/hetonghao/dsh-backspace" target="_blank" rel="noreferrer">
+      <a class="nav-github" href="https://github.com/hetonghao/dsh-zed-space" target="_blank" rel="noreferrer">
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
           <path fill="currentColor" d="M8 0C3.58 0 0 3.64 0 8.13c0 3.59 2.29 6.64 5.47 7.71.4.08.55-.17.55-.39 0-.19-.01-.83-.01-1.5-2.01.38-2.53-.5-2.69-.96-.09-.23-.48-.96-.82-1.15-.28-.15-.68-.53-.01-.54.63-.01 1.08.59 1.23.83.72 1.23 1.87.88 2.33.67.07-.53.28-.88.51-1.08-1.78-.2-3.64-.9-3.64-4.01 0-.89.31-1.62.82-2.19-.08-.2-.36-1.04.08-2.16 0 0 .67-.22 2.2.84A7.5 7.5 0 0 1 8 3.99c.68 0 1.36.09 2 .27 1.53-1.06 2.2-.84 2.2-.84.44 1.12.16 1.96.08 2.16.51.57.82 1.3.82 2.19 0 3.12-1.87 3.81-3.65 4.01.29.25.54.74.54 1.5 0 1.08-.01 1.95-.01 2.22 0 .22.15.47.55.39A8.04 8.04 0 0 0 16 8.13C16 3.64 12.42 0 8 0Z"></path>
         </svg>
@@ -55,17 +51,17 @@
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="ocean-fallback" aria-hidden="true"></div>
       <noscript><p class="ocean-noscript">当前显示静态海面预览。启用 JavaScript 即可调节实时海洋。 / Enable JavaScript for the live ocean.</p></noscript>
-      <iframe id="ocean-frame" class="ocean-frame" title="Interactive Backspace WebGPU ocean" tabindex="-1" aria-hidden="true"></iframe>
+      <iframe id="ocean-frame" class="ocean-frame" title="Interactive Zed Space Skin ocean preview" tabindex="-1" aria-hidden="true"></iframe>
       <div class="grain" aria-hidden="true"></div>
       <div class="chart-lines" aria-hidden="true"></div>
 
       <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span><span data-i18n="eyebrow">DEEPSEEK HARNESS · 实时海洋皮肤</span></div>
-        <h1 id="hero-title" data-i18n="heroTitle">让 Harness<br>拥有自己的海平线</h1>
-        <p data-i18n="heroBody">不是壁纸，而是一片会随你调节的 WebGPU 海洋。拖动右侧控制台，亲手改变波浪、日光与界面通透度。</p>
+        <div class="eyebrow"><span class="live-dot"></span><span data-i18n="eyebrow">DeepSeek Harness · 动态背景与界面皮肤</span></div>
+        <h1 id="hero-title" data-i18n="heroTitle">Zed Space Skin</h1>
+        <p data-i18n="heroBody">海洋、宇宙双视角和本地视频，让 Harness 随你的工作场景变化。每个场景单独保存参数，切换时平滑衔接。</p>
         <div class="hero-actions">
-          <a class="primary-action" href="#install"><span data-i18n="installNow">立即安装</span><span aria-hidden="true">↓</span></a>
-          <a class="quiet-action" href="#gallery"><span data-i18n="seeReal">查看真实 Harness 实拍</span><span aria-hidden="true">↘</span></a>
+          <a class="primary-action" href="#install"><span data-i18n="installNow">查看候选版状态</span><span aria-hidden="true">↓</span></a>
+          <a class="quiet-action" href="#gallery"><span data-i18n="seeReal">查看多场景演示</span><span aria-hidden="true">↘</span></a>
         </div>
         <div class="hero-meta" aria-label="Project highlights">
           <span>WEBGPU + TSL</span>
@@ -77,8 +73,8 @@
       <section class="control-dock" aria-label="Live ocean controls">
         <div class="dock-heading">
           <div>
-            <span class="dock-index">LIVE / 01</span>
-            <h2 data-i18n="labTitle">潮汐实验台</h2>
+
+            <h2 data-i18n="labTitle">海洋实时预览</h2>
           </div>
           <span class="renderer-status" id="renderer-status" role="status" aria-live="polite"><i></i><span data-i18n="rendererLoading">预览海面 · 正在启动</span></span>
         </div>
@@ -110,7 +106,7 @@
         <input class="range" id="transparency" type="range" min="20" max="86" value="64" aria-label="Interface transparency">
 
         <div class="dock-footer">
-          <span data-i18n="uiMode">界面模式</span>
+          <span data-i18n="uiMode">截图主题</span>
           <div class="theme-toggle" role="group" aria-label="Interface theme">
             <button type="button" class="active" data-theme-choice="dark" data-i18n="dark">深色</button>
             <button type="button" data-theme-choice="light" data-i18n="light">浅色</button>
@@ -118,147 +114,112 @@
         </div>
       </section>
 
-      <section class="harness-window" aria-label="Real DeepSeek Harness recording with adjustable transparency">
+      <section class="harness-window" aria-label="Actual plugin in an isolated test interface">
         <div class="harness-topbar">
-          <span class="capture-identity"><i></i><span data-i18n="realCapture">真实 Harness 实录</span></span>
-          <span class="harness-address">127.0.0.1:3080</span>
+          <span class="capture-identity"><i></i><span data-i18n="realCapture">隔离验收界面</span></span>
+          <span class="harness-address">LOCAL TEST FIXTURE</span>
           <span class="capture-glass"><span data-i18n="captureGlass">通透度</span><output id="capture-opacity-output">64%</output></span>
         </div>
         <div class="harness-capture-stage">
-          <img class="harness-capture harness-capture-dark" src="./harness-dark-overview-40.jpg" data-motion-src="./media/harness-dark-overview-40.gif" loading="lazy" decoding="async" alt="Real Backspace skin running in DeepSeek Harness dark mode" draggable="false">
-          <img class="harness-capture harness-capture-light" src="./harness-light-overview-40.jpg" data-motion-src="./media/harness-light-overview-40.gif" loading="lazy" decoding="async" alt="Real Backspace skin running in DeepSeek Harness light mode" draggable="false">
+          <img class="harness-capture harness-capture-dark" src="./media/zed-horizon.png"  loading="lazy" decoding="async" alt="Zed Space Skin in an isolated test interface, dark mode" draggable="false">
+          <img class="harness-capture harness-capture-light" src="./media/zed-horizon-light.png"  loading="lazy" decoding="async" alt="Zed Space Skin in an isolated test interface, light mode" draggable="false">
           <div class="capture-glass-layer" aria-hidden="true"></div>
-          <div class="capture-status" aria-hidden="true"><i></i><span>REAL HARNESS · 40% GLASS RECORDING</span></div>
+          <div class="capture-status" aria-hidden="true"><i></i><span>ISOLATED TEST INTERFACE</span></div>
         </div>
       </section>
 
-      <div class="hero-coordinate" aria-hidden="true">31°13′N · 121°28′E / OCEAN RUNTIME</div>
+
       <a class="scroll-cue" href="#features"><span data-i18n="scroll">继续探索</span><i></i></a>
     </section>
 
     <section class="signal-strip" aria-label="Key facts">
-      <div><span>01</span><b data-i18n="factOne">只作用于 Harness</b><small data-i18n="factOneBody">不接管新标签页</small></div>
-      <div><span>02</span><b data-i18n="factTwo">五组 Gerstner 波</b><small>THREE.JS · TSL</small></div>
-      <div><span>03</span><b data-i18n="factThree">自适应性能</b><small>60 / 30 / 20 FPS</small></div>
-      <div><span>04</span><b data-i18n="factFour">可逆安装</b><small data-i18n="factFourBody">五种入口，按需选择</small></div>
+      <div><span>01</span><b data-i18n="factOne">用于 DeepSeek Harness</b><small data-i18n="factOneBody">社区皮肤插件</small></div>
+      <div><span>02</span><b data-i18n="factTwo">海洋与宇宙双视角</b><small>HORIZON · VORTEX</small></div>
+      <div><span>03</span><b data-i18n="factThree">本地视频库</b><small>32 MiB · 30s · 1080p</small></div>
+      <div><span>04</span><b data-i18n="factFour">1.3.0 候选版</b><small data-i18n="factFourBody">尚未发布</small></div>
     </section>
 
     <section class="feature-section section-shell" id="features" aria-labelledby="features-title">
       <div class="section-heading reveal">
-        <span class="section-number">02 / WHY BACKSPACE</span>
-        <h2 id="features-title" data-i18n="featuresTitle">一片真正属于<br>工作流的海</h2>
-        <p data-i18n="featuresBody">它不是覆盖在界面上的视频。海面、天空、太阳和反射由 GPU 实时生成，控制变化会立刻反馈到你的工作空间。</p>
+
+        <h2 id="features-title" data-i18n="featuresTitle">背景随场景切换</h2>
+        <p data-i18n="featuresBody">实时海洋、宇宙的地平线与漩涡视角，以及你导入的本地视频。各场景保留自己的参数和界面浓度。</p>
       </div>
       <div class="feature-grid">
         <article class="feature-large reveal">
-          <span class="feature-code">A · LIVE</span>
-          <h3 data-i18n="featureLive">实时，而非循环素材</h3>
-          <p data-i18n="featureLiveBody">五组 Gerstner 涌浪、解析法线、FBM 微表面、浪尖泡沫与 Fresnel 天空反射，共享同一组日光参数。</p>
+
+          <h3 data-i18n="featureLive">海洋与宇宙</h3>
+          <p data-i18n="featureLiveBody">海洋可调节波浪与日光；宇宙提供地平线和漩涡两个视角，可分别调节光晕、星点和运动参数。</p>
           <div class="wave-diagram" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
         </article>
         <article class="feature-card reveal">
-          <span class="feature-code">B · NATIVE</span>
-          <h3 data-i18n="featureHarness">为 Harness 而生</h3>
-          <p data-i18n="featureHarnessBody">左下角快捷控制、设置页原生入口、对话框层级修复，以及只识别真正 Harness 页面的浏览器扩展。</p>
+
+          <h3 data-i18n="featureHarness">每个场景，自己的参数</h3>
+          <p data-i18n="featureHarnessBody">快捷设置中选择场景、调整玻璃浓度，也可单独调整对话面板背景；返回场景时恢复原有参数。</p>
         </article>
         <article class="feature-card accent-card reveal">
-          <span class="feature-code">C · QUIET</span>
-          <h3 data-i18n="featureQuiet">安静地运行</h3>
-          <p data-i18n="featureQuietBody">隐藏标签页自动暂停，动态分辨率和低端设备降级，让海洋成为氛围，而不是负担。</p>
+
+          <h3 data-i18n="featureQuiet">平滑切换</h3>
+          <p data-i18n="featureQuietBody">海洋与宇宙切换时等待新画面就绪，再交叠过渡；宇宙两个视角在同一个渲染器内切换。</p>
         </article>
         <article class="feature-wide reveal">
-          <div><span class="feature-code">D · LOCAL</span><h3 data-i18n="featureLocal">没有遥测，也没有远程代码</h3></div>
-          <p data-i18n="featureLocalBody">three.js、TSL、字体和全部着色器随包本地提供。扩展只请求本机 Harness 地址与设置存储权限。</p>
-          <span class="privacy-seal"><i></i>0 BYTES COLLECTED</span>
+          <div><h3 data-i18n="featureLocal">本地视频库</h3></div>
+          <p data-i18n="featureLocalBody">多选导入、缩略图列表、单个启用、重命名和移除。每个视频不超过 32 MiB、30 秒、1080p，素材留在本机。</p>
+          <span class="privacy-seal"><i></i>LOCAL MEDIA</span>
         </article>
       </div>
     </section>
 
     <section class="gallery-section section-shell" id="gallery" aria-labelledby="gallery-title">
       <div class="section-heading gallery-heading reveal">
-        <span class="section-number">03 / FIELD RECORDINGS</span>
-        <h2 id="gallery-title" data-i18n="galleryTitle">来自真实 Harness<br>的海况记录</h2>
-        <p data-i18n="galleryBody">以下全部在 DeepSeek Harness 中录制，玻璃不透明度统一为 40%。不是概念图，也不是后期合成。</p>
+
+        <h2 id="gallery-title" data-i18n="galleryTitle">同一界面，不同背景</h2>
+        <p data-i18n="galleryBody">以下由真实插件代码在隔离验收界面中渲染并截图，展示海洋、宇宙双视角和视频管理；不是原生 Harness 实拍。</p>
       </div>
       <div class="gallery-grid">
         <figure class="gallery-item gallery-dark reveal">
-          <img src="./harness-dark-overview-40.jpg" data-motion-src="./media/harness-dark-overview-40.gif" loading="lazy" alt="Backspace in DeepSeek Harness dark mode">
-          <figcaption><span>01 · DARK CURRENT</span><b data-i18n="galleryDark">深色全景</b></figcaption>
+          <img src="./media/zed-ocean.png"  loading="lazy" alt="海洋及波浪与日光设置，隔离验收界面">
+          <figcaption><b data-i18n="galleryDark">海洋 · 波浪与日光</b></figcaption>
         </figure>
         <figure class="gallery-item gallery-light reveal">
-          <img src="./harness-light-overview-40.jpg" data-motion-src="./media/harness-light-overview-40.gif" loading="lazy" alt="Backspace in DeepSeek Harness light mode">
-          <figcaption><span>02 · PALE WATER</span><b data-i18n="galleryLight">浅色全景</b></figcaption>
+          <img src="./media/zed-horizon.png"  loading="lazy" alt="宇宙地平线及设置，隔离验收界面">
+          <figcaption><b data-i18n="galleryLight">宇宙 · 地平线</b></figcaption>
         </figure>
         <figure class="gallery-item reveal">
-          <img src="./harness-wave-control-40.jpg" data-motion-src="./media/harness-wave-control-40.gif" loading="lazy" alt="Adjusting wave size in DeepSeek Harness">
-          <figcaption><span>03 · SEA STATE</span><b data-i18n="galleryWaves">调节波浪</b></figcaption>
+          <img src="./media/zed-vortex.png"  loading="lazy" alt="宇宙漩涡及设置，隔离验收界面">
+          <figcaption><b data-i18n="galleryWaves">宇宙 · 漩涡</b></figcaption>
         </figure>
         <figure class="gallery-item reveal">
-          <img src="./harness-daylight-sunset-40.jpg" data-motion-src="./media/harness-daylight-sunset-40.gif" loading="lazy" alt="Adjusting daylight to sunset in DeepSeek Harness">
-          <figcaption><span>04 · GOLDEN HOUR</span><b data-i18n="gallerySunset">从白天到夕阳</b></figcaption>
+          <img src="./media/zed-video.png"  loading="lazy" alt="本地视频导入与播放，隔离验收界面">
+          <figcaption><b data-i18n="gallerySunset">本地视频 · 素材管理</b></figcaption>
         </figure>
       </div>
     </section>
 
     <section class="install-section section-shell" id="install" aria-labelledby="install-title">
       <div class="section-heading install-heading reveal">
-        <span class="section-number">04 / INSTALLATION</span>
-        <h2 id="install-title" data-i18n="installTitle">把海带回<br>你的 Harness</h2>
-        <p data-i18n="installBody">推荐直接安装 Harness 插件：官方客户端填包名，Harness Web 用命令。同一实例只选一种方式，无需再装浏览器扩展或第三方市场。</p>
+
+        <h2 id="install-title" data-i18n="installTitle">1.3.0 候选版</h2>
+        <p data-i18n="installBody">技术包名为 dsh-zed-space。npm、GitHub Release、插件市场和新版 Pages 均未发布；本页用于本地预览与审核。</p>
       </div>
-      <div class="install-grid">
-        <article class="install-card recommended reveal">
-          <div class="install-card-head"><span>01</span><strong data-i18n="recommended">推荐</strong></div>
-          <h3 data-i18n="desktopTitle">🖥️ 官方客户端 · Windows / Mac</h3>
-          <p data-i18n="desktopBody">无需终端：在桌面端打开「插件」→「添加插件」，输入下面的包名，安装后选择「立即启用」。可使用大陆镜像；未同步时切换官方 npm 源。</p>
-          <div class="code-line"><code>dsh-backspace@1.2.6</code><button type="button" data-copy="dsh-backspace@1.2.6" data-copy-kind="package" data-i18n-aria="copyPackage" aria-label="复制包名" data-i18n="copyButton">复制</button></div>
-          <a class="install-guide-link" id="desktop-guide-link" href="https://github.com/hetonghao/dsh-backspace/blob/main/docs/install.zh.md"><span data-i18n="desktopGuide">中文安装指南与常见报错</span><span>↗</span></a>
-        </article>
-        <article class="install-card reveal">
-          <div class="install-card-head"><span>02</span><strong>HARNESS WEB</strong></div>
-          <h3 data-i18n="webTitle">🌐 Harness 网页版</h3>
-          <p data-i18n="dshBody">Web 插件一行命令安装 v1.2.6；使用预构建 npm 包，无需访问 GitHub 下载压缩包。</p>
-          <div class="code-line"><code>dsh plugin --profile web add dsh-backspace@1.2.6</code><button type="button" data-copy="dsh plugin --profile web add dsh-backspace@1.2.6" data-i18n-aria="copy" aria-label="复制命令" data-i18n="copyButton">复制</button></div>
-          <small data-i18n="restart">安装后重新启动 dsh web</small>
-        </article>
-        <article class="install-card reveal">
-          <div class="install-card-head"><span>03</span><strong>CHROME / EDGE</strong></div>
-          <h3 data-i18n="browserExtension">浏览器扩展</h3>
-          <p data-i18n="browserBody">只为经过识别的 Harness 页面换肤，不会接管新标签页或影响其他本地网站。</p>
-          <a class="download-link" href="https://github.com/hetonghao/dsh-backspace/releases/download/v1.2.6/dsh-backspace-extension-v1.2.6.zip"><span data-i18n="downloadZip">下载 v1.2.6 ZIP</span><span>↓</span></a>
-        </article>
-        <article class="install-card reveal">
-          <div class="install-card-head"><span>04</span><strong>STATIC DIST</strong></div>
-          <h3 data-i18n="oneCommand">🔧 静态前端 · 进阶</h3>
-          <p data-i18n="staticBody">进阶备用：适用于 macOS / Linux 的 Bash。会修改已构建前端；Windows 官方客户端请选择方式 1。</p>
-          <div class="code-line"><code>curl -fsSL https://raw.githubusercontent.com/hetonghao/dsh-backspace/main/install.sh | bash</code><button type="button" data-copy="curl -fsSL https://raw.githubusercontent.com/hetonghao/dsh-backspace/main/install.sh | bash" data-i18n-aria="copy" aria-label="复制命令" data-i18n="copyButton">复制</button></div>
-        </article>
-      </div>
-      <div class="install-source reveal">
-        <span>05</span>
-        <div><h3 data-i18n="sourceTitle">🛠️ 源码接入</h3><p data-i18n="sourceBody">供自行编译 Harness 的开发者使用。普通客户端用户请选择方式 1。</p></div>
-        <a href="https://github.com/hetonghao/dsh-backspace/blob/main/harness-plugin/README.md" data-i18n="sourceGuide">查看源码接入指南</a>
-      </div>
+      <div class="install-source reveal"><div><h3 data-i18n="sourceTitle">从源码本地验收</h3><p data-i18n="sourceBody">开发者可构建当前候选代码，在隔离环境验证。发布前请勿把候选包名当成可直接安装的 npm 版本。</p></div><a href="https://github.com/hetonghao/dsh-zed-space/blob/main/docs/dsh-plugin.md" data-i18n="sourceGuide">查看构建与接入说明</a></div>
       <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
     </section>
 
+    <section class="section-shell faq-section" id="faq" aria-labelledby="faq-title"><h2 id="faq-title" data-i18n="faqTitle">常见问题</h2><details><summary data-i18n="faqInstall">现在可以安装新版吗？</summary><p data-i18n="faqInstallBody">还不能从 npm、Release 或插件市场安装 1.3.0。发布完成后会更新安装说明；当前仅供源码本地验收。</p></details><details><summary data-i18n="faqMarket">有共享壁纸市场吗？</summary><p data-i18n="faqMarketBody">目前没有。共享壁纸库属于规划；本地视频库已在当前代码中实现，素材不会自动上传。</p></details><details><summary data-i18n="faqScope">适用于哪个 DeepSeek 产品？</summary><p data-i18n="faqScopeBody">适用于 DeepSeek Harness，不是 DeepSeek 网页聊天站点。项目为社区作品，与 DeepSeek 官方没有隶属关系。</p></details></section>
     <section class="closing-section">
       <div class="closing-ocean" aria-hidden="true"></div>
       <div class="closing-copy reveal">
         <span>OPEN SOURCE · MIT</span>
-        <h2 data-i18n="closingTitle">工作可以很深，<br>界面不必沉重。</h2>
-        <p data-i18n="closingBody">Backspace 免费、开源、本地优先。欢迎把它带进你的 Harness，也欢迎一起把这片海做得更好。</p>
+        <h2 data-i18n="closingTitle">选择背景，继续工作</h2>
+        <p data-i18n="closingBody">Zed Space Skin 是面向 DeepSeek Harness 的社区插件。共享壁纸库仍在规划，当前提供本地视频管理。</p>
         <div class="closing-actions">
-          <a class="primary-action" href="https://github.com/hetonghao/dsh-backspace" target="_blank" rel="noreferrer"><span data-i18n="visitGitHub">前往 GitHub</span><span>↗</span></a>
-          <a class="quiet-action" href="https://github.com/hetonghao/dsh-backspace/releases/tag/v1.2.6"><span data-i18n="viewRelease">查看最新 Release</span><span>→</span></a>
+          <a class="primary-action" href="https://github.com/hetonghao/dsh-zed-space" target="_blank" rel="noreferrer"><span data-i18n="visitGitHub">前往 GitHub</span><span>↗</span></a>
+          <a class="quiet-action" href="https://github.com/hetonghao/dsh-zed-space/blob/main/CHANGELOG.md"><span data-i18n="viewRelease">查看候选版说明</span><span>→</span></a>
         </div>
       </div>
       <div class="closing-mark" aria-hidden="true">
-        <svg class="brand-symbol" viewBox="0 0 48 48" focusable="false">
-          <path d="M10 17.5c4.5-4 9-4 13.5 0s9 4 14.5 0"></path>
-          <path d="M10 24c4.5-4 9-4 13.5 0s9 4 14.5 0"></path>
-          <path d="M10 30.5c4.5-4 9-4 13.5 0s9 4 14.5 0"></path>
-        </svg>
+        <img class="brand-symbol" src="./brand/zed-space-mark.png" alt="" width="48" height="48">
       </div>
     </section>
   </main>
@@ -266,16 +227,12 @@
   <footer>
     <a class="brand footer-brand" href="#top">
       <span class="brand-mark" aria-hidden="true">
-        <svg class="brand-symbol" viewBox="0 0 48 48" focusable="false">
-          <path d="M10 17.5c4.5-4 9-4 13.5 0s9 4 14.5 0"></path>
-          <path d="M10 24c4.5-4 9-4 13.5 0s9 4 14.5 0"></path>
-          <path d="M10 30.5c4.5-4 9-4 13.5 0s9 4 14.5 0"></path>
-        </svg>
+        <img class="brand-symbol" src="./brand/zed-space-mark.png" alt="" width="48" height="48">
       </span>
-      <span>BACKSPACE</span><small>FOR HARNESS</small>
+      <span>ZED SPACE SKIN</span><small>FOR HARNESS</small>
     </a>
     <p>© 2026 hetonghao · MIT LICENSE</p>
-    <div><a href="https://github.com/hetonghao/dsh-backspace/blob/main/docs/privacy.md" data-i18n="privacyPolicy">隐私</a><a href="https://github.com/hetonghao/dsh-backspace/issues" data-i18n="issues">问题反馈</a></div>
+    <div><a href="https://github.com/hetonghao/dsh-zed-space/blob/main/docs/privacy.md" data-i18n="privacyPolicy">隐私</a><a href="https://github.com/hetonghao/dsh-zed-space/issues" data-i18n="issues">问题反馈</a></div>
   </footer>
 
   <script type="module" src="./app.js"></script>

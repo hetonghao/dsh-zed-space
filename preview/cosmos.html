@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
   <link rel="icon" href="data:,">
-  <title>宇宙 · Backspace</title>
+  <title>宇宙 · Zed Space Skin</title>
   <style>
     @font-face { font-family: Geist; src: url('../shared/vendor/fonts/geist-sans-latin-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
     :root { --ink: #f2eee8; --muted: #b8b4b1; --surface: #151416; --line: #484448; --space: clamp(24px, 3.4vw, 52px); color-scheme: dark; font: 14px/1.5 Geist, 'PingFang SC', 'Microsoft YaHei', sans-serif; color: var(--ink); background: #010102; }
@@ -99,7 +99,7 @@
     const syncView = () => {
       $('name').textContent = names[skinId];
       $('description').textContent = skinId === 'horizon' ? '侧视吸积盘 · 切换至涡旋，升起视角' : '俯瞰吸积盘 · 切换至视界，贴近盘面';
-      document.title = `${names[skinId]} · Backspace`;
+      document.title = `${names[skinId]} · Zed Space Skin`;
       document.body.dataset.skin = skinId;
       for (const id of Object.keys(names)) $(`view-${id}`).setAttribute('aria-pressed', String(id === skinId));
       const url = new URL(location.href);

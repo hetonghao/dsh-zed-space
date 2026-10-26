@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdir } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { chromium } from 'playwright'
 import { chromiumArgs, findChromeForTesting, serveDirectory, setRange } from './browser-support.mjs'
@@ -40,14 +40,9 @@ try {
   await page.waitForFunction(() => document.querySelector('#ocean-frame').contentWindow.__bsState().sea > 1.4)
   await page.waitForTimeout(700)
   await screenshot(page, 'ready-desktop')
-  await page.locator('.harness-window').scrollIntoViewIfNeeded()
-  await page.waitForFunction(() => document.querySelector('.harness-capture-dark').src.endsWith('.gif'))
-  assert.ok(!gifs.some(url => url.includes('light-overview')), 'Hidden theme should not download a GIF')
-  await page.locator('[data-theme-choice="light"]').click()
-  await page.locator('.harness-window').scrollIntoViewIfNeeded()
-  await page.waitForFunction(() => document.querySelector('.harness-capture-light').src.endsWith('.gif'))
+  assert.equal(gifs.length, 0, 'current scene gallery uses static captures, not historical GIFs')
   await page.close()
-  console.log('✓ Poster, zero eager GIFs, late first frame, queued controls, visible-theme loading')
+  console.log('✓ Poster, zero eager GIFs, late first frame, queued controls, static scene captures')
 
   const failure = await browser.newPage({ viewport: { width: 390, height: 844 } })
   await failure.route('**/ocean.js?skin=1', route => route.abort())
@@ -64,9 +59,9 @@ try {
   await failure.locator('#renderer-status.ready').waitFor({ timeout: 45_000 })
   await failure.locator('.harness-window').scrollIntoViewIfNeeded()
   await failure.waitForTimeout(1000)
-  assert.match(await failure.locator('.harness-capture-dark').getAttribute('src'), /\.jpg$/)
+  assert.match(await failure.locator('.harness-capture-dark').getAttribute('src'), /\.png$/)
   await failure.close()
-  console.log('✓ Failed download, source validation, mobile fallback, retry, failed GIF keeps poster')
+  console.log('✓ Failed download, source validation, mobile fallback, retry, static scene image remains available')
 
   // Exercise the full timeout without spending 45 seconds in every CI run.
   const timeout = await browser.newPage()
@@ -101,8 +96,10 @@ try {
   assert.equal(await noJS.locator('.ocean-noscript').isVisible(), true)
   await screenshot(noJS, 'no-javascript')
   await noJS.close()
-  console.log('✓ Reduced-motion static recordings and no-JavaScript preview')
+  console.log('✓ Reduced-motion static captures and no-JavaScript preview')
+  if (screenshotDir) await writeFile(resolve(screenshotDir, 'loading-results.json'), JSON.stringify({ status: 'PASS', scenarios: ['delayed-first-frame', 'queued-controls', 'no-historical-gifs', 'download-failure', 'message-source-validation', 'retry', 'timeout-then-ready', 'reduced-motion', 'no-javascript'] }, null, 2))
 } finally {
   await browser.close()
   await server.close()
+  if (screenshotDir) await writeFile(resolve(screenshotDir, 'loading-cleanup.json'), JSON.stringify({ browserClosed: true, serverClosed: true, actualHarnessAccessed: false }, null, 2))
 }

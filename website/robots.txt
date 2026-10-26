@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hetonghao.github.io/dsh-backspace/sitemap.xml
+Sitemap: https://hetonghao.github.io/dsh-zed-space/sitemap.xml

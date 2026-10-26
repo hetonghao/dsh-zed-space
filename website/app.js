@@ -1,68 +1,170 @@
 const translations = {
-  zh: {
-    skip: '跳到主要内容', navFeatures: '特色', navGallery: '实拍', navInstall: '安装', source: '源代码',
-    eyebrow: 'DEEPSEEK HARNESS · 实时海洋皮肤', heroTitle: '让 Harness<br>拥有自己的海平线',
-    heroBody: '不是壁纸，而是一片会随你调节的 WebGPU 海洋。拖动右侧控制台，亲手改变波浪、日光与界面通透度。',
-    installNow: '立即安装', seeReal: '查看真实 Harness 实拍', localOnly: '资源全本地', noTracking: '零数据收集',
-    labTitle: '潮汐实验台', rendererLoading: '预览海面 · 正在启动', rendererReady: '实时渲染中', rendererFallback: '海面预览模式',
-    rendererSlow: '实时海洋准备中', loadingNote: '先显示海面预览，实时波浪准备中。可以先调节参数。', readyNote: '实时海洋已就绪。拖动滑块，探索你的海况与光线。', slowNote: '首次加载需要下载渲染资源并准备 GPU，海面就绪后会自动切换。', fallbackNote: '实时海洋暂未就绪，已保留海面预览。你可以重试，或继续查看实拍与安装说明。', retryOcean: '重新加载实时海洋',
-    calm: '平静', sunset: '夕阳', highSea: '高海况', waves: '波浪大小', wavesNote: '从镜面到涌浪',
-    daylight: '日光', daylightNote: '正午到黄昏', transparency: '界面通透度', transparencyNote: '让海洋浮现',
-    uiMode: '界面模式', dark: '深色', light: '浅色', realCapture: '真实 Harness 实录', captureGlass: '通透度',
-    settings: '设置', taskTitle: '打造一片可交互的海', modelMode: '标准模式⌄', welcome: '探索未至之境',
-    welcomeBody: 'Backspace 让 DeepSeek Harness 的工作空间随海况与光线呼吸。', composer: '描述你想构建的内容',
-    detailsTitle: '当前环境', rendering: '渲染', privacy: '隐私', local: '本地', fps: '帧率', scroll: '继续探索',
-    factOne: '只作用于 Harness', factOneBody: '不接管新标签页', factTwo: '五组 Gerstner 波', factThree: '自适应性能',
-    factFour: '可逆安装', factFourBody: '五种入口，按需选择', featuresTitle: '一片真正属于<br>工作流的海',
-    featuresBody: '它不是覆盖在界面上的视频。海面、天空、太阳和反射由 GPU 实时生成，控制变化会立刻反馈到你的工作空间。',
-    featureLive: '实时，而非循环素材', featureLiveBody: '五组 Gerstner 涌浪、解析法线、FBM 微表面、浪尖泡沫与 Fresnel 天空反射，共享同一组日光参数。',
-    featureHarness: '为 Harness 而生', featureHarnessBody: '左下角快捷控制、设置页原生入口、对话框层级修复，以及只识别真正 Harness 页面的浏览器扩展。',
-    featureQuiet: '安静地运行', featureQuietBody: '隐藏标签页自动暂停，动态分辨率和低端设备降级，让海洋成为氛围，而不是负担。',
-    featureLocal: '没有遥测，也没有远程代码', featureLocalBody: 'three.js、TSL、字体和全部着色器随包本地提供。扩展只请求本机 Harness 地址与设置存储权限。',
-    galleryTitle: '来自真实 Harness<br>的海况记录', galleryBody: '以下全部在 DeepSeek Harness 中录制，玻璃不透明度统一为 40%。不是概念图，也不是后期合成。',
-    galleryDark: '深色全景', galleryLight: '浅色全景', galleryWaves: '调节波浪', gallerySunset: '从白天到夕阳',
-    installTitle: '把海带回<br>你的 Harness', installBody: '推荐直接安装 Harness 插件：官方客户端填包名，Harness Web 用命令。同一实例只选一种方式，无需再装浏览器扩展或第三方市场。',
-    desktopTitle: '🖥️ 官方客户端 · Windows / Mac', webTitle: '🌐 Harness 网页版', copyButton: '复制', sourceTitle: '🛠️ 源码接入', sourceBody: '供自行编译 Harness 的开发者使用。普通客户端用户请选择方式 1。', sourceGuide: '查看源码接入指南', recommended: '优先推荐', desktopBody: '无需终端：在桌面端打开「插件」→「添加插件」，输入下面的包名，安装后选择「立即启用」。可使用大陆镜像；未同步时切换官方 npm 源。', desktopGuide: '中文安装指南与常见报错',
-    dshBody: 'Web 插件一行命令安装 v1.2.6；使用预构建 npm 包，无需访问 GitHub 下载压缩包。', restart: '安装后重新启动 dsh web',
-    browserExtension: '🧩 浏览器扩展', browserBody: '只为经过识别的 Harness 页面换肤，不会接管新标签页或影响其他本地网站。',
-    downloadZip: '下载 v1.2.6 ZIP', oneCommand: '🔧 静态前端 · 进阶', staticBody: '进阶备用：适用于 macOS / Linux 的 Bash。会修改已构建前端；Windows 官方客户端请选择方式 1。',
-    copy: '复制命令', copied: '命令已复制', copyFailed: '复制失败，请手动选择命令', copyPackage: '复制包名', copiedPackage: '包名已复制', copyPackageFailed: '复制失败，请手动选择包名',
-    closingTitle: '工作可以很深，<br>界面不必沉重。', closingBody: 'Backspace 免费、开源、本地优先。欢迎把它带进你的 Harness，也欢迎一起把这片海做得更好。',
-    visitGitHub: '前往 GitHub', viewRelease: '查看最新 Release', privacyPolicy: '隐私', issues: '问题反馈',
-    timeDusk: '黄昏', timeGolden: '金色时刻', timeAfternoon: '下午', timeNoon: '正午',
+  "zh": {
+    "skip": "跳到主要内容",
+    "navFeatures": "特色",
+    "navGallery": "场景",
+    "navInstall": "候选版",
+    "source": "源代码",
+    "eyebrow": "DeepSeek Harness · 动态背景与界面皮肤",
+    "heroTitle": "Zed Space Skin",
+    "heroBody": "海洋、宇宙双视角和本地视频，让 Harness 随你的工作场景变化。每个场景单独保存参数，切换时平滑衔接。",
+    "installNow": "查看候选版状态",
+    "seeReal": "查看多场景演示",
+    "localOnly": "资源全本地",
+    "noTracking": "零数据收集",
+    "labTitle": "海洋实时预览",
+    "rendererLoading": "预览海面 · 正在启动",
+    "rendererReady": "实时渲染中",
+    "rendererFallback": "海面预览模式",
+    "rendererSlow": "实时海洋准备中",
+    "loadingNote": "先显示海面预览，实时波浪准备中。可以先调节参数。",
+    "readyNote": "实时海洋已就绪。拖动滑块，探索你的海况与光线。",
+    "slowNote": "首次加载需要下载渲染资源并准备 GPU，海面就绪后会自动切换。",
+    "fallbackNote": "实时海洋暂未就绪，已保留海面预览。可以重试，或继续查看场景截图与候选版说明。",
+    "retryOcean": "重新加载实时海洋",
+    "calm": "平静",
+    "sunset": "夕阳",
+    "highSea": "高海况",
+    "waves": "波浪大小",
+    "wavesNote": "从镜面到涌浪",
+    "daylight": "日光",
+    "daylightNote": "正午到黄昏",
+    "transparency": "界面通透度",
+    "transparencyNote": "让海洋浮现",
+    "uiMode": "截图主题",
+    "dark": "深色",
+    "light": "浅色",
+    "realCapture": "隔离验收界面",
+    "captureGlass": "通透度",
+    "scroll": "继续探索",
+    "factOne": "用于 DeepSeek Harness",
+    "factOneBody": "社区皮肤插件",
+    "factTwo": "海洋与宇宙双视角",
+    "factThree": "本地视频库",
+    "factFour": "1.3.0 候选版",
+    "factFourBody": "尚未发布",
+    "featuresTitle": "背景随场景切换",
+    "featuresBody": "实时海洋、宇宙的地平线与漩涡视角，以及你导入的本地视频。各场景保留自己的参数和界面浓度。",
+    "featureLive": "海洋与宇宙",
+    "featureLiveBody": "海洋可调节波浪与日光；宇宙提供地平线和漩涡两个视角，可分别调节光晕、星点和运动参数。",
+    "featureHarness": "每个场景，自己的参数",
+    "featureHarnessBody": "快捷设置中选择场景、调整玻璃浓度，也可单独调整对话面板背景；返回场景时恢复原有参数。",
+    "featureQuiet": "平滑切换",
+    "featureQuietBody": "海洋与宇宙切换时等待新画面就绪，再交叠过渡；宇宙两个视角在同一个渲染器内切换。",
+    "featureLocal": "本地视频库",
+    "featureLocalBody": "多选导入、缩略图列表、单个启用、重命名和移除。每个视频不超过 32 MiB、30 秒、1080p，素材留在本机。",
+    "galleryTitle": "同一界面，不同背景",
+    "galleryBody": "以下由真实插件代码在隔离验收界面中渲染并截图，展示海洋、宇宙双视角和视频管理；不是原生 Harness 实拍。",
+    "galleryDark": "海洋 · 波浪与日光",
+    "galleryLight": "宇宙 · 地平线",
+    "galleryWaves": "宇宙 · 漩涡",
+    "gallerySunset": "本地视频 · 素材管理",
+    "installTitle": "1.3.0 候选版",
+    "installBody": "技术包名为 dsh-zed-space。npm、GitHub Release、插件市场和新版 Pages 均未发布；本页用于本地预览与审核。",
+    "sourceTitle": "从源码本地验收",
+    "sourceBody": "开发者可构建当前候选代码，在隔离环境验证。发布前请勿把候选包名当成可直接安装的 npm 版本。",
+    "sourceGuide": "查看构建与接入说明",
+    "closingTitle": "选择背景，继续工作",
+    "closingBody": "Zed Space Skin 是面向 DeepSeek Harness 的社区插件。共享壁纸库仍在规划，当前提供本地视频管理。",
+    "visitGitHub": "前往 GitHub",
+    "viewRelease": "查看候选版说明",
+    "privacyPolicy": "隐私",
+    "issues": "问题反馈",
+    "timeDusk": "黄昏",
+    "timeGolden": "金色时刻",
+    "timeAfternoon": "下午",
+    "timeNoon": "正午",
+    "faqTitle": "常见问题",
+    "faqInstall": "现在可以安装新版吗？",
+    "faqInstallBody": "还不能从 npm、Release 或插件市场安装 1.3.0。发布完成后会更新安装说明；当前仅供源码本地验收。",
+    "faqMarket": "有共享壁纸市场吗？",
+    "faqMarketBody": "目前没有。共享壁纸库属于规划；本地视频库已在当前代码中实现，素材不会自动上传。",
+    "faqScope": "适用于哪个 DeepSeek 产品？",
+    "faqScopeBody": "适用于 DeepSeek Harness，不是 DeepSeek 网页聊天站点。项目为社区作品，与 DeepSeek 官方没有隶属关系。"
   },
-  en: {
-    skip: 'Skip to main content', navFeatures: 'Features', navGallery: 'Gallery', navInstall: 'Install', source: 'Source',
-    eyebrow: 'DEEPSEEK HARNESS · REALTIME OCEAN SKIN', heroTitle: 'Give Harness<br>its own horizon',
-    heroBody: 'Not a wallpaper—a WebGPU ocean that responds to you. Use the live console to shape the waves, daylight, and interface transparency.',
-    installNow: 'Install now', seeReal: 'See real Harness captures', localOnly: 'All assets local', noTracking: 'Zero data collection',
-    labTitle: 'Tidal laboratory', rendererLoading: 'Preview · Starting', rendererReady: 'Rendering live', rendererFallback: 'Ocean preview mode',
-    rendererSlow: 'Preparing live ocean', loadingNote: 'An ocean preview appears first. Adjust the controls while the live waves prepare.', readyNote: 'The ocean is live. Shape the waves and light with the sliders.', slowNote: 'The first visit downloads the renderer and prepares your GPU. Live waves will appear automatically.', fallbackNote: 'Live rendering is not ready. The ocean preview stays visible; retry or explore the captures and install guide.', retryOcean: 'Retry live ocean',
-    calm: 'Calm', sunset: 'Sunset', highSea: 'High sea', waves: 'Wave size', wavesNote: 'Mirror to swell',
-    daylight: 'Daylight', daylightNote: 'Noon to dusk', transparency: 'UI transparency', transparencyNote: 'Reveal the ocean',
-    uiMode: 'Interface mode', dark: 'Dark', light: 'Light', realCapture: 'Real Harness recording', captureGlass: 'Transparency',
-    settings: 'Settings', taskTitle: 'Build an interactive sea', modelMode: 'Standard mode⌄', welcome: 'Explore what lies beyond',
-    welcomeBody: 'Backspace lets the DeepSeek Harness workspace breathe with sea state and light.', composer: 'Describe what you want to build',
-    detailsTitle: 'Current environment', rendering: 'Rendering', privacy: 'Privacy', local: 'Local', fps: 'Frame rate', scroll: 'Keep exploring',
-    factOne: 'Harness only', factOneBody: 'Never replaces New Tab', factTwo: 'Five Gerstner waves', factThree: 'Adaptive performance',
-    factFour: 'Reversible install', factFourBody: 'Five install paths', featuresTitle: 'An ocean made<br>for the workflow',
-    featuresBody: 'This is not a video behind the interface. The sea, sky, sun, and reflections are generated live on the GPU, so every control responds immediately.',
-    featureLive: 'Realtime, never looped footage', featureLiveBody: 'Five Gerstner swells, analytic normals, FBM micro-surface, crest foam, and Fresnel sky reflections share one daylight model.',
-    featureHarness: 'Made for Harness', featureHarnessBody: 'Lower-left quick controls, native Settings integration, corrected modal stacking, and a browser extension that recognizes only real Harness pages.',
-    featureQuiet: 'Designed to stay quiet', featureQuietBody: 'Hidden-tab pause, adaptive resolution, and low-end fallbacks keep the ocean atmospheric instead of demanding.',
-    featureLocal: 'No telemetry. No remote code.', featureLocalBody: 'three.js, TSL, fonts, and every shader ship locally. The extension requests only loopback Harness access and preference storage.',
-    galleryTitle: 'Sea-state records<br>from real Harness', galleryBody: 'Every capture below was recorded inside DeepSeek Harness at 40% glass opacity. No concept renders and no compositing.',
-    galleryDark: 'Dark overview', galleryLight: 'Light overview', galleryWaves: 'Adjusting waves', gallerySunset: 'Daylight to sunset',
-    installTitle: 'Bring the ocean<br>into your Harness', installBody: 'Recommended: install the Harness plugin. Desktop accepts the package name; Harness Web uses the CLI. Choose one integration per instance—no browser extension or third-party market required.',
-    desktopTitle: '🖥️ Official Desktop · Windows / Mac', webTitle: '🌐 Harness Web', copyButton: 'Copy', sourceTitle: '🛠️ Source integration', sourceBody: 'For developers building Harness from source. Desktop users should choose option 1.', sourceGuide: 'Source integration guide', recommended: 'Recommended', desktopBody: 'No terminal: open Plugins → Add plugin in Desktop, enter the package below, then choose Enable now. Use the npm mirror, or switch to the official registry before it syncs.', desktopGuide: 'Full steps & troubleshooting',
-    dshBody: 'Install the prebuilt v1.2.6 Web plugin in one command—no GitHub tarball download.', restart: 'Restart dsh web after installation',
-    browserExtension: 'Browser extension', browserBody: 'Skins verified Harness pages only. It never replaces New Tab or touches other localhost apps.',
-    downloadZip: 'Download v1.2.6 ZIP', oneCommand: '🔧 Static frontend · advanced', staticBody: 'Advanced fallback for Bash on macOS / Linux. Modifies a built frontend; use option 1 for Official Desktop.',
-    copy: 'Copy command', copied: 'Command copied', copyFailed: 'Copy failed—select the command manually', copyPackage: 'Copy package name', copiedPackage: 'Package name copied', copyPackageFailed: 'Copy failed—select the package name manually',
-    closingTitle: 'The work can be deep.<br>The interface can feel light.', closingBody: 'Backspace is free, open source, and local-first. Bring it into your Harness—and help us make this ocean even better.',
-    visitGitHub: 'Visit GitHub', viewRelease: 'View latest release', privacyPolicy: 'Privacy', issues: 'Issues',
-    timeDusk: 'Dusk', timeGolden: 'Golden hour', timeAfternoon: 'Afternoon', timeNoon: 'Midday',
-  },
+  "en": {
+    "skip": "Skip to main content",
+    "navFeatures": "Features",
+    "navGallery": "Scenes",
+    "navInstall": "Candidate",
+    "source": "Source",
+    "eyebrow": "DeepSeek Harness · Dynamic backgrounds & interface skins",
+    "heroTitle": "Zed Space Skin",
+    "heroBody": "Ocean, two cosmic views, and local videos for your Harness workspace. Each scene keeps its own settings, with smooth transitions between backgrounds.",
+    "installNow": "Candidate status",
+    "seeReal": "Explore the scenes",
+    "localOnly": "All assets local",
+    "noTracking": "Zero data collection",
+    "labTitle": "Live ocean preview",
+    "rendererLoading": "Preview · Starting",
+    "rendererReady": "Rendering live",
+    "rendererFallback": "Ocean preview mode",
+    "rendererSlow": "Preparing live ocean",
+    "loadingNote": "An ocean preview appears first. Adjust the controls while the live waves prepare.",
+    "readyNote": "The ocean is live. Shape the waves and light with the sliders.",
+    "slowNote": "The first visit downloads the renderer and prepares your GPU. Live waves will appear automatically.",
+    "fallbackNote": "Live rendering is not ready. The ocean preview stays visible; retry or explore scene captures and candidate notes.",
+    "retryOcean": "Retry live ocean",
+    "calm": "Calm",
+    "sunset": "Sunset",
+    "highSea": "High sea",
+    "waves": "Wave size",
+    "wavesNote": "Mirror to swell",
+    "daylight": "Daylight",
+    "daylightNote": "Noon to dusk",
+    "transparency": "UI transparency",
+    "transparencyNote": "Reveal the ocean",
+    "uiMode": "Capture theme",
+    "dark": "Dark",
+    "light": "Light",
+    "realCapture": "Isolated test interface",
+    "captureGlass": "Transparency",
+    "scroll": "Keep exploring",
+    "factOne": "For DeepSeek Harness",
+    "factOneBody": "Community skin plugin",
+    "factTwo": "Ocean and cosmic views",
+    "factThree": "Local video library",
+    "factFour": "1.3.0 candidate",
+    "factFourBody": "Not yet published",
+    "featuresTitle": "Your scenes",
+    "featuresBody": "Choose the live ocean, the cosmic horizon or vortex, or a local video. Each scene remembers its parameters and interface opacity.",
+    "featureLive": "Ocean and cosmos",
+    "featureLiveBody": "Adjust ocean waves and daylight. The cosmos has horizon and vortex views, each with its own glow, stars, and motion controls.",
+    "featureHarness": "Settings for each scene",
+    "featureHarnessBody": "Quick settings select scenes and glass opacity, with an optional independent conversation background. Returning to a scene restores its settings.",
+    "featureQuiet": "Smooth transitions",
+    "featureQuietBody": "Ocean and cosmos transitions wait for the next frame before blending. Both cosmic views transition within the same renderer.",
+    "featureLocal": "Local video library",
+    "featureLocalBody": "Import multiple files, view thumbnails, enable one video, rename, or remove it. Each file is limited to 32 MiB, 30 seconds, and 1080p. Media stays local.",
+    "galleryTitle": "One interface, different scenes",
+    "galleryBody": "These captures run the actual plugin code in an isolated test interface. They show ocean, both cosmic views, and video management; they are not native Harness captures.",
+    "galleryDark": "Ocean · waves and daylight",
+    "galleryLight": "Cosmos · horizon",
+    "galleryWaves": "Cosmos · vortex",
+    "gallerySunset": "Local video · library",
+    "installTitle": "1.3.0 candidate",
+    "installBody": "The technical package name is dsh-zed-space. npm, GitHub Release, marketplace, and the new Pages site are not published. This page is a local review preview.",
+    "sourceTitle": "Validate from source",
+    "sourceBody": "Developers can build the candidate code and test in an isolated environment. The candidate package name is not an installable npm release.",
+    "sourceGuide": "Build and integration notes",
+    "closingTitle": "Choose a scene. Keep working.",
+    "closingBody": "Zed Space Skin is a community plugin for DeepSeek Harness. A shared wallpaper library is planned; local video management is implemented.",
+    "visitGitHub": "Visit GitHub",
+    "viewRelease": "Candidate documentation",
+    "privacyPolicy": "Privacy",
+    "issues": "Issues",
+    "timeDusk": "Dusk",
+    "timeGolden": "Golden hour",
+    "timeAfternoon": "Afternoon",
+    "timeNoon": "Midday",
+    "faqTitle": "Common questions",
+    "faqInstall": "Can I install this version now?",
+    "faqInstallBody": "Version 1.3.0 is not on npm, GitHub Release, or the plugin marketplace. Installation instructions will follow publication; use source only for local validation.",
+    "faqMarket": "Is there a wallpaper marketplace?",
+    "faqMarketBody": "Not yet. A shared library is planned. The local video library is implemented in the current code and does not automatically upload your media.",
+    "faqScope": "Which DeepSeek product is supported?",
+    "faqScopeBody": "DeepSeek Harness, not the DeepSeek web chat site. This is an independent community project, not an official DeepSeek product."
+  }
 };
 
 const root = document.documentElement;
@@ -79,7 +181,6 @@ const rendererStatusText = rendererStatus.querySelector('span');
 const loadingNote = document.getElementById('ocean-loading-note');
 const retryOcean = document.getElementById('ocean-retry');
 const languageToggle = document.getElementById('language-toggle');
-const copyStatus = document.getElementById('copy-status');
 
 const state = {
   sea: 56,
@@ -185,50 +286,9 @@ function updateRendererStatus(next) {
 let oceanAttempt = 0;
 let slowTimer;
 let fallbackTimer;
-let mediaTimer;
-let mediaAllowed = false;
-const visibleMedia = new Set();
-const motionLoads = new Map();
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-
-// Keep the light JPEG until the full recording has decoded. Only fetch the
-// visible theme and visible gallery items, after critical ocean work finishes.
-function loadVisibleMedia() {
-  if (!mediaAllowed || reducedMotion.matches) return;
-  for (const image of visibleMedia) {
-    if (!image.dataset.motionSrc || image.dataset.motionStarted) continue;
-    if (image.classList.contains('harness-capture')
-      && !image.classList.contains(`harness-capture-${state.theme}`)) continue;
-    image.dataset.motionStarted = 'true';
-    const src = image.dataset.motionSrc;
-    if (!motionLoads.has(src)) {
-      const recording = new Image();
-      recording.fetchPriority = 'low';
-      recording.src = src;
-      motionLoads.set(src, recording.decode());
-    }
-    motionLoads.get(src).then(() => {
-      if (!reducedMotion.matches) image.src = src;
-    }).catch(() => {
-      // A failed recording must not remove its usable static preview.
-      delete image.dataset.motionStarted;
-      motionLoads.delete(src);
-    });
-  }
-}
-const mediaObserver = new IntersectionObserver(entries => {
-  for (const entry of entries) {
-    if (entry.isIntersecting) visibleMedia.add(entry.target);
-    else visibleMedia.delete(entry.target);
-  }
-  loadVisibleMedia();
-}, { rootMargin: '0px' });
-for (const image of document.querySelectorAll('[data-motion-src]')) mediaObserver.observe(image);
-
 function clearLoadingTimers() {
   clearTimeout(slowTimer);
   clearTimeout(fallbackTimer);
-  clearTimeout(mediaTimer);
 }
 function settleOcean(status) {
   clearLoadingTimers();
@@ -238,15 +298,10 @@ function settleOcean(status) {
     performance.mark('ocean-first-frame');
     sendOceanState();
   }
-  mediaTimer = setTimeout(() => {
-    mediaAllowed = true;
-    loadVisibleMedia();
-  }, 650);
 }
 function startOcean() {
   clearLoadingTimers();
   oceanAttempt += 1;
-  mediaAllowed = false;
   oceanFrame.classList.remove('ready');
   updateRendererStatus('loading');
   // Start timing at navigation, not iframe load. Even blocked scripts get a
@@ -282,30 +337,11 @@ function applyLanguage(lang) {
     if (value !== undefined) element.setAttribute('aria-label', value);
   }
   languageToggle.textContent = lang === 'zh' ? 'EN' : '中文';
-  document.getElementById('desktop-guide-link').href = lang === 'zh'
-    ? 'https://github.com/hetonghao/dsh-backspace/blob/main/docs/install.zh.md'
-    : 'https://github.com/hetonghao/dsh-backspace/blob/main/docs/dsh-plugin.md#dsh-desktop';
   document.title = lang === 'zh'
-    ? 'Backspace · DeepSeek Harness 海洋皮肤'
-    : 'Backspace · Ocean skin for DeepSeek Harness';
+    ? 'Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤'
+    : 'Zed Space Skin · Dynamic backgrounds for DeepSeek Harness';
   updateOutputs();
   updateRendererStatus(state.renderer);
-}
-
-async function copyText(value) {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(value);
-    return;
-  }
-  const area = document.createElement('textarea');
-  area.value = value;
-  area.style.position = 'fixed';
-  area.style.opacity = '0';
-  document.body.appendChild(area);
-  area.select();
-  const copied = document.execCommand('copy');
-  area.remove();
-  if (!copied) throw new Error('copy failed');
 }
 
 for (const input of [seaInput, dayInput, transparencyInput]) {
@@ -329,24 +365,10 @@ for (const button of document.querySelectorAll('[data-theme-choice]')) {
     for (const candidate of document.querySelectorAll('[data-theme-choice]')) {
       candidate.classList.toggle('active', candidate === button);
     }
-    loadVisibleMedia();
   });
 }
 
 languageToggle.addEventListener('click', () => applyLanguage(state.lang === 'zh' ? 'en' : 'zh'));
-
-for (const button of document.querySelectorAll('[data-copy]')) {
-  button.addEventListener('click', async () => {
-    try {
-      await copyText(button.dataset.copy);
-      copyStatus.textContent = copy()[button.dataset.copyKind === 'package' ? 'copiedPackage' : 'copied'];
-      button.textContent = '✓';
-      window.setTimeout(() => { button.textContent = copy().copyButton; }, 1400);
-    } catch {
-      copyStatus.textContent = copy()[button.dataset.copyKind === 'package' ? 'copyPackageFailed' : 'copyFailed'];
-    }
-  });
-}
 
 const revealObserver = new IntersectionObserver((entries) => {
   for (const entry of entries) {
