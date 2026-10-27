@@ -34,6 +34,10 @@ jobs:
       - name: Refuse historical package identity
         run: node -e 'if (require("./package.json").name !== "dsh-zed-space") process.exit(1)'
       - run: npm ci
+      - name: Prepare browser and video checks
+        run: |
+          npx playwright install --with-deps chromium
+          command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
       - name: Verify release version
         env:
           RELEASE_TAG: ${{ inputs.tag }}
