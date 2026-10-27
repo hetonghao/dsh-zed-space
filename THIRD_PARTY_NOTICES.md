@@ -2,15 +2,15 @@
 
 Zed Space Skin 继续使用下列上游代码、库和字体。安装版把渲染依赖与字体打包在本地；网络安装、更新和访问托管网站不属于离线运行承诺。
 
-## Open Sea Skin 与 Backspace
+## Open Sea Skin 与本项目沿革
 
 - 上游项目：https://github.com/d-dev0101/open-sea-skin
-- 历史项目：https://github.com/hetonghao/dsh-backspace
+- 本项目旧名 Backspace：https://github.com/hetonghao/dsh-backspace
 - 许可：MIT
-- 版权：© 2026 Open Sea Skin contributors；© 2026 Backspace contributors
-- 本项目：© 2026 Zed Space Skin contributors
+- 上游版权：© 2026 Open Sea Skin contributors
+- 本项目版权：© 2026 Zed Space Skin contributors（包含以 Backspace 名义提交的贡献）
 
-海洋渲染、Harness 集成、扩展与安装器继承自 Open Sea Skin / Backspace。Zed Space Skin 在此基础上继续维护宇宙双视角、本地视频、各皮肤配置与背景切换；这些功能来自已提交的 Backspace 功能历史，并非改名时重新原创。独立仓库和新名称不消除旧作者贡献，完整 MIT 许可与原版权行保留在 `LICENSE`。
+海洋渲染、Harness 集成、扩展与安装器继承自 Open Sea Skin。Backspace 是本项目的旧名；宇宙双视角、本地视频、各皮肤配置与背景切换延续了更名前的功能历史。项目更名后，自有贡献者署名统一为 Zed Space Skin contributors，历史贡献和提交记录保留。`LICENSE` 继续保留 Open Sea Skin 的上游版权声明和完整 MIT 许可。
 
 ## three.js 0.178.0
 
