@@ -27,7 +27,7 @@
 
 ## 场景展示
 
-以下五张截图来自 **DeepSeek Harness Web 0.2.1-rc.3** 的真实运行界面，安装的是 `dsh-zed-space@1.0.0`。截图使用独立临时 profile；[截图环境、参数与素材来源](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/screenshots/README.md)均有记录。
+以下五张截图来自 **DeepSeek Harness Web 0.2.1-rc.3** 的真实运行界面，安装的是 `dsh-zed-space@1.0.0`。截图使用独立临时 profile，展示当前壁纸的配置面板：玻璃不透明度为最低值 **40%**，开启对话面板独立调整并设为 **60%**。图片已压缩；[截图环境、参数与素材来源](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/screenshots/README.md)均有记录。
 
 ### 黑洞 · 事件视界
 

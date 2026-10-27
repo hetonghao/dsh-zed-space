@@ -23,11 +23,11 @@ This is an independent community plugin for DeepSeek Harness, not an official De
 | Local video library | Import multiple files, view thumbnails, enable one video, rename, remove, and restore after reopening. |
 | Smooth transitions | Wait for the next frame before blending; both cosmic views transition within one renderer. |
 
-Each video is limited to **32 MiB, 30 seconds, and 1080p**. See [local video background](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/video-background.md) for formats and storage details. Media stays on the device and is not automatically uploaded or synced through a browser account. **A shared wallpaper library is planned; there is no wallpaper marketplace today.**
+Each video is limited to **32 MiB, 30 seconds, and 1080p**. See [local video background](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/video-background.md) for formats and storage details. Media stays on the device and is not automatically uploaded or synced through a browser account. **The local acceptance build includes the official video skin gallery.** Open “Discover official animated skins” from “Local video” to browse, preview, and download; applying a downloaded video is a separate action. The gallery service currently runs locally. See [local marketplace integration](docs/market-integration.md).
 
 ## Scene gallery
 
-These five screenshots were captured in the real **DeepSeek Harness Web 0.2.1-rc.3** application with `dsh-zed-space@1.0.0` installed in a separate temporary profile. See the [capture environment, settings, and media sources](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/screenshots/README.md).
+These five screenshots were captured in the real **DeepSeek Harness Web 0.2.1-rc.3** application with `dsh-zed-space@1.0.0` installed in a separate temporary profile. Each image shows the active wallpaper’s settings: glass opacity at its minimum of **40%**, with independent conversation opacity enabled at **60%**. The PNGs are compressed without resizing. See the [capture environment, settings, and media sources](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/screenshots/README.md).
 
 ### Black hole · event horizon
 
@@ -74,7 +74,7 @@ Not yet. Version 1.0.0 is unpublished. Installation instructions and downloads w
 
 **Is there a shared wallpaper marketplace?**
 
-No. Local video management is implemented; a shared library remains planned.
+The local acceptance build connects to the official video skin gallery and shares its catalog with Zed Space. You can browse, download to “My videos,” and apply a video in DSH. It is not publicly released; see [local marketplace integration](docs/market-integration.md) for setup requirements.
 
 **Why is historical Backspace content still present?**
 
