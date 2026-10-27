@@ -28,6 +28,7 @@
   },
   "files": [
     "plugin/index.js",
+    "plugin/market-server.js",
     "plugin/client.js",
     "cordis.patch.yml",
     "native-dist/loader.js",
@@ -48,7 +49,8 @@
     "native-dist/video.js",
     "native-dist/video-media.js",
     "SECURITY.md",
-    "docs/video-background.md"
+    "docs/video-background.md",
+    "docs/market-integration.md"
   ],
   "dsh": {
     "bundle": {

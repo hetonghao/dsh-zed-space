@@ -4,6 +4,7 @@
  * the Harness checkout.
  */
 import { readFile } from 'node:fs/promises'
+import { createMarketHandler } from './market-server.js'
 import { extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -11,6 +12,7 @@ export const name = 'dsh-zed-space'
 export const inject = ['webServer']
 
 const ROUTE = '/dsh-zed-space'
+const serveMarket = createMarketHandler()
 const ASSET_ROOT = resolve(fileURLToPath(new URL('../native-dist/', import.meta.url)))
 const MIME = Object.freeze({
   '.css': 'text/css; charset=utf-8',
@@ -29,6 +31,7 @@ function finish(res, status, headers = {}) {
 }
 
 async function serveAsset(req, res) {
+  if (await serveMarket(req, res)) return
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     finish(res, 405, { allow: 'GET, HEAD' })
     return
