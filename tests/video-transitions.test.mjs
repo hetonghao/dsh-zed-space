@@ -127,7 +127,7 @@ test('本地视频之间保留旧播放器，使用同一时长与曲线渐变�
     assert.equal(await page.getByRole('checkbox', { name: '启用 blue', exact: true }).isChecked(), true)
     assert.equal(await frame.locator('body').evaluate(() => liveBlobUrls.size), 1, '渐变结束后只保留当前视频的 Blob URL')
     await page.locator('#__dsh-backspace-panel__-enabled').uncheck()
-    assert.equal(await frame.locator('video').evaluate(video => video.paused), true)
+    await page.waitForFunction(id => document.getElementById(id)?.contentDocument?.querySelector('video')?.paused === true, videoId, { timeout: 5000 })
     await page.evaluate(() => controller.stop())
     assert.equal(await page.locator(`#${videoId}`).count(), 0)
   } finally { await close() }
