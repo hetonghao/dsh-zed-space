@@ -122,6 +122,7 @@ try {
         await otherPage.close()
       }
       await page.getByRole('button', { name: '移除 跨路径视频', exact: true }).click()
+      await page.locator('.bs-video-remove-confirm .bs-confirm-remove').click()
       await ready(page)
       assert.equal(await page.locator('.bs-video-grid img').count(), 0)
       await page.reload()

@@ -9,10 +9,14 @@ let activeId = null;
 let selectionLoaded = false;
 let hostPaused = true;
 let player;
+let playerId;
 let objectUrl;
+let outgoing;
+let transition;
 let playbackGeneration = 0;
 let queue = Promise.resolve();
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const transitionDuration = query.get('transitionDuration') === '150' || reducedMotion.matches ? 150 : 550;
 const shouldPause = () => hostPaused || document.hidden || reducedMotion.matches;
 const send = data => parent.postMessage({ type: 'bs-video', token, ...data }, parentOrigin);
 
@@ -59,14 +63,26 @@ async function snapshot() {
   });
   return { items, activeId };
 }
+function releasePlayer(video, url) {
+  if (video) { video.onerror = null; video.pause(); video.removeAttribute('src'); video.load(); video.remove(); }
+  if (url) URL.revokeObjectURL(url);
+}
+function finishTransition() {
+  transition?.cancel();
+  transition = null;
+  if (outgoing) releasePlayer(outgoing.player, outgoing.url);
+  outgoing = null;
+  if (player) player.style.opacity = '1';
+}
 function stopPlayer() {
   playbackGeneration++;
-  if (player) { player.onerror = null; player.pause(); player.removeAttribute('src'); player.load(); player.remove(); player = null; }
-  if (objectUrl) URL.revokeObjectURL(objectUrl);
-  objectUrl = null;
+  finishTransition();
+  releasePlayer(player, objectUrl);
+  player = playerId = objectUrl = null;
 }
-async function showClip(clip) {
+async function showClip(clip, beforeCommit = () => {}) {
   if (!clip?.blob || !(clip.blob instanceof Blob)) throw new Error('missing');
+  if (player && playerId === clip.id) { await beforeCommit(); updatePlayback(); return; }
   const candidate = document.createElement('video');
   const candidateUrl = URL.createObjectURL(clip.blob);
   candidate.muted = true; candidate.loop = true; candidate.playsInline = true; candidate.preload = 'auto';
@@ -79,16 +95,29 @@ async function showClip(clip) {
       catch { if (!shouldPause()) throw new Error('playback'); }
     }
     if (shouldPause()) candidate.pause();
+    if (transition) await transition.finished.catch(() => {});
+    await beforeCommit();
+    if (shouldPause()) candidate.pause();
   } catch (error) {
-    candidate.pause(); candidate.removeAttribute('src'); candidate.load();
-    URL.revokeObjectURL(candidateUrl);
+    releasePlayer(candidate, candidateUrl);
     throw error;
   }
-  stopPlayer();
+  const previous = { player, url: objectUrl };
+  playbackGeneration++;
   player = candidate;
+  playerId = clip.id;
   objectUrl = candidateUrl;
   document.body.append(player);
   player.onerror = () => playbackFailure('decode', candidate, playbackGeneration);
+  if (previous.player && !hostPaused && !document.hidden) {
+    previous.player.pause(); previous.player.onerror = null;
+    outgoing = previous;
+    const animation = player.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: transitionDuration, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards',
+    });
+    transition = animation;
+    animation.finished.then(() => { if (transition === animation) finishTransition(); }).catch(() => {});
+  } else releasePlayer(previous.player, previous.url);
 }
 function playbackFailure(code, failedPlayer, generation) {
   // 与选择/移除串行，旧播放器或旧播放尝试的取消不能清除新选择。
@@ -149,16 +178,9 @@ async function handle(data) {
       break;
     }
     case 'select': {
-      const previous = activeId;
       if (data.id === null) { await saveSelection(null); activeId = null; stopPlayer(); }
       else {
-        await showClip(await readClip(data.id));
-        try { await saveSelection(data.id); }
-        catch (error) {
-          if (previous) await showClip(await readClip(previous));
-          else stopPlayer();
-          throw error;
-        }
+        await showClip(await readClip(data.id), () => saveSelection(data.id));
         activeId = data.id;
       }
       break;

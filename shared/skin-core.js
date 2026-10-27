@@ -126,6 +126,7 @@
       videoEmpty: '导入自己的视频作为背景', videoLimits: 'MP4 / WebM · 每个最长 30 秒 · 最高 1080p · 最大 32 MB',
       videoLocal: '仅在本机保存，不上传。', videoLoading: '正在读取视频…', videoIdle: '尚未启用，勾选缩略图即可播放。',
       videoActive: '正在使用：', videoSelected: '已选择：', videoChosen: '已选择', videoPlaying: '启用中', videoEnable: '启用', videoRename: '重命名', videoRemove: '移除',
+      videoRemoveTitle: (name) => `移除「${name}」？`, videoRemoveConfirm: '确认移除',
       videoErrors: {
         empty: '文件为空，请重新导出视频。', size: '每个视频不能超过 32 MB，请压缩后再导入。',
         format: '请导出为 MP4 或 WebM 视频后重试。', codec: '请使用 H.264、VP9 或 AV1 编码，建议导出为 H.264 MP4。',
@@ -189,6 +190,7 @@
       videoEmpty: 'Use your own video as the background', videoLimits: 'MP4 / WebM · Up to 30 seconds, 1080p and 32 MB each',
       videoLocal: 'Stored only on this device. Never uploaded.', videoLoading: 'Reading video…', videoIdle: 'Select a thumbnail to start playback.',
       videoActive: 'Playing: ', videoSelected: 'Selected: ', videoChosen: 'Selected', videoPlaying: 'Active', videoEnable: 'Enable', videoRename: 'Rename', videoRemove: 'Remove',
+      videoRemoveTitle: (name) => `Remove “${name}”?`, videoRemoveConfirm: 'Remove',
       videoErrors: {
         empty: 'This file is empty. Export the video again.', size: 'Each video must be under 32 MB. Compress it and retry.',
         format: 'Export this file as an MP4 or WebM video.', codec: 'Use H.264, VP9 or AV1 encoding. H.264 MP4 is recommended.',
@@ -217,6 +219,8 @@
 </svg>`;
 
   const HELP_ICON = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.75" stroke="currentColor" stroke-width="1.25"/><path d="M8 7.2v3.4M8 5.2v.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  const IMPORT_ICON = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 2v7m-3-3 3 3 3-3M2.5 10v2.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V10"/></svg>';
+  const DISCOVER_ICON = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="5.75"/><path d="m10.5 5.5-1.4 3.6-3.6 1.4 1.4-3.6 3.6-1.4Z"/></svg>';
   const CLOSE_ICON = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 
   const SURFACE_READY_TIMEOUT = 8000;
@@ -655,12 +659,12 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
 #${IDS.panel} .bs-reset { padding:6px 8px; border-radius:7px; border:1px solid transparent; background:transparent; color:var(--bs-text); font-size:12px; cursor:pointer; transition:background .16s ease; }
 #${IDS.panel} .bs-reset:hover:not(:disabled) { border-color:var(--bs-line); background:var(--bs-inset); }
 #${IDS.panel} .bs-reset:disabled { color:var(--bs-muted); opacity:.5; cursor:default; }
-#${IDS.panel} .bs-reset-confirm { position:fixed; inset:auto; margin:0; width:280px; max-width:calc(100vw - 24px); padding:14px; border:1px solid var(--bs-line); border-radius:12px; background:var(--bs-surface) !important; color:var(--bs-text); box-shadow:0 8px 28px rgba(9,22,30,.2); font-size:12px; line-height:1.6; }
-#${IDS.panel} .bs-reset-confirm strong { display:block; font-size:13px; font-weight:600; }
+#${IDS.panel} .bs-confirm { position:fixed; inset:auto; margin:0; width:280px; max-width:calc(100vw - 24px); padding:14px; border:1px solid var(--bs-line); border-radius:12px; background:var(--bs-surface) !important; color:var(--bs-text); box-shadow:0 8px 28px rgba(9,22,30,.2); font-size:12px; line-height:1.6; }
+#${IDS.panel} .bs-confirm strong { display:block; font-size:13px; font-weight:600; overflow-wrap:anywhere; }
 #${IDS.panel} .bs-confirm-actions { display:flex; justify-content:flex-end; gap:6px; margin-top:12px; }
 #${IDS.panel} .bs-confirm-actions button { padding:6px 10px; border:1px solid var(--bs-line); border-radius:7px; background:var(--bs-inset); color:var(--bs-text); cursor:pointer; }
 #${IDS.panel} .bs-confirm-actions button:hover { border-color:var(--bs-accent); }
-#${IDS.panel} .bs-confirm-actions .bs-confirm-restore { background:var(--bs-selected); color:var(--bs-accent); }
+#${IDS.panel} .bs-confirm-actions .bs-confirm-restore, #${IDS.panel} .bs-confirm-actions .bs-confirm-remove { background:var(--bs-selected); color:var(--bs-accent); }
 @media (max-width:380px) {
   #${IDS.panel} { padding:16px; }
   #${IDS.panel} .bs-footer { align-items:flex-start; }
@@ -668,10 +672,13 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
 }
 #${IDS.panel} .bs-video-group[hidden], #${IDS.panel} .bs-video-group [hidden] { display:none !important; }
 #${IDS.panel} .bs-video-group { padding-top:14px; }
-#${IDS.panel} .bs-video-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 #${IDS.panel} .bs-video-title { font-size:14px; font-weight:500; }
-#${IDS.panel} .bs-video-import, #${IDS.panel} .bs-video-discover { border:0; border-radius:8px; padding:8px 12px; background:var(--bs-accent); color:var(--bs-surface); cursor:pointer; font-size:12px; }
-#${IDS.panel} .bs-video-discover { width:100%; min-height:44px; margin-top:8px; }
+#${IDS.panel} .bs-video-actions { display:flex; align-items:stretch; gap:8px; margin-top:8px; }
+#${IDS.panel} .bs-video-import, #${IDS.panel} .bs-video-discover { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px; border:1px solid transparent; border-radius:8px; padding:8px; background:var(--bs-accent); color:var(--bs-surface); cursor:pointer; font-size:12px; line-height:1.5; }
+#${IDS.panel} .bs-video-actions svg { flex:none; }
+#${IDS.panel} .bs-video-import { flex:none; border-color:var(--bs-line); background:var(--bs-inset); color:var(--bs-text); }
+#${IDS.panel} .bs-video-discover { flex:1; min-width:0; }
+#${IDS.panel} .bs-video-import:hover:not(:disabled), #${IDS.panel} .bs-video-discover:hover { border-color:var(--bs-accent); filter:brightness(.96); }
 #${IDS.panel} .bs-video-import:disabled { opacity:.55; cursor:wait; }
 #${IDS.panel} .bs-video-help, #${IDS.panel} .bs-video-status, #${IDS.panel} .bs-video-errors { font-size:12px; line-height:1.7; color:var(--bs-muted); margin:8px 0 12px; overflow-wrap:anywhere; }
 #${IDS.panel} .bs-video-errors { color:#a4382d; white-space:pre-line; }
@@ -730,12 +737,14 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     let incomingFrame = null;
     let transitionAnimation = null;
     let fadeTarget = 1;
+    let fadeProgress = 0;
     let requestSequence = 0;
     let transitionPhase = 'idle';
     let transitionRoute = 'initial';
     let transitionError = '';
     let hideHelp = () => {};
     let hideResetConfirm = () => {};
+    let hideVideoRemoveConfirm = () => {};
     let panelAnimation = null;
     let panelSizeAnimation = null;
     let sectionSizeAnimations = [];
@@ -820,7 +829,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       if (frame instanceof HTMLIFrameElement) frame.contentWindow.postMessage({ type: 'bs-video', token: videoToken, action: 'visibility', paused }, videoOrigin(frame));
     };
     const removeVideoFrame = (force = false) => {
-      if (videoLeases && !force) return;
+      if (!force && (videoLeases || frames.has('video'))) return;
       videoGeneration++;
       clearTimeout(videoReadyTimer);
       videoReadyReject?.(new Error('cancelled'));
@@ -839,7 +848,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       const frame = document.createElement('iframe');
       videoToken = crypto.randomUUID();
       frame.id = IDS.video;
-      frame.src = `${options.assetUrl('video.html')}?${new URLSearchParams({ parentOrigin: location.origin, token: videoToken })}`;
+      frame.src = `${options.assetUrl('video.html')}?${new URLSearchParams({ parentOrigin: location.origin, token: videoToken, transitionDuration: String(transitionDuration) })}`;
       frame.setAttribute('aria-hidden', 'true');
       frame.setAttribute('tabindex', '-1');
       frame.setAttribute('allow', 'autoplay');
@@ -991,11 +1000,15 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       });
     };
 
+    const requestedSurface = () => state.skin === 'video' ? (videoData.activeId ? 'video' : 'ocean') : skinById(state.skin).surface;
+
     function syncSurfaces() {
-      const targetSurface = state.skin === 'video' ? (videoData.activeId ? 'video' : 'ocean') : skinById(state.skin).surface;
+      const targetSurface = requestedSurface();
       for (const record of frames.values()) {
         const active = record.ready && (incomingFrame?.ready ? record.surface === targetSurface : record === baseFrame);
-        postToFrame(record.frame.id, { type: 'bs-pause', paused: !state.enabled || document.hidden || !active });
+        const paused = !state.enabled || document.hidden || !active;
+        if (record.surface === 'video') setVideoPaused(paused);
+        else postToFrame(record.frame.id, { type: 'bs-pause', paused });
       }
       if (transitionAnimation) {
         if (document.hidden) transitionAnimation.pause();
@@ -1022,14 +1035,23 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
     function removeFrame(record) {
       if (!record) return;
       clearTimeout(record.timer);
+      frames.delete(record.surface);
+      if (record.surface === 'video') {
+        setFrameActive(IDS.video, false);
+        setVideoPaused(true);
+        if (state.skin !== 'video' || (!state.enabled && !panelOpen)) removeVideoFrame();
+        return;
+      }
       record.frame.onload = null;
       record.frame.remove();
-      frames.delete(record.surface);
     }
 
     function stopTransition() {
       if (!transitionAnimation) return;
-      incomingFrame.frame.style.opacity = getComputedStyle(incomingFrame.frame).opacity;
+      const layer = transitionAnimation.effect.target;
+      const opacity = getComputedStyle(layer).opacity;
+      fadeProgress = layer === incomingFrame.frame ? Number(opacity) : 1 - Number(opacity);
+      layer.style.opacity = opacity;
       transitionAnimation.cancel();
       transitionAnimation = null;
     }
@@ -1052,6 +1074,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       baseFrame.frame.style.opacity = '1';
       transitionAnimation = null;
       transitionPhase = 'idle';
+      if (baseFrame.surface !== requestedSurface()) { applySkin(); return; }
       syncSurfaces();
       schedulePointer();
     }
@@ -1060,11 +1083,15 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       if (transitionAnimation && fadeTarget === target) { syncSurfaces(); return; }
       stopTransition();
       fadeTarget = target;
-      const from = Number(incomingFrame.frame.style.opacity);
+      const from = fadeProgress;
       transitionPhase = 'crossfade';
       transitionRoute = 'crossfade';
       if (Math.abs(target - from) < 0.001) { finishTransition(target); return; }
-      const animation = incomingFrame.frame.animate([{ opacity: from }, { opacity: target }], {
+      // 移动已加载的 iframe 会重载视频；保持 DOM 位置，只改变实际位于上方那一层的透明度。
+      const incomingOnTop = Boolean(baseFrame.frame.compareDocumentPosition(incomingFrame.frame) & Node.DOCUMENT_POSITION_FOLLOWING);
+      const layer = incomingOnTop ? incomingFrame.frame : baseFrame.frame;
+      (incomingOnTop ? baseFrame.frame : incomingFrame.frame).style.opacity = '1';
+      const animation = layer.animate([{ opacity: incomingOnTop ? from : 1 - from }, { opacity: incomingOnTop ? target : 1 - target }], {
         duration: transitionDuration * Math.abs(target - from),
         easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards',
       });
@@ -1072,7 +1099,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       syncSurfaces();
       animation.finished.then(() => {
         if (transitionAnimation !== animation) return;
-        incomingFrame.frame.style.opacity = String(target);
+        fadeProgress = target;
         animation.cancel();
         finishTransition(target);
       }).catch(() => {});
@@ -1261,6 +1288,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       button.setAttribute('aria-expanded', String(open));
       hideHelp();
       hideResetConfirm();
+      hideVideoRemoveConfirm();
       if (open) {
         previousFocus = document.activeElement;
         placePanel();
@@ -1289,6 +1317,14 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
 
     const mountFrame = (skin) => {
       const root = document.body || document.documentElement;
+      if (skin.surface === 'video') {
+        const frame = document.getElementById(IDS.video);
+        const record = { frame, surface: 'video', skin: 'video', origin: videoOrigin(frame), ready: true, loaded: true, timer: 0 };
+        frame.style.cssText = `${FRAME_STYLE}opacity:0;`;
+        frames.set('video', record);
+        ownsSurface = true;
+        return record;
+      }
       const surface = SURFACES[skin.surface];
       if (!root || document.getElementById(surface.id)) return null;
       const query = new URLSearchParams({
@@ -1355,24 +1391,26 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       ensureGlassStyle();
       updateGlass();
       const selected = skinById(state.skin);
-      if (selected.surface === 'video' && !document.getElementById(IDS.video)) void videoAction('list');
-      const activeVideo = selected.surface === 'video' && !!videoData.activeId;
-      const heldVideo = selected.surface !== 'video' && !!videoData.activeId && !baseFrame?.ready;
-      setFrameActive(IDS.video, activeVideo || heldVideo);
-      setVideoPaused(!activeVideo);
-      if (activeVideo) {
-        clearSurfaces();
-        transitionRoute = 'video';
+      if (selected.surface === 'video' && !document.getElementById(IDS.video)) {
+        void videoAction('list');
         syncSkinUi();
         return;
       }
-      const skin = selected.surface === 'video' ? skinById('ocean') : selected;
+      if (selected.surface === 'video' && videoBusy && !videoData.activeId) { syncSkinUi(); return; }
+      const activeVideo = selected.surface === 'video' && !!videoData.activeId;
+      const skin = selected.surface === 'video' && !activeVideo ? skinById('ocean') : selected;
       transitionError = '';
       if (incomingFrame && !incomingFrame.ready && incomingFrame.surface !== skin.surface) {
         removeFrame(incomingFrame);
         incomingFrame = null;
       }
       if (incomingFrame) {
+        // 第三种背景到来时先完成当前交叠，再从完整画面衔接，避免中途丢掉可见层。
+        if (incomingFrame.surface !== skin.surface && baseFrame?.surface !== skin.surface) {
+          fadeTo(1);
+          syncSkinUi();
+          return;
+        }
         const record = incomingFrame.surface === skin.surface ? incomingFrame : baseFrame;
         updateFrameSkin(record, skin);
         if (incomingFrame.ready) fadeTo(record === incomingFrame ? 1 : 0);
@@ -1385,8 +1423,12 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       } else {
         transitionRoute = baseFrame ? 'crossfade' : 'initial';
         transitionPhase = 'preparing';
+        fadeProgress = 0;
         incomingFrame = mountFrame(skin);
-        syncSurfaces();
+        if (incomingFrame.ready) {
+          if (baseFrame) fadeTo(1);
+          else finishTransition(1);
+        } else syncSurfaces();
       }
       syncSkinUi();
     }
@@ -1446,7 +1488,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
             <div class="bs-row bs-switch"><span class="bs-label"><label for="${IDS.panel}-${skin.surface === 'ocean' ? 'cycle' : 'cosmos-cycle'}">${skin.surface === 'ocean' ? copy.autoCycle : copy.cosmicCycle}</label>${helpButton(skin.surface === 'ocean' ? 'autoCycle' : 'cosmicCycle')}</span><input type="checkbox" role="switch" id="${IDS.panel}-${skin.surface === 'ocean' ? 'cycle' : 'cosmos-cycle'}" /></div>
           </section>`).join('')}
           <section class="bs-skin-group bs-video-group" id="${IDS.panel}-video" role="tabpanel" aria-label="${copy.skins.video}" hidden>
-            <div class="bs-video-head"><strong class="bs-video-title"></strong><button type="button" class="bs-video-import"></button></div>${typeof options.onDiscoverVideos === 'function' ? '<button type="button" class="bs-video-discover">发现官方精美视频皮肤</button>' : ''}
+            <strong class="bs-video-title"></strong><div class="bs-video-actions"><button type="button" class="bs-video-import">${IMPORT_ICON}<span></span></button>${typeof options.onDiscoverVideos === 'function' ? `<button type="button" class="bs-video-discover">${DISCOVER_ICON}<span>发现官方精美动态皮肤</span></button>` : ''}</div>
             <p class="bs-video-help"></p><div class="bs-video-grid"></div>
             <p class="bs-video-status" role="status"></p><p class="bs-video-errors" role="alert" hidden></p>
             <input id="${IDS.panel}-video-files" type="file" accept=".mp4,.webm" multiple hidden>
@@ -1459,7 +1501,8 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
           </section>
         </div>
         <div class="bs-footer"><span class="bs-save-hint">${copy.saveHint}</span><span class="bs-reset-wrap"><button type="button" class="bs-reset" aria-haspopup="dialog" aria-controls="${IDS.panel}-reset-confirm" aria-expanded="false">${copy.reset}</button>${helpButton('reset')}</span></div>
-        <div class="bs-reset-confirm" id="${IDS.panel}-reset-confirm" popover="auto" role="dialog" aria-labelledby="${IDS.panel}-reset-title"><strong id="${IDS.panel}-reset-title"></strong><div class="bs-confirm-actions"><button type="button" class="bs-confirm-cancel" autofocus>${copy.cancel}</button><button type="button" class="bs-confirm-restore">${copy.resetConfirm}</button></div></div>`;
+        <div class="bs-confirm bs-reset-confirm" id="${IDS.panel}-reset-confirm" popover="auto" role="dialog" aria-labelledby="${IDS.panel}-reset-title"><strong id="${IDS.panel}-reset-title"></strong><div class="bs-confirm-actions"><button type="button" class="bs-confirm-cancel" autofocus>${copy.cancel}</button><button type="button" class="bs-confirm-restore">${copy.resetConfirm}</button></div></div>
+        <div class="bs-confirm bs-video-remove-confirm" id="${IDS.panel}-remove-confirm" popover="auto" role="dialog" aria-labelledby="${IDS.panel}-remove-title"><strong id="${IDS.panel}-remove-title"></strong><div class="bs-confirm-actions"><button type="button" class="bs-confirm-cancel" autofocus>${copy.cancel}</button><button type="button" class="bs-confirm-remove">${copy.videoRemoveConfirm}</button></div></div>`;
 
       const host = document.body || document.documentElement;
       const tooltip = document.createElement('div');
@@ -1485,6 +1528,11 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       const resetConfirm = panel.querySelector('.bs-reset-confirm');
       const cancelResetBtn = panel.querySelector('.bs-confirm-cancel');
       const confirmResetBtn = panel.querySelector('.bs-confirm-restore');
+      const positionConfirm = (popover, target) => {
+        const rect = target.getBoundingClientRect();
+        popover.style.left = `${Math.max(12, Math.min(rect.right - popover.offsetWidth, window.innerWidth - popover.offsetWidth - 12))}px`;
+        popover.style.top = `${Math.max(12, rect.top - popover.offsetHeight - 8)}px`;
+      };
       hideResetConfirm = () => {
         resetConfirm.hidePopover();
         resetBtn.setAttribute('aria-expanded', 'false');
@@ -1493,10 +1541,9 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       on(cancelResetBtn, 'click', () => { hideResetConfirm(); resetBtn.focus(); });
       on(resetBtn, 'click', () => {
         hideHelp();
+        hideVideoRemoveConfirm();
         resetConfirm.showPopover();
-        const rect = resetBtn.getBoundingClientRect();
-        resetConfirm.style.left = `${Math.max(12, Math.min(rect.right - resetConfirm.offsetWidth, window.innerWidth - resetConfirm.offsetWidth - 12))}px`;
-        resetConfirm.style.top = `${Math.max(12, rect.top - resetConfirm.offsetHeight - 8)}px`;
+        positionConfirm(resetConfirm, resetBtn);
         resetBtn.setAttribute('aria-expanded', 'true');
         cancelResetBtn.focus();
       });
@@ -1506,14 +1553,38 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       const videoImport = videoGroup.querySelector('.bs-video-import');
       const videoFiles = videoGroup.querySelector('input[type=file]');
       let videoFocus = null;
+      const removeConfirm = panel.querySelector('.bs-video-remove-confirm');
+      const cancelRemoveBtn = removeConfirm.querySelector('.bs-confirm-cancel');
+      const confirmRemoveBtn = removeConfirm.querySelector('.bs-confirm-remove');
+      let pendingRemoval = null;
+      hideVideoRemoveConfirm = (restoreFocus = false) => {
+        const target = pendingRemoval?.button;
+        pendingRemoval = null;
+        removeConfirm.hidePopover();
+        target?.setAttribute('aria-expanded', 'false');
+        if (restoreFocus) target?.focus({ preventScroll: true });
+      };
+      on(removeConfirm, 'toggle', () => {
+        if (!removeConfirm.matches(':popover-open')) hideVideoRemoveConfirm();
+      });
+      on(cancelRemoveBtn, 'click', () => hideVideoRemoveConfirm(true));
+      on(confirmRemoveBtn, 'click', () => {
+        const id = pendingRemoval?.id;
+        hideVideoRemoveConfirm();
+        if (videoBusy || !videoData.items.some(clip => clip.id === id)) return;
+        videoFocus = { id, action: 'remove' };
+        void videoAction('remove', { id });
+      });
+      surfaceCleanups.push(hideVideoRemoveConfirm);
       on(videoImport, 'click', () => videoFiles.click());
       const discover = videoGroup.querySelector('.bs-video-discover');
       if (discover) on(discover, 'click', () => options.onDiscoverVideos());
       on(videoFiles, 'change', () => { const files = [...videoFiles.files]; videoFiles.value = ''; void importVideos(files); });
       on(window, 'message', onVideoMessage);
       syncVideoUi = () => {
+        hideVideoRemoveConfirm();
         videoGroup.querySelector('.bs-video-title').textContent = `${copy.videoTitle}${videoData.items.length ? ` ${videoData.items.length}` : ''}`;
-        videoImport.textContent = copy.videoImport; videoImport.disabled = videoBusy;
+        videoImport.querySelector('span').textContent = copy.videoImport; videoImport.disabled = videoBusy;
         videoGroup.querySelector('.bs-video-help').textContent = copy.videoHelp;
         const grid = videoGroup.querySelector('.bs-video-grid');
         const scrollTop = grid.scrollTop;
@@ -1561,9 +1632,16 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
           tile.querySelector('.bs-video-meta').textContent = `${(clip.size / 1024 / 1024).toFixed(1)} MB`;
           const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'bs-video-remove';
           remove.textContent = copy.videoRemove; remove.setAttribute('aria-label', `${copy.videoRemove} ${clip.name}`); remove.disabled = videoBusy;
+          remove.dataset.videoId = clip.id; remove.dataset.videoAction = 'remove';
+          remove.setAttribute('aria-haspopup', 'dialog'); remove.setAttribute('aria-controls', removeConfirm.id); remove.setAttribute('aria-expanded', 'false');
           remove.addEventListener('click', () => {
-            videoFocus = { id: clip.id, action: 'remove' };
-            void videoAction('remove', { id: clip.id });
+            hideHelp(); hideResetConfirm(); hideVideoRemoveConfirm();
+            pendingRemoval = { id: clip.id, button: remove };
+            removeConfirm.querySelector('strong').textContent = copy.videoRemoveTitle(clip.name);
+            removeConfirm.showPopover();
+            positionConfirm(removeConfirm, remove);
+            remove.setAttribute('aria-expanded', 'true');
+            cancelRemoveBtn.focus();
           });
           tile.querySelector('.bs-video-meta').append(remove);
           grid.append(tile);
@@ -1616,9 +1694,10 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       }
       on(tooltip, 'pointerleave', (event) => { if (!helpTarget?.contains(event.relatedTarget)) hideHelp(); });
       on(panel.querySelector('.bs-scroll'), 'scroll', () => {
+        hideVideoRemoveConfirm();
         if (helpTarget && document.activeElement === helpTarget) showHelp(helpTarget);
         else hideHelp();
-      }, { passive: true });
+      }, { passive: true, capture: true });
       surfaceCleanups.push(hideHelp);
 
       const fillRange = (input) => {
@@ -1688,6 +1767,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       syncSkinUi = () => {
         hideHelp();
         hideResetConfirm();
+        hideVideoRemoveConfirm();
         const layoutChanged = renderedSkin !== state.skin || chatRow.hidden !== !state.chatCustom;
         const before = panelOpen && layoutChanged ? {
           height: getComputedStyle(panel).height, top: getComputedStyle(panel).top,
@@ -1768,6 +1848,8 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         syncReset();
         cancelResetBtn.textContent = copy.cancel;
         confirmResetBtn.textContent = copy.resetConfirm;
+        cancelRemoveBtn.textContent = copy.cancel;
+        confirmRemoveBtn.textContent = copy.videoRemoveConfirm;
         panel.querySelector('.bs-save-hint').textContent = copy.saveHint;
         syncVideoUi();
         for (const help of panel.querySelectorAll('.bs-help')) {
@@ -1881,13 +1963,14 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         if (event.key === 'Escape') {
           event.preventDefault();
           if (resetConfirm.matches(':popover-open')) { hideResetConfirm(); resetBtn.focus(); return; }
+          if (removeConfirm.matches(':popover-open')) { hideVideoRemoveConfirm(true); return; }
           if (!tooltip.hidden) { hideHelp(); return; }
           setPanelOpen(false);
           return;
         }
         if (event.key !== 'Tab') return;
         // 只看可见的控件：三张皮肤的配置行里有隐藏块与折叠的对话面板滑块
-        const focusRoot = resetConfirm.matches(':popover-open') ? resetConfirm : panel;
+        const focusRoot = panel.querySelector('.bs-confirm:popover-open') || panel;
         const focusable = [...focusRoot.querySelectorAll('button, input')]
           .filter((element) => !element.disabled && element.tabIndex >= 0 && element.offsetParent !== null);
         if (focusable.length === 0) return;
@@ -1896,7 +1979,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
       });
-      on(window, 'resize', () => { hideHelp(); hideResetConfirm(); cancelPanelResize(); schedulePlace(); });
+      on(window, 'resize', () => { hideHelp(); hideResetConfirm(); hideVideoRemoveConfirm(); cancelPanelResize(); schedulePlace(); });
 
       on(window, 'message', onSurfaceMessage);
       on(document, 'visibilitychange', onSurfaceVisibility);

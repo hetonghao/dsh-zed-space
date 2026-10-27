@@ -133,20 +133,22 @@ test('真实视频库：来源验证、幂等、显式应用、失败回滚、�
       await new Promise(resolve => setTimeout(resolve, 250))
       await route.continue()
     })
-    const pending = await page.evaluate(async ({ bytes, source }) => {
+    const reused = await page.evaluate(async ({ bytes, source }) => {
       await controller.start()
       const operation = controller.videoLibrary.import(new File([new Uint8Array(bytes)], 'pending.mp4'), source)
       controller.focusVideoDiscovery()
       document.querySelector('.bs-close').click()
       const imported = await operation
-      await new Promise(resolve => setTimeout(resolve, 20))
-      const released = !document.querySelector('#__dsh-backspace-video__')
+      return imported.reused
+    }, { bytes: [...bytes], source })
+    await page.waitForFunction(() => !document.querySelector('#__dsh-backspace-video__'), null, { timeout: 5000 })
+    const pending = await page.evaluate(async reused => {
       const late = controller.videoLibrary.list().then(() => 'resolved', error => error.message)
       controller.stop()
       const cancelled = await late
       await new Promise(resolve => setTimeout(resolve, 300))
-      return { reused: imported.reused, released, cancelled, noLateFrame: !document.querySelector('#__dsh-backspace-video__') }
-    }, { bytes: [...bytes], source })
+      return { reused, released: true, cancelled, noLateFrame: !document.querySelector('#__dsh-backspace-video__') }
+    }, reused)
     assert.deepEqual(pending, { reused: true, released: true, cancelled: 'cancelled', noLateFrame: true })
     await writeFile(resolve(output, 'observables.json'), JSON.stringify({ result, rename, damaged, isolated, stopped, pending }, null, 2))
   } finally { await browser.close(); await server.close() }
