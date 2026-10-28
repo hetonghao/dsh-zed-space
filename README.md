@@ -7,9 +7,9 @@
 
 海洋、宇宙双视角和本地视频，让 Harness 随你的工作场景变化。每个场景单独保存参数，切换时平滑衔接。
 
-**当前为 1.0.0 候选版，技术包名为 `dsh-zed-space`。npm、GitHub Release、插件市场和新版 Pages 均未发布。** 仓库代码可用于本地构建验收，请勿把候选包名当成已发布的安装入口。
+**1.0.0 · 技术包名 `dsh-zed-space`。** 下载安装入口与市场收录进度见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.0.md)。
 
-[源代码](https://github.com/hetonghao/dsh-zed-space) · [发布前说明](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md) · [问题反馈](https://github.com/hetonghao/dsh-zed-space/issues)
+[源代码](https://github.com/hetonghao/dsh-zed-space) · [安装说明](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md) · [问题反馈](https://github.com/hetonghao/dsh-zed-space/issues)
 
 本项目是 DeepSeek Harness 的社区插件，不是 DeepSeek 官方产品，也不适用于 DeepSeek 网页聊天站点。
 
@@ -51,6 +51,18 @@
 
 两段视频通过「本地视频」导入并实际播放，仅作效果展示，不随插件分发。
 
+## 安装
+
+在 Harness 的「插件 → 添加插件」中输入 `dsh-zed-space@1.0.0`。Harness Web 可运行：
+
+```sh
+dsh plugin --profile web add dsh-zed-space@1.0.0
+```
+
+也可从 [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.0) 下载 `dsh-zed-space-1.0.0.tgz`，将本地文件路径填入安装命令。安装后重启对应的 Harness 实例。
+
+从 Backspace 升级时，先在同一 profile 卸载旧插件，再安装新包；保留原有配置与视频数据。详见[安装与迁移](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md)。
+
 ## 本地构建与预览
 
 需要 Node.js 20+。在仓库目录运行：
@@ -62,7 +74,7 @@ npm run build:site
 npm test
 ```
 
-`pages-dist/` 是官网静态产物，可通过本地 HTTP 服务预览。本轮仅做本地审核；Pages 工作流只保留手动触发，不随推送自动发布。
+`pages-dist/` 是官网静态产物，可通过本地 HTTP 服务预览。Pages 工作流只保留手动触发，不随 npm 或 GitHub Release 自动发布。
 
 开发者接入方式见[插件构建说明](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/dsh-plugin.md)和[源码集成](https://github.com/hetonghao/dsh-zed-space/blob/main/harness-plugin/README.md)。旧版迁移注意事项见[安装说明](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md)，不要删除整个 Harness 配置或会话目录。
 
@@ -70,7 +82,7 @@ npm test
 
 **现在能从 npm 或市场安装新版吗？**
 
-不能。1.0.0 尚未发布；发布后会更新安装说明和下载入口。
+可按上方精确版本或 Release 文件安装。社区市场需要维护者审核，收录状态见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.0.md)。
 
 **有共享壁纸市场吗？**
 
@@ -78,7 +90,7 @@ npm test
 
 **历史 Backspace 内容为什么还在？**
 
-本项目从 Backspace 演进而来。历史版本、变更记录和旧媒体保留溯源用途，不代表 Zed Space Skin 已发布。上游作者和许可记录见 [THIRD_PARTY_NOTICES.md](https://github.com/hetonghao/dsh-zed-space/blob/main/THIRD_PARTY_NOTICES.md) 与 [LICENSE](https://github.com/hetonghao/dsh-zed-space/blob/main/LICENSE)。
+本项目从 Backspace 演进而来。历史变更记录和旧媒体保留溯源用途。当前仓库的 Git tag 从 `v1.0.0` 重新开始。上游作者和许可记录见 [THIRD_PARTY_NOTICES.md](https://github.com/hetonghao/dsh-zed-space/blob/main/THIRD_PARTY_NOTICES.md) 与 [LICENSE](https://github.com/hetonghao/dsh-zed-space/blob/main/LICENSE)。
 
 ## 开发资料
 

@@ -1,6 +1,6 @@
 # DSH bundle 安装
 
-根目录是 `dsh-zed-space` 的可安装 DSH bundle，展示名为 Zed Space Skin。`1.0.0` 尚未发布；当前安装方法见[安装与排错](install.zh.md)，旧包迁移见[迁移说明](publishing/migration.md)。
+根目录是 `dsh-zed-space` 的可安装 DSH bundle，展示名为 Zed Space Skin。`1.0.0` 的发布进度见[发布记录](publishing/releases/1.0.0.md)；安装方法见[安装与排错](install.zh.md)，旧包迁移见[迁移说明](publishing/migration.md)。
 
 bundle 通过 Host、Web client module 和同源只读资源路由加载背景，无需修改 Harness 源码。安装后核对 profile 中只有一个新插件实例，并检查以下资源响应正常：
 

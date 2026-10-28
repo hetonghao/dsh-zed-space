@@ -1,10 +1,10 @@
-# npm 发布审核：dsh-zed-space
+# npm 发布与核验：dsh-zed-space
 
-## 当前状态与包信息
+当前版本为 `1.0.0`，实际结果见[发布记录](releases/1.0.0.md)。产品名称为 **Zed Space Skin**，定义为“Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤”。
 
-`1.0.0` 是未发布的待审候选版本，尚未执行 `npm publish`。产品名称为 **Zed Space Skin**，定义为“Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤”。
+## 包信息
 
-| 字段 | 候选值 |
+| 字段 | 值 |
 | --- | --- |
 | `name` | `dsh-zed-space` |
 | `version` | `1.0.0` |
@@ -12,57 +12,52 @@
 | `repository.url` | `git+https://github.com/hetonghao/dsh-zed-space.git` |
 | `homepage` | `https://github.com/hetonghao/dsh-zed-space` |
 | `bugs` | `https://github.com/hetonghao/dsh-zed-space/issues` |
-| `license` | `MIT`；上游及第三方声明随包保留 |
+| `license` | MIT；保留上游及第三方声明 |
 | `publishConfig.access` | `public` |
 | `dsh.bundle.patch` | `./cordis.patch.yml` |
+| `icon` | `./native-dist/icons/icon128.png`，随包提供 |
 | Node.js | `>=20` |
 
-包名和版本由 npm 标识具体制品，展示名不作为安装参数。npm 必填的 `name`、`version` 及随包文件规则见 [package.json 文档](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/)。
+安装参数使用技术包名，展示名通过 `./locale/*.json` 导出。字段规则见 [npm package.json 文档](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/)。旧 tag 经备份后清理，新仓库从 `v1.0.0` 开始；历史提交和变更记录保留。
 
-Zed Space Skin 使用独立版本序列，首发候选版为 `1.0.0`。Backspace 的历史 tags 和 `1.3.0-rc.*` 本地记录保留原版本号，不是新包的发布记录。
-
-## 发布前验收
-
-在仓库根目录运行：
+## 发布前检查
 
 ```sh
 npm ci
+npm run build
 npm run check
 npm run test:browser
 npm run test:desktop
 npm run test:video
 npm run test:transitions
+npm run package:extension
 npm pack --dry-run --json
-npm pack --pack-destination /absolute/path/to/review
+npm pack --ignore-scripts --pack-destination /absolute/path/to/review
 ```
 
-逐项审阅最终 tarball：包名和版本、`cordis.patch.yml`、Host/Client 入口、海洋/宇宙/视频资源、MIT 许可、three.js MIT、Geist OFL、`THIRD_PARTY_NOTICES.md`。检查没有用户视频、令牌、浏览器配置或 QA 临时文件。实际安装这个 tarball 并验证三个背景、两个宇宙视角、参数恢复和旧存储迁移；构建通过不能替代安装验证。
+检查最终 tarball 的包名、版本、patch、Host/Client 入口、图标、locale、海洋/宇宙/视频资源、MIT、three.js MIT、Geist OFL 和第三方声明。包中不应含用户视频、令牌、浏览器配置或测试临时文件。用临时 Harness profile 安装最终 tarball，核对插件列表图标、设置面板和背景。
 
-README 的图片使用新仓库可读取的绝对 HTTPS 地址，文档链接也要在 npm 展示环境可访问。公开推送前的新 URL、尚未启用的 Pages 地址不算已验证可用链接。Pages 暂不启用；未来启用后再决定是否更改 homepage。相对链接若依赖未随包提供的文件，改用源码文档地址。
+README 图片必须可公开访问。公网视频市场尚未上线，发布说明应保留这一边界；旧 React 源码集成仍只接海洋。Pages 和浏览器扩展商店单独发布。
 
-产品说明只描述已实现能力：海洋、宇宙双视角、本地视频、独立玻璃配置与背景切换。视频市场已完成本地接入，公网平台尚未上线；无法连接时显示友好提示，本地导入与已保存皮肤继续可用。发布说明不能将在线市场描述为已对外开放。旧 React 源码集成仍仅接海洋，不作为多背景验收路径。
+## 发布
 
-## 发布身份与审批边界
-
-发布前由包维护者核对 npm 账户与包名权限。官方要求使用启用 2FA 的账户，或符合策略的 granular access token；CI 可按 npm 的 trusted publishing 流程配置。不要把令牌写入仓库、截图或本地证据。见 [npm 发布身份说明](https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages/)和 [trusted publishing](https://docs.npmjs.com/trusted-publishers/)。本次未读取账户秘密，未配置 npm 发布凭据。
-
-下面是**批准发布后才执行**的命令。本次仅准备资料：
+先核对 npm 身份和目标版本是否存在，再发布已审核的同一个 tarball。首次发布可在本机完成登录与 2FA；后续 CI 可配置 [trusted publishing](https://docs.npmjs.com/trusted-publishers/)。不要把凭据写入仓库或日志。
 
 ```sh
 npm whoami --registry=https://registry.npmjs.org
 npm view dsh-zed-space@1.0.0 version --registry=https://registry.npmjs.org
-npm publish /absolute/path/to/review/dsh-zed-space-1.0.0.tgz --access public --registry=https://registry.npmjs.org
+npm publish /absolute/path/to/review/dsh-zed-space-1.0.0.tgz --ignore-scripts --access public --registry=https://registry.npmjs.org
 ```
 
-`npm view` 返回 404 只说明此刻官方源取不到目标，不保证名字可注册。成功发布过的 `name@version` 不能复用；若发布后验证失败，应修复并增加版本，不能删除后重发同一版本。若改为预发布版本，显式使用 `--tag next`，避免覆盖 `latest`。[npm publish 规则](https://docs.npmjs.com/cli/v11/commands/npm-publish/)
+已成功发布的 `name@version` 不能重复使用；修复后必须增加版本。预发布显式使用 `--tag next`，避免覆盖 `latest`。见 [npm publish 规则](https://docs.npmjs.com/cli/v11/commands/npm-publish/)。
 
-## 发布后核验（尚未执行）
+## 发布后核验
 
-从官方 registry 下载对应 tarball，核对 `dist.integrity` 与本地审核制品；再验证精确版本安装。GitHub Release 若随后获批，上传与 registry 字节一致的 `dsh-zed-space-1.0.0.tgz` 和 `dsh-zed-space.tgz`，不另行重新打包。工作流必须手动触发且使用已核准 tag；本轮不触发。
+从官方 registry 下载 tarball，核对 `dist.integrity`、SHA-256 和本地制品，再验证精确版本安装。GitHub Release 上传相同字节的 `dsh-zed-space-1.0.0.tgz` 与 `dsh-zed-space.tgz`，另附扩展 ZIP 和 `SHA256SUMS`。
 
 ```sh
 npm view dsh-zed-space@1.0.0 name version repository dist --json --registry=https://registry.npmjs.org
 node scripts/verify-release.mjs github.tgz registry.tgz dist.json
 ```
 
-新仓库的历史 tags 来自迁移历史，不能当作 Zed Space Skin 已发布凭证。正式发布时间、registry 核验、GitHub 资产和市场收录各自记录。
+现有 Actions 发布工作流只支持手动触发，要求已存在 Release 和 `NPM_TOKEN`。本机已发布的版本不要再次触发该工作流。

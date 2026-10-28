@@ -2,7 +2,7 @@
 
 ## 名称和仓库
 
-展示名改为 **Zed Space Skin**，npm 包、DSH 插件标识和仓库名改为 `dsh-zed-space`。新仓库为 [hetonghao/dsh-zed-space](https://github.com/hetonghao/dsh-zed-space)，`1.0.0` 仍是未发布候选版。
+展示名改为 **Zed Space Skin**，npm 包、DSH 插件标识和仓库名改为 `dsh-zed-space`。新仓库为 [hetonghao/dsh-zed-space](https://github.com/hetonghao/dsh-zed-space)，正式版本从 `1.0.0` 开始，渠道状态见[发布记录](releases/1.0.0.md)。
 
 新项目从旧项目已提交的多背景代码继续维护；保留 Git 提交、历史分支和 tags。旧仓库继续保留，旧 Issues/PR 不迁移。历史票据的具体链接仍指向 `hetonghao/dsh-backspace`；新反馈请到[新仓库 Issues](https://github.com/hetonghao/dsh-zed-space/issues)。原目录未提交的文档不混入此次源码迁移，`.scratch/` 既有记录保留历史含义。
 
@@ -10,7 +10,7 @@
 
 1. 记录当前 Harness 版本、安装 profile 和已启用背景；保留导入视频的原始文件。
 2. 在当前实例停用并卸载 `dsh-backspace`，确认没有旧插件继续运行。
-3. 安装审核过的本地 `dsh-zed-space-1.0.0.tgz`。正式发布后，才可改用 `dsh-zed-space@1.0.0`。
+3. 安装 `dsh-zed-space@1.0.0`，或使用 Release 中的 `dsh-zed-space-1.0.0.tgz`。
 4. 重启同一实例，检查背景、玻璃设置、宇宙视角、视频列表与刷新恢复。
 
 Web 的例子（本地 tarball 路径须换成真实文件）：

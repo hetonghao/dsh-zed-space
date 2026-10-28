@@ -7,9 +7,9 @@
 
 Ocean, two cosmic views, and local videos for your Harness workspace. Each scene keeps its own settings, with smooth transitions between backgrounds.
 
-**Version 1.0.0 is a candidate. The technical package name is `dsh-zed-space`. npm, GitHub Release, the plugin marketplace, and the new Pages site are not published.** The source is available for local build validation; the candidate package name is not an installable release.
+**1.0.0 · Package name: `dsh-zed-space`.** See the [release record](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.0.md) for downloads and marketplace review status.
 
-[Source](https://github.com/hetonghao/dsh-zed-space) · [Pre-release notes](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/dsh-plugin.md) · [Issues](https://github.com/hetonghao/dsh-zed-space/issues)
+[Source](https://github.com/hetonghao/dsh-zed-space) · [Installation](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/dsh-plugin.md) · [Issues](https://github.com/hetonghao/dsh-zed-space/issues)
 
 This is an independent community plugin for DeepSeek Harness, not an official DeepSeek product or a skin for the DeepSeek web chat site.
 
@@ -51,6 +51,18 @@ These five screenshots were captured in the real **DeepSeek Harness Web 0.2.1-rc
 
 Both videos were imported through the local video library and played in the application. They are demonstration media and are not included with the plugin.
 
+## Installation
+
+In Harness, open Plugins → Add plugin and enter `dsh-zed-space@1.0.0`. For Harness Web:
+
+```sh
+dsh plugin --profile web add dsh-zed-space@1.0.0
+```
+
+Alternatively, download `dsh-zed-space-1.0.0.tgz` from the [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.0) and install using its local path. Restart the corresponding Harness instance after installation.
+
+When upgrading from Backspace, remove the old plugin from the same profile before adding the new one. Keep your settings and video data. See [installation and migration](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md).
+
 ## Build and preview locally
 
 Requires Node.js 20+. From the repository directory:
@@ -62,7 +74,7 @@ npm run build:site
 npm test
 ```
 
-`pages-dist/` contains the static website and can be previewed through a local HTTP server. This iteration is for local review. Pages deployment is manual and does not run on push.
+`pages-dist/` contains the static website and can be previewed through a local HTTP server. Pages deployment is manual and does not run with npm or GitHub releases.
 
 See [plugin integration](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/dsh-plugin.md), [source integration](https://github.com/hetonghao/dsh-zed-space/blob/main/harness-plugin/README.md), and [migration notes](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md). Do not delete the entire Harness configuration or session directory.
 
@@ -70,7 +82,7 @@ See [plugin integration](https://github.com/hetonghao/dsh-zed-space/blob/main/do
 
 **Can I install this version from npm or a marketplace?**
 
-Not yet. Version 1.0.0 is unpublished. Installation instructions and downloads will follow publication.
+Use the exact package version or Release file above. Marketplace listing requires maintainer review; see the [release record](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.0.md).
 
 **Is there a shared wallpaper marketplace?**
 
@@ -78,7 +90,7 @@ The local acceptance build connects to the official video skin gallery and share
 
 **Why is historical Backspace content still present?**
 
-This project evolved from Backspace. Historical releases, changelog entries, and media remain for provenance and do not mean Zed Space Skin is published. See [THIRD_PARTY_NOTICES.md](https://github.com/hetonghao/dsh-zed-space/blob/main/THIRD_PARTY_NOTICES.md) and [LICENSE](https://github.com/hetonghao/dsh-zed-space/blob/main/LICENSE) for upstream authorship and licensing.
+This project evolved from Backspace. Historical changelog entries and media remain for provenance. Git tags in the current repository restart at `v1.0.0`. See [THIRD_PARTY_NOTICES.md](https://github.com/hetonghao/dsh-zed-space/blob/main/THIRD_PARTY_NOTICES.md) and [LICENSE](https://github.com/hetonghao/dsh-zed-space/blob/main/LICENSE) for upstream authorship and licensing.
 
 ## Development
 

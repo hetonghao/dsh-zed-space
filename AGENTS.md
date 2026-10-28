@@ -22,4 +22,4 @@
 
 采用 single-context：根目录 `GLOSSARY.md` 与 `docs/adr/`；探索领域概念或设计决策前读取 `docs/agents/domain.md`。
 
-发布前读取 `docs/publishing/README.md`；当前 1.0.0 是未发布候选版。历史 `.scratch/` 资料、旧 Issues/PR 链接与版权声明保留原含义。
+发布前读取 `docs/publishing/README.md`；实际渠道状态见 `docs/publishing/releases/1.0.0.md`。历史 `.scratch/` 资料、旧 Issues/PR 链接与版权声明保留原含义。
