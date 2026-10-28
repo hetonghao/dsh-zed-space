@@ -57,6 +57,7 @@ function emitLoader(adapter, target) {
 
 emitLoader('shared/extension-entry.js', 'extension/content.js')
 emitLoader('shared/native-entry.js', 'native-dist/loader.js')
+emit('extension/icons/icon128.png', ['native-dist/icons/icon128.png'])
 
 emit('shared/ocean.js', [
   'extension/ocean.js',

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
 import { apply } from '../plugin/index.js'
@@ -45,6 +46,12 @@ test('DSH Host bundle serves only local Backspace assets', async () => {
   assert.equal(page.status, 200)
   assert.equal(page.headers['content-type'], 'text/html; charset=utf-8')
   assert.match(page.body.toString(), /src="\.\/ocean\.js\?skin=1"/)
+
+  const icon = createResponse()
+  await route.handler({ method: 'GET', url: '/dsh-zed-space/icons/icon128.png' }, icon)
+  assert.equal(icon.status, 200)
+  assert.equal(icon.headers['content-type'], 'image/png')
+  assert.deepEqual(icon.body, await readFile(new URL('../extension/icons/icon128.png', import.meta.url)))
 
   const head = createResponse()
   await route.handler({ method: 'HEAD', url: '/dsh-zed-space/styles.css' }, head)

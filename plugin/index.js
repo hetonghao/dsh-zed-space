@@ -1,5 +1,5 @@
 /**
- * Installable DeepSeek Harness Host plugin for Backspace.
+ * Installable DeepSeek Harness Host plugin for Zed Space Skin.
  * Serves the self-contained renderer under /dsh-zed-space without patching
  * the Harness checkout.
  */
@@ -18,6 +18,7 @@ const MIME = Object.freeze({
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  '.png': 'image/png',
   '.woff2': 'font/woff2',
 })
 

@@ -215,13 +215,6 @@ window.__ModuleLoader__.load({ id: "dsh-zed-space", factory: (require) => {
     },
   });
 
-  const BLACK_HOLE_ICON = `
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <ellipse cx="12" cy="12" rx="10" ry="3.8" transform="rotate(-25 12 12)" stroke="currentColor" stroke-width="1.4"/>
-  <circle cx="12" cy="12" r="5" fill="#091114" stroke="currentColor" stroke-width="1.5"/>
-  <path d="M3.1 16.2c2.5.8 6.1.1 10.1-1.8s7.2-4.3 7.8-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-</svg>`;
-
   const HELP_ICON = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.75" stroke="currentColor" stroke-width="1.25"/><path d="M8 7.2v3.4M8 5.2v.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   const IMPORT_ICON = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 2v7m-3-3 3 3 3-3M2.5 10v2.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V10"/></svg>';
   const DISCOVER_ICON = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="5.75"/><path d="m10.5 5.5-1.4 3.6-3.6 1.4 1.4-3.6 3.6-1.4Z"/></svg>';
@@ -597,8 +590,8 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
 }
 #${IDS.button}:hover, #${IDS.button}.active { color:var(--bs-accent); border-color:var(--bs-accent); background:var(--bs-selected); }
 #${IDS.button}:active { background:var(--bs-inset); }
-#${IDS.button} > svg { transition:transform .24s cubic-bezier(.16,1,.3,1); }
-#${IDS.button}:hover > svg, #${IDS.button}.active > svg { transform:rotate(18deg) scale(1.08); }
+#${IDS.button} > img { transition:transform .24s cubic-bezier(.16,1,.3,1); }
+#${IDS.button}:hover > img, #${IDS.button}.active > img { transform:scale(1.08); }
 #${IDS.button} .bs-launcher-tip { position:absolute; bottom:calc(100% + 8px); left:0; width:max-content; padding:7px 10px; border:1px solid var(--bs-line); border-radius:8px; background:var(--bs-surface); color:var(--bs-text); font-size:12px; line-height:1.5; box-shadow:0 4px 16px rgba(9,22,30,.14); pointer-events:none; visibility:hidden; }
 #${IDS.button}:is(:hover,:focus-visible):not(.active) .bs-launcher-tip { visibility:visible; }
 #${IDS.button}:focus-visible, #${IDS.panel} button:focus-visible, #${IDS.panel} input:focus-visible { outline:2px solid var(--bs-accent); outline-offset:3px; }
@@ -614,7 +607,6 @@ body[data-ds-dark-theme] #${IDS.button}, body[data-ds-dark-theme] #${IDS.panel},
 #${IDS.panel} ::selection { background:var(--bs-selected); color:var(--bs-text); }
 #${IDS.panel} .bs-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex:0 0 auto; }
 #${IDS.panel} .bs-brand { display:flex; align-items:center; gap:9px; font-size:18px; font-weight:600; letter-spacing:-.02em; }
-#${IDS.panel} .bs-brand svg { color:var(--bs-accent); }
 #${IDS.panel} .bs-close { display:grid; place-items:center; width:30px; height:30px; padding:0; border:0; border-radius:8px; background:transparent; color:var(--bs-muted); cursor:pointer; }
 #${IDS.panel} .bs-close:hover { color:var(--bs-text); background:var(--bs-inset); }
 #${IDS.panel} .bs-switch.bs-skin-heading { display:flex; align-items:center; justify-content:flex-start; gap:6px; margin:0 0 7px; min-height:24px; font-weight:500; }
@@ -706,7 +698,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
 #${IDS.panel} .bs-video-empty { grid-column:1/-1; padding:24px 14px; border:1px dashed var(--bs-line); border-radius:10px; text-align:center; font-size:13px; }
 #${IDS.panel} .bs-video-empty p { color:var(--bs-muted); font-size:12px; line-height:1.7; margin:10px 0 0; }
 @media (prefers-reduced-motion:reduce) {
-  #${IDS.button}, #${IDS.button} > svg, #${IDS.panel}, #${IDS.panel} *, #${IDS.panel} .bs-tabs::before { transition:none !important; }
+  #${IDS.button}, #${IDS.button} > img, #${IDS.panel}, #${IDS.panel} *, #${IDS.panel} .bs-tabs::before { transition:none !important; }
 }`;
   }
 
@@ -1453,6 +1445,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
 
     const mountUi = () => {
       if (document.getElementById(IDS.button)) return;
+      const brandIcon = `<img src="${options.assetUrl('icons/icon128.png')}" width="20" height="20" alt="" aria-hidden="true" />`;
       const style = document.createElement('style');
       style.id = IDS.uiStyle;
       style.textContent = uiCss();
@@ -1465,7 +1458,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
       button.setAttribute('aria-controls', IDS.panel);
       button.setAttribute('aria-expanded', 'false');
       button.setAttribute('aria-haspopup', 'dialog');
-      button.innerHTML = `${BLACK_HOLE_ICON}<span class="bs-launcher-tip" aria-hidden="true">${copy.button}</span>`;
+      button.innerHTML = `${brandIcon}<span class="bs-launcher-tip" aria-hidden="true">${copy.button}</span>`;
 
       const panel = document.createElement('div');
       panel.id = IDS.panel;
@@ -1483,7 +1476,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         </div>`).join('');
 
       panel.innerHTML = `
-        <div class="bs-title"><span class="bs-brand">${BLACK_HOLE_ICON}Zed Space Skin</span><button class="bs-close" type="button" aria-label="${copy.close}">${CLOSE_ICON}</button></div>
+        <div class="bs-title"><span class="bs-brand">${brandIcon}Zed Space Skin</span><button class="bs-close" type="button" aria-label="${copy.close}">${CLOSE_ICON}</button></div>
         <div class="bs-switch bs-skin-heading"><label for="${IDS.panel}-enabled">${copy.skinTitle}</label><input type="checkbox" role="switch" id="${IDS.panel}-enabled" aria-label="${copy.enable}" />${helpButton('skinTitle')}</div>
         <div class="bs-tabs" role="tablist" aria-label="${copy.skinTitle}">${SKIN_TABS.map((skin) => `<button class="bs-tab" type="button" role="tab" data-skin="${skin.id}" aria-selected="${skin.id === state.skin}" aria-controls="${IDS.panel}-${skin.surface}">${copy.skins[skin.id]}</button>`).join('')}</div>
         <div class="bs-scroll"><div class="bs-skin-region">${PARAM_GROUPS.map((skin) => `

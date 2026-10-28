@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤",
+  "icon": "./native-dist/icons/icon128.png",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hetonghao/dsh-zed-space.git"
@@ -24,12 +25,15 @@
   "exports": {
     ".": "./plugin/index.js",
     "./client": "./plugin/client.js",
+    "./locale/*.json": "./plugin/locale/*.json",
     "./package.json": "./package.json"
   },
   "files": [
     "plugin/index.js",
     "plugin/market-server.js",
     "plugin/client.js",
+    "plugin/locale/*.json",
+    "native-dist/icons/icon128.png",
     "cordis.patch.yml",
     "native-dist/loader.js",
     "native-dist/ocean.js",

@@ -63,6 +63,7 @@ test('static installer is repeatable and preserves unrelated Harness updates', a
   assert.equal((html.match(/dsh-zed-space:begin/g) || []).length, 1)
   assert.match(html, /\/dsh-zed-space\/loader\.js/)
   await stat(resolve(dist, 'dsh-zed-space/vendor/three.webgpu.js'))
+  assert.deepEqual(await readFile(resolve(dist, 'dsh-zed-space/icons/icon128.png')), await readFile(resolve(root, 'extension/icons/icon128.png')))
   await stat(`${index}.bs-backup`)
 
   html = html.replace('<title>Harness</title>', '<title>Harness upgraded</title><meta name="fixture" content="preserve">')

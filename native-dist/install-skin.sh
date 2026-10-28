@@ -136,6 +136,7 @@ for dist in "${DISTS[@]}"; do
     "$SKIN_SRC/cosmos.html" "$SKIN_SRC/cosmos.js" "$SKIN_SRC/video.html" "$SKIN_SRC/video.js" "$SKIN_SRC/video-media.js" "$SKIN_SRC/styles.css" "$dist/dsh-zed-space/"
   cp -R "$SKIN_SRC/vendor" "$dist/dsh-zed-space/vendor"
   cp -R "$SKIN_SRC/skins" "$dist/dsh-zed-space/skins"
+  cp -R "$SKIN_SRC/icons" "$dist/dsh-zed-space/icons"
   inject_loader "$index"
   echo "  Installed assets and loader; backup: $index.bs-backup"
 done

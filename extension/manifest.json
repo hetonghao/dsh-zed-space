@@ -37,6 +37,7 @@
   "web_accessible_resources": [
     {
       "resources": [
+        "icons/icon128.png",
         "skin.html",
         "ocean.js",
         "styles.css",
