@@ -2,11 +2,11 @@ import { createPublicKey, verify } from 'node:crypto'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 
-const CATALOG_URL = 'http://127.0.0.1:8080/api/catalog'
+const CATALOG_URL = 'https://zed-space.ai-cove.com/api/catalog'
 const PREFIX = '/dsh-zed-space/market/'
 const MAX_CATALOG_BYTES = 8 * 1024 * 1024
 const trustedKey = createPublicKey({
-  key: Buffer.from('302a300506032b657003210017b5ce0cdb7bd07a50f06cd3210da1a3929d3ff9586e79823dcef6202aed1d72', 'hex'),
+  key: Buffer.from('302a300506032b657003210024078e74941616f5821ba4a7c3f8f9dab1ebb2a61e8731203141c3aea8c962d2', 'hex'),
   format: 'der',
   type: 'spki',
 })
@@ -38,7 +38,7 @@ function base64(value) {
 }
 function mediaURL(value) {
   const raw = text(value)
-  requireValue(/^http:\/\/127\.0\.0\.1:9000\/zed-space-public\/[A-Za-z0-9_./-]+$/.test(raw)
+  requireValue(/^https:\/\/zed-space\.ai-cove\.com\/zed-space-public\/[A-Za-z0-9_./-]+$/.test(raw)
     && !raw.includes('..') && !raw.endsWith('/'))
   const url = new URL(raw)
   requireValue(url.href === raw && !url.pathname.split('/').includes('.'))

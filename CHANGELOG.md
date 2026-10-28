@@ -2,6 +2,13 @@
 
 本文件记录 Zed Space Skin 及其 Backspace 历史变更。Zed Space Skin 从 1.0.0 开始独立编号；Backspace 的历史版本号和本地候选记录保留原含义。
 
+## Zed Space Skin 1.0.1 — 2026-10-28
+
+- 发现入口接入 [Zed Space 公网壁纸市场](https://zed-space.ai-cove.com/wallpapers)，无需启动本地市场服务。
+- 目录与视频下载切换为固定 HTTPS 地址，更新生产目录验签公钥；继续校验签名、素材归属、文件大小和 SHA-256。
+- 连接失败时提示检查网络、重试或返回本地视频，移除“平台暂未上线”的旧提示。
+- 发布与安装验证见[1.0.1 发布记录](docs/publishing/releases/1.0.1.md)。
+
 ## Zed Space Skin 1.0.0 — 2026-10-28
 
 - 展示名改为 Zed Space Skin；包、插件和新仓库标识为 `dsh-zed-space`。

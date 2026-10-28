@@ -2213,7 +2213,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
 
 (function (global) {
   'use strict';
-  const origin = 'http://127.0.0.1:4173';
+  const origin = 'https://zed-space.ai-cove.com';
   const channel = 'zed-space-market';
   const busy = phase => ['downloading', 'verifying', 'importing', 'applying'].includes(phase);
   const validText = value => typeof value === 'string' && value.trim().length > 0 && value.length <= 200;
@@ -2370,7 +2370,7 @@ body[data-ds-dark-theme] #${IDS.panel} .bs-video-errors { color:#ffb4a7; }
         clearTimeout(current.timer);
         connection.dataset.state = 'unavailable';
         connection.querySelector('strong').textContent = '动态皮肤发现页暂不可用';
-        connection.querySelector('p').textContent = '官方动态皮肤平台暂未上线。\n你可以继续导入本地视频。';
+        connection.querySelector('p').textContent = '暂时无法连接官方动态皮肤平台。\n请检查网络后重试，也可以继续导入本地视频。';
         connection.querySelector('.zs-market-connection-actions').hidden = false;
       };
       frame.addEventListener('error', showUnavailable);

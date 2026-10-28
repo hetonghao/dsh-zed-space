@@ -13,7 +13,7 @@ test('发现页不可用时可返回本地视频，服务恢复后可以重试�
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
     page.setDefaultTimeout(12000)
     let available = false
-    await page.route('http://127.0.0.1:4173/wallpapers?*', route => available
+    await page.route('https://zed-space.ai-cove.com/wallpapers?*', route => available
       ? route.fulfill({ contentType: 'text/html', body: `<script>const q=new URLSearchParams(location.search);parent.postMessage({channel:'zed-space-market',version:1,session:q.get('session'),type:'ready'},q.get('parentOrigin'))</script>` })
       : route.abort('connectionrefused'))
     await page.goto(`${server.url}/tests/fixtures/generic/index.html`)
@@ -30,7 +30,7 @@ test('发现页不可用时可返回本地视频，服务恢复后可以重试�
     const unavailable = page.locator('.zs-market-connection[data-state="unavailable"]')
     await page.locator('#open-market').click()
     await unavailable.waitFor()
-    assert.match(await unavailable.textContent(), /官方动态皮肤平台暂未上线/)
+    assert.match(await unavailable.textContent(), /暂时无法连接官方动态皮肤平台/)
     assert.match(await unavailable.textContent(), /继续导入本地视频/)
     assert.equal(await page.locator('.zs-market iframe').evaluate(frame => frame.inert), true)
     assert.equal(await page.evaluate(() => libraryCalls), 0)

@@ -3,7 +3,7 @@ import test from 'node:test'
 import '../shared/market-download.js'
 import '../shared/market-client.js'
 const sha = 'a'.repeat(64)
-const message = (type, extra = {}) => ({ origin: 'http://127.0.0.1:4173', source: frame, data: { channel: 'zed-space-market', version: 1, session: 'session', type, ...extra } })
+const message = (type, extra = {}) => ({ origin: 'https://zed-space.ai-cove.com', source: frame, data: { channel: 'zed-space-market', version: 1, session: 'session', type, ...extra } })
 const frame = {}
 const tick = () => new Promise(resolve => setImmediate(resolve))
 function session(overrides = {}) {
@@ -17,7 +17,9 @@ test('session rejects forged origin/source/session and waits for handshake', asy
   const s = session()
   const request = message('download', { requestId: 'one', assetId: 'asset', sha256: sha })
   s.controller.receive(request)
-  s.controller.receive({ ...message('ready'), origin: 'https://evil.test' })
+  for (const origin of ['https://evil.test', 'http://127.0.0.1:4173', 'http://zed-space.ai-cove.com', 'https://zed-space.ai-cove.com.evil.test']) {
+    s.controller.receive({ ...message('ready'), origin })
+  }
   s.controller.receive({ ...message('ready'), source: {} })
   s.controller.receive(message('ready', { session: 'old' }))
   assert.equal(s.sent.length, 0)

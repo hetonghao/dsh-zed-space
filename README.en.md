@@ -7,7 +7,7 @@
 
 Ocean, two cosmic views, and local videos for your Harness workspace. Each scene keeps its own settings, with smooth transitions between backgrounds.
 
-**1.0.0 · Package name: `dsh-zed-space`.** See the [release record](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.0.md) for downloads and marketplace review status.
+**1.0.1 · Package name: `dsh-zed-space`.** See the [release record](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.1.md) for downloads and marketplace review status.
 
 [Source](https://github.com/hetonghao/dsh-zed-space) · [Installation](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/dsh-plugin.md) · [Issues](https://github.com/hetonghao/dsh-zed-space/issues)
 
@@ -23,7 +23,7 @@ This is an independent community plugin for DeepSeek Harness, not an official De
 | Local video library | Import multiple files, view thumbnails, enable one video, rename, remove, and restore after reopening. |
 | Smooth transitions | Wait for the next frame before blending; both cosmic views transition within one renderer. |
 
-Each video is limited to **32 MiB, 30 seconds, and 1080p**. See [local video background](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/video-background.md) for formats and storage details. Media stays on the device and is not automatically uploaded or synced through a browser account. **The local acceptance build includes the official video skin gallery.** Open “Discover official animated skins” from “Local video” to browse, preview, and download; applying a downloaded video is a separate action. The gallery service currently runs locally. See [local marketplace integration](docs/market-integration.md).
+Each video is limited to **32 MiB, 30 seconds, and 1080p**. See [local video background](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/video-background.md) for formats and storage details. Media stays on the device and is not automatically uploaded or synced through a browser account. **The plugin connects to the public [Zed Space wallpaper market](https://zed-space.ai-cove.com/wallpapers).** Open “Discover official animated skins” from “Local video” to browse, preview, and download; applying a downloaded video is a separate action. See [marketplace integration](docs/market-integration.md) for usage and network details.
 
 ## Scene gallery
 
@@ -53,13 +53,13 @@ Both videos were imported through the local video library and played in the appl
 
 ## Installation
 
-In Harness, open Plugins → Add plugin and enter `dsh-zed-space@1.0.0`. For Harness Web:
+In Harness, open Plugins → Add plugin and enter `dsh-zed-space@1.0.1`. For Harness Web:
 
 ```sh
-dsh plugin --profile web add dsh-zed-space@1.0.0
+dsh plugin --profile web add dsh-zed-space@1.0.1
 ```
 
-Alternatively, download `dsh-zed-space-1.0.0.tgz` from the [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.0) and install using its local path. Restart the corresponding Harness instance after installation.
+Alternatively, download `dsh-zed-space-1.0.1.tgz` from the [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.1) and install using its local path. Restart the corresponding Harness instance after installation.
 
 When upgrading from Backspace, remove the old plugin from the same profile before adding the new one. Keep your settings and video data. See [installation and migration](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md).
 
@@ -82,11 +82,11 @@ See [plugin integration](https://github.com/hetonghao/dsh-zed-space/blob/main/do
 
 **Can I install this version from npm or a marketplace?**
 
-Use the exact package version or Release file above. Marketplace listing requires maintainer review; see the [release record](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.0.md).
+Use the exact package version or Release file above. Marketplace listing requires maintainer review; see the [release record](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.1.md).
 
 **Is there a shared wallpaper marketplace?**
 
-The local acceptance build connects to the official video skin gallery and shares its catalog with Zed Space. You can browse, download to “My videos,” and apply a video in DSH. It is not publicly released; see [local marketplace integration](docs/market-integration.md) for setup requirements.
+Yes. The public [Zed Space wallpaper market](https://zed-space.ai-cove.com/wallpapers) lets you browse, download to “My videos,” and apply a video in DSH without running a local market server. Saved videos remain available offline. See [marketplace integration](docs/market-integration.md).
 
 **Why is historical Backspace content still present?**
 

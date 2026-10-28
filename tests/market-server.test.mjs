@@ -7,7 +7,7 @@ import { createMarketHandler, verifyEnvelope } from '../plugin/market-server.js'
 const { publicKey, privateKey } = generateKeyPairSync('ed25519')
 const sha = 'a'.repeat(64)
 const bytes = Buffer.from('video bytes')
-const file = { role: 'video', url: 'http://127.0.0.1:9000/zed-space-public/video', sha256: sha, bytes: bytes.length, mime: 'video/mp4', media: { width: 1920, height: 1080, duration_ms: 30000 } }
+const file = { role: 'video', url: 'https://zed-space.ai-cove.com/zed-space-public/video', sha256: sha, bytes: bytes.length, mime: 'video/mp4', media: { width: 1920, height: 1080, duration_ms: 30000 } }
 const catalog = () => ({ wallpapers: [{ asset_id: 'demo', localization: { 'zh-Hans': { title: '视频' } }, files: [{ role: 'poster' }, structuredClone(file)] }] })
 function envelope(value = catalog()) {
   const payload = Buffer.from(JSON.stringify(value))
@@ -46,11 +46,11 @@ test('HTTP catalog strips URLs and posters; media GET and HEAD use only trusted 
     assert.equal(media.headers.get('content-type'), 'video/mp4')
     assert.deepEqual(Buffer.from(await media.arrayBuffer()), method === 'HEAD' ? Buffer.alloc(0) : bytes)
   }
-  assert.ok(calls.every(c => ['http://127.0.0.1:8080/api/catalog', file.url].includes(c.url) && c.redirect === 'error'))
+  assert.ok(calls.every(c => ['https://zed-space.ai-cove.com/api/catalog', file.url].includes(c.url) && c.redirect === 'error'))
 })
 
 test('signed metadata rejects duplicate IDs/hashes, malformed sizes and escaped or non-public URLs', () => {
-  const invalidURLs = ['http://127.0.0.1:9000/private/video', 'http://localhost:9000/zed-space-public/video', 'http://127.0.0.1:9000/zed-space-public/../secret', 'http://127.0.0.1:9000/zed-space-public/%2e%2e/video', 'http://user@127.0.0.1:9000/zed-space-public/video', file.url + '?key=x', file.url + '#x', file.url + '/./x', file.url + '\\x', 'https://external.test/video']
+  const invalidURLs = ['http://127.0.0.1:9000/zed-space-public/video', 'http://zed-space.ai-cove.com/zed-space-public/video', 'https://zed-space.ai-cove.com.evil.test/zed-space-public/video', 'https://zed-space.ai-cove.com:444/zed-space-public/video', 'https://zed-space.ai-cove.com/private/video', 'http://localhost:9000/zed-space-public/video', 'https://zed-space.ai-cove.com/zed-space-public/../secret', 'https://zed-space.ai-cove.com/zed-space-public/%2e%2e/video', 'https://user@zed-space.ai-cove.com/zed-space-public/video', file.url + '?key=x', file.url + '#x', file.url + '/./x', file.url + '\\x', 'https://external.test/video']
   for (const url of invalidURLs) {
     const value = catalog(); value.wallpapers[0].files[1].url = url
     assert.throws(() => verifyCatalog(envelope(value)), url)
@@ -74,7 +74,7 @@ test('public HTTP rejects malformed queries/methods and unknown IDs without arbi
   assert.equal((await fetch(`${base}/catalog`, { method: 'POST' })).status, 405)
   assert.equal(calls.length, 0)
   assert.equal((await fetch(`${base}/media?asset=missing&file=${sha}`)).status, 404)
-  assert.deepEqual(calls, ['http://127.0.0.1:8080/api/catalog'])
+  assert.deepEqual(calls, ['https://zed-space.ai-cove.com/api/catalog'])
 })
 
 test('incompatible videos remain discoverable but never reach media upstream', async t => {

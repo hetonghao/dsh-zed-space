@@ -2,7 +2,7 @@
 
 此方式适用于运行预构建 Harness、不编译客户端插件的用户。技术名为 `dsh-zed-space`；安装器将皮肤资源复制到前端的 `dsh-zed-space/` 目录，并在 `</head>` 前插入带标记的延迟加载脚本，资源路径为 `/dsh-zed-space/`。
 
-当前版本为 `1.0.0`。本安装器随源码归档提供；常规安装优先使用根目录的 DSH bundle。下载入口、制品核验和市场状态见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.0.md)。
+当前版本为 `1.0.1`。本安装器随源码归档提供；常规安装优先使用根目录的 DSH bundle。下载入口、制品核验和市场状态见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.1.md)。
 
 ## 安装、更新与卸载
 

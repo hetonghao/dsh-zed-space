@@ -6,6 +6,7 @@ Zed Space Skin 没有聊天内容上传、统计分析或遥测功能。皮肤�
 - **DSH npm 插件与静态加载器：** 视觉偏好保存在当前页面的 localStorage。
 - **原生源码集成：** 使用 Harness 设置服务保存偏好。
 - **安装版与当前官网：** 海洋渲染依赖和字体随包提供。官网、npm 与 GitHub 的页面访问、安装和更新本身仍需要网络。
+- **公网壁纸市场：** 打开 DSH 插件的发现入口后，会访问 `https://zed-space.ai-cove.com/wallpapers` 及其目录、预览和媒体资源。服务端校验签名目录，并下载用户选择的视频；不上传本地视频或聊天内容。已保存的视频可离线播放，网络与存储边界见[壁纸市场接入](market-integration.md)。
 - **历史演示 `site/`：** 保留原版实现，会使用 jsDelivr；不包含在安装版或当前官网中。
 
 以上只描述 Zed Space Skin，不代表浏览器同步、宿主客户端或托管平台的数据处理方式。
@@ -21,8 +22,10 @@ The browser extension uses:
 - `http://127.0.0.1/*` and `http://localhost/*`: to inject the background into a
   locally served DeepSeek Harness interface.
 
-There are no remote host permissions, analytics SDKs, advertising systems,
-tracking pixels, or network APIs. three.js and Geist are included locally.
+The extension requests no remote host permissions and includes three.js and Geist locally.
+The DSH bundle connects to the public Zed Space market when you open its discovery
+page, and downloads the video you select after catalog and file verification.
+It does not upload your local videos or chat content. Saved videos work offline.
 Visual preferences use browser sync storage for the extension and may sync across
 devices when browser sync is enabled. The npm plugin and static installer use
 localStorage; the native source integration uses Harness's settings service.

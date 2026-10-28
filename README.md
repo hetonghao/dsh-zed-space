@@ -7,7 +7,7 @@
 
 海洋、宇宙双视角和本地视频，让 Harness 随你的工作场景变化。每个场景单独保存参数，切换时平滑衔接。
 
-**1.0.0 · 技术包名 `dsh-zed-space`。** 下载安装入口与市场收录进度见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.0.md)。
+**1.0.1 · 技术包名 `dsh-zed-space`。** 下载安装入口与市场收录进度见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.1.md)。
 
 [源代码](https://github.com/hetonghao/dsh-zed-space) · [安装说明](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md) · [问题反馈](https://github.com/hetonghao/dsh-zed-space/issues)
 
@@ -23,7 +23,7 @@
 | 本地视频库 | 多选导入、缩略图列表、勾选启用一个、重命名和移除，重新打开后恢复。 |
 | 平滑切换 | 新画面就绪后交叠过渡；宇宙双视角在同一个渲染器内切换。 |
 
-单个视频上限为 **32 MiB、30 秒、1080p**，支持范围及存储说明见[本地视频背景](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/video-background.md)。素材保存在本机，不会自动上传或随浏览器账号同步。**本地验收版已接入官方视频皮肤画廊**：在「本地视频」中点击「发现官方精美动态皮肤」，即可搜索、预览和下载；校验入库后再显式应用。市场服务目前仅在本机运行，详见[本地市场接入](docs/market-integration.md)。
+单个视频上限为 **32 MiB、30 秒、1080p**，支持范围及存储说明见[本地视频背景](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/video-background.md)。素材保存在本机，不会自动上传或随浏览器账号同步。**已接入[Zed Space 公网壁纸市场](https://zed-space.ai-cove.com/wallpapers)**：在「本地视频」中点击「发现官方精美动态皮肤」，即可搜索、预览和下载；校验入库后再显式应用。使用方式与网络范围见[壁纸市场接入](docs/market-integration.md)。
 
 ## 场景展示
 
@@ -53,13 +53,13 @@
 
 ## 安装
 
-在 Harness 的「插件 → 添加插件」中输入 `dsh-zed-space@1.0.0`。Harness Web 可运行：
+在 Harness 的「插件 → 添加插件」中输入 `dsh-zed-space@1.0.1`。Harness Web 可运行：
 
 ```sh
-dsh plugin --profile web add dsh-zed-space@1.0.0
+dsh plugin --profile web add dsh-zed-space@1.0.1
 ```
 
-也可从 [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.0) 下载 `dsh-zed-space-1.0.0.tgz`，将本地文件路径填入安装命令。安装后重启对应的 Harness 实例。
+也可从 [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.1) 下载 `dsh-zed-space-1.0.1.tgz`，将本地文件路径填入安装命令。安装后重启对应的 Harness 实例。
 
 从 Backspace 升级时，先在同一 profile 卸载旧插件，再安装新包；保留原有配置与视频数据。详见[安装与迁移](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md)。
 
@@ -82,11 +82,11 @@ npm test
 
 **现在能从 npm 或市场安装新版吗？**
 
-可按上方精确版本或 Release 文件安装。社区市场需要维护者审核，收录状态见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.0.md)。
+可按上方精确版本或 Release 文件安装。社区市场需要维护者审核，收录状态见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.1.md)。
 
 **有共享壁纸市场吗？**
 
-已接通本地官方视频皮肤画廊，与 Zed Space 网站复用目录。支持在 DSH 内浏览、下载到「我的视频」并应用；尚未公开发布，启动条件见[本地市场接入](docs/market-integration.md)。
+有。[Zed Space 壁纸市场](https://zed-space.ai-cove.com/wallpapers)已上线，DSH 插件可在画廊内浏览、下载到「我的视频」并应用，无需启动本地市场服务。已保存的视频可离线使用，详见[壁纸市场接入](docs/market-integration.md)。
 
 **历史 Backspace 内容为什么还在？**
 

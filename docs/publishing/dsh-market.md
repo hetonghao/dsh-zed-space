@@ -20,7 +20,7 @@ PR 只增加 `data/plugins/hetonghao__dsh-zed-space.yml`，内容见[本地 YAML
 
 仓库需公开、有可运行代码、创建满一天、带 `dsh-plugin` topic，并在 `package.json` 声明可用的 `dsh.bundle`。本项目保留 Open Sea Skin 来源与 MIT，差异为宇宙双视角、本地视频素材管理、各皮肤独立配置和切换效果。
 
-在线壁纸服务尚未公开开放，不把本地画廊验收描述成可供所有用户使用的公网功能。市场 CI 通过后仍需维护者审核；清单收录、网页展示与 Discover 可安装分别核验。
+[公网壁纸市场](https://zed-space.ai-cove.com/wallpapers)已上线，`1.0.1` 接入该服务，验证结果见[发布记录](releases/1.0.1.md)。市场 CI 通过后仍需维护者审核；清单收录、网页展示与 Discover 可安装分别核验。
 
 ## 校验
 

@@ -1,6 +1,6 @@
 {
   "name": "dsh-zed-space",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤",
   "icon": "./native-dist/icons/icon128.png",
