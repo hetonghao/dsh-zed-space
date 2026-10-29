@@ -24,7 +24,7 @@ try {
   await page.locator('#renderer-status.ready').waitFor()
   assert.equal(await page.locator('#hero-title').innerText(), 'Zed Space Skin')
   assert.equal(await page.locator('.brand-mark img').count(), 2)
-  assert.equal(await page.locator('#install [data-copy]').count(), 0, 'unpublished candidate must not offer copy-and-install commands')
+  assert.equal(await page.locator('#install [data-copy]').count(), 0, 'installation is documented in the linked guide')
   const repo = await page.locator('.nav-github').getAttribute('href')
   assert.equal(repo, 'https://github.com/hetonghao/dsh-zed-space')
   const links = await page.locator('a[href]').evaluateAll(nodes => nodes.map(node => node.getAttribute('href')))
@@ -34,7 +34,7 @@ try {
     assert.equal(href.includes('/dsh-backspace'), false)
     assert.equal(href.includes('/releases/download/'), false)
   }
-  results.push({ scenario: 'brand-candidate-status-and-navigation', result: 'PASS', links })
+  results.push({ scenario: 'brand-positioning-and-navigation', result: 'PASS', links })
   await page.locator('[data-preset="sunset"]').click()
   await page.waitForFunction(() => Math.abs(document.querySelector('#ocean-frame').contentWindow.__bsState().daylight - 18) < .02)
   const sunset = await ocean.locator('body').evaluate(() => globalThis.__bsState())

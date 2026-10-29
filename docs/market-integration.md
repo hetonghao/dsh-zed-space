@@ -20,7 +20,7 @@
 在对应 Harness profile 中安装或更新插件，重启该实例后打开「本地视频」：
 
 ```sh
-dsh plugin --profile web add dsh-zed-space@1.0.1
+dsh plugin --profile web add dsh-zed-space@1.0.2
 ```
 
 Desktop 使用独立 profile，具体步骤见[安装与排错](install.zh.md)。从 `1.0.0` 更新无需卸载或清理本地视频。真实安装与下载验证范围见[1.0.1 发布记录](publishing/releases/1.0.1.md)；Web 验证不等同于原生 Electron 或 Windows 实机验证。

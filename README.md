@@ -1,13 +1,11 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/extension/icons/icon128.png" width="80" height="80" alt="Zed Space 标志" />
   <h1>Zed Space Skin</h1>
-  <p>DeepSeek Harness 动态背景与界面皮肤</p>
+  <p>Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤。原生个性化动态背景皮肤，以及市场下载精美的动态壁纸。</p>
   <p><strong>简体中文</strong> · <a href="README.en.md">English</a></p>
 </div>
 
-海洋、宇宙双视角和本地视频，让 Harness 随你的工作场景变化。每个场景单独保存参数，切换时平滑衔接。
-
-**1.0.1 · 技术包名 `dsh-zed-space`。** 下载安装入口与市场收录进度见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.1.md)。
+**1.0.2 · 技术包名 `dsh-zed-space`。** 下载安装入口与市场收录进度见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.2.md)。
 
 [源代码](https://github.com/hetonghao/dsh-zed-space) · [安装说明](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md) · [问题反馈](https://github.com/hetonghao/dsh-zed-space/issues)
 
@@ -20,6 +18,7 @@
 | 实时海洋 | 调节波浪、日光，或启用自动昼夜变化。 |
 | 宇宙双视角 | 在地平线和漩涡视角间切换，分别调整光晕、星点与运动参数。 |
 | 每场景参数 | 各场景保存自己的参数和玻璃浓度；可单独调整对话面板背景。 |
+| 在线壁纸市场 | 浏览、预览和下载动态壁纸，保存到「我的视频」后应用。 |
 | 本地视频库 | 多选导入、缩略图列表、勾选启用一个、重命名和移除，重新打开后恢复。 |
 | 平滑切换 | 新画面就绪后交叠过渡；宇宙双视角在同一个渲染器内切换。 |
 
@@ -53,13 +52,13 @@
 
 ## 安装
 
-在 Harness 的「插件 → 添加插件」中输入 `dsh-zed-space@1.0.1`。Harness Web 可运行：
+在 Harness 的「插件 → 添加插件」中输入 `dsh-zed-space@1.0.2`。Harness Web 可运行：
 
 ```sh
-dsh plugin --profile web add dsh-zed-space@1.0.1
+dsh plugin --profile web add dsh-zed-space@1.0.2
 ```
 
-也可从 [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.1) 下载 `dsh-zed-space-1.0.1.tgz`，将本地文件路径填入安装命令。安装后重启对应的 Harness 实例。
+也可从 [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.2) 下载 `dsh-zed-space-1.0.2.tgz`，将本地文件路径填入安装命令。安装后重启对应的 Harness 实例。
 
 从 Backspace 升级时，先在同一 profile 卸载旧插件，再安装新包；保留原有配置与视频数据。详见[安装与迁移](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md)。
 
@@ -82,7 +81,7 @@ npm test
 
 **现在能从 npm 或市场安装新版吗？**
 
-可按上方精确版本或 Release 文件安装。社区市场需要维护者审核，收录状态见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.1.md)。
+可按上方精确版本或 Release 文件安装。社区目录已收录，客户端索引按各市场的计划同步；各渠道状态见[发布记录](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.2.md)。
 
 **有共享壁纸市场吗？**
 

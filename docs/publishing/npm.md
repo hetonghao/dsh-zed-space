@@ -1,14 +1,14 @@
 # npm 发布与核验：dsh-zed-space
 
-当前版本为 `1.0.1`，实际结果见[发布记录](releases/1.0.1.md)。产品名称为 **Zed Space Skin**，定义为“Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤”。
+当前版本为 `1.0.2`，实际结果见[发布记录](releases/1.0.2.md)。产品名称为 **Zed Space Skin**，定义为“Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤。原生个性化动态背景皮肤，以及市场下载精美的动态壁纸。”
 
 ## 包信息
 
 | 字段 | 值 |
 | --- | --- |
 | `name` | `dsh-zed-space` |
-| `version` | `1.0.1` |
-| `description` | Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤 |
+| `version` | `1.0.2` |
+| `description` | Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤。原生个性化动态背景皮肤，以及市场下载精美的动态壁纸。 |
 | `repository.url` | `git+https://github.com/hetonghao/dsh-zed-space.git` |
 | `homepage` | `https://github.com/hetonghao/dsh-zed-space` |
 | `bugs` | `https://github.com/hetonghao/dsh-zed-space/issues` |
@@ -45,18 +45,18 @@ README 图片必须可公开访问。[公网壁纸市场](https://zed-space.ai-c
 
 ```sh
 npm whoami --registry=https://registry.npmjs.org
-npm view dsh-zed-space@1.0.1 version --registry=https://registry.npmjs.org
-npm publish /absolute/path/to/review/dsh-zed-space-1.0.1.tgz --ignore-scripts --access public --registry=https://registry.npmjs.org
+npm view dsh-zed-space@1.0.2 version --registry=https://registry.npmjs.org
+npm publish /absolute/path/to/review/dsh-zed-space-1.0.2.tgz --ignore-scripts --access public --registry=https://registry.npmjs.org
 ```
 
 已成功发布的 `name@version` 不能重复使用；修复后必须增加版本。预发布显式使用 `--tag next`，避免覆盖 `latest`。见 [npm publish 规则](https://docs.npmjs.com/cli/v11/commands/npm-publish/)。
 
 ## 发布后核验
 
-从官方 registry 下载 tarball，核对 `dist.integrity`、SHA-256 和本地制品，再验证精确版本安装。GitHub Release 上传相同字节的 `dsh-zed-space-1.0.1.tgz` 与 `dsh-zed-space.tgz`，另附扩展 ZIP 和 `SHA256SUMS`。
+从官方 registry 下载 tarball，核对 `dist.integrity`、SHA-256 和本地制品，再验证精确版本安装。GitHub Release 上传相同字节的 `dsh-zed-space-1.0.2.tgz` 与 `dsh-zed-space.tgz`，另附扩展 ZIP 和 `SHA256SUMS`。
 
 ```sh
-npm view dsh-zed-space@1.0.1 name version repository dist --json --registry=https://registry.npmjs.org
+npm view dsh-zed-space@1.0.2 name version repository dist --json --registry=https://registry.npmjs.org
 node scripts/verify-release.mjs github.tgz registry.tgz dist.json
 ```
 

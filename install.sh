@@ -2,7 +2,7 @@
 # Download a pinned Backspace source archive and run the static Harness installer.
 set -euo pipefail
 
-BACKSPACE_VERSION="${BACKSPACE_VERSION:-v1.0.1}"
+BACKSPACE_VERSION="${BACKSPACE_VERSION:-v1.0.2}"
 BACKSPACE_ARCHIVE_URL="${BACKSPACE_ARCHIVE_URL:-https://github.com/hetonghao/dsh-zed-space/archive/refs/tags/${BACKSPACE_VERSION}.tar.gz}"
 
 REQUESTED_MODE="install"

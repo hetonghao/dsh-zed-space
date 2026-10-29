@@ -1,13 +1,11 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/hetonghao/dsh-zed-space/main/extension/icons/icon128.png" width="80" height="80" alt="Zed Space mark" />
   <h1>Zed Space Skin</h1>
-  <p>Dynamic backgrounds and interface skins for DeepSeek Harness</p>
+  <p>Zed Space Skin · Dynamic backgrounds and interface skins for DeepSeek Harness. Native customizable animated skins, plus beautiful live wallpapers to download from the marketplace.</p>
   <p><a href="README.md">简体中文</a> · <strong>English</strong></p>
 </div>
 
-Ocean, two cosmic views, and local videos for your Harness workspace. Each scene keeps its own settings, with smooth transitions between backgrounds.
-
-**1.0.1 · Package name: `dsh-zed-space`.** See the [release record](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.1.md) for downloads and marketplace review status.
+**1.0.2 · Package name: `dsh-zed-space`.** See the [release record](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.2.md) for downloads and marketplace review status.
 
 [Source](https://github.com/hetonghao/dsh-zed-space) · [Installation](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/dsh-plugin.md) · [Issues](https://github.com/hetonghao/dsh-zed-space/issues)
 
@@ -20,6 +18,7 @@ This is an independent community plugin for DeepSeek Harness, not an official De
 | Live ocean | Adjust waves and daylight, or enable the automatic day cycle. |
 | Two cosmic views | Switch between horizon and vortex, with separate glow, stars, and motion settings. |
 | Per-scene settings | Keep scene parameters and glass opacity; optionally adjust the conversation background independently. |
+| Wallpaper marketplace | Browse, preview, and download live wallpapers, then apply them from My Videos. |
 | Local video library | Import multiple files, view thumbnails, enable one video, rename, remove, and restore after reopening. |
 | Smooth transitions | Wait for the next frame before blending; both cosmic views transition within one renderer. |
 
@@ -53,13 +52,13 @@ Both videos were imported through the local video library and played in the appl
 
 ## Installation
 
-In Harness, open Plugins → Add plugin and enter `dsh-zed-space@1.0.1`. For Harness Web:
+In Harness, open Plugins → Add plugin and enter `dsh-zed-space@1.0.2`. For Harness Web:
 
 ```sh
-dsh plugin --profile web add dsh-zed-space@1.0.1
+dsh plugin --profile web add dsh-zed-space@1.0.2
 ```
 
-Alternatively, download `dsh-zed-space-1.0.1.tgz` from the [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.1) and install using its local path. Restart the corresponding Harness instance after installation.
+Alternatively, download `dsh-zed-space-1.0.2.tgz` from the [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.2) and install using its local path. Restart the corresponding Harness instance after installation.
 
 When upgrading from Backspace, remove the old plugin from the same profile before adding the new one. Keep your settings and video data. See [installation and migration](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/install.zh.md).
 
@@ -82,7 +81,7 @@ See [plugin integration](https://github.com/hetonghao/dsh-zed-space/blob/main/do
 
 **Can I install this version from npm or a marketplace?**
 
-Use the exact package version or Release file above. Marketplace listing requires maintainer review; see the [release record](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.1.md).
+Use the exact package version or Release file above. The community directory lists the plugin, while client indexes follow their own sync schedules. See the [release record](https://github.com/hetonghao/dsh-zed-space/blob/main/docs/publishing/releases/1.0.2.md).
 
 **Is there a shared wallpaper marketplace?**
 

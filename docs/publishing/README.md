@@ -1,8 +1,8 @@
 # Zed Space Skin 发布资料
 
-Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤
+Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤。原生个性化动态背景皮肤，以及市场下载精美的动态壁纸。
 
-当前版本为 `dsh-zed-space@1.0.1`。本目录保留发布步骤；实际发布时间、制品校验值和市场审核状态以[1.0.1 发布记录](releases/1.0.1.md)为准。
+当前版本为 `dsh-zed-space@1.0.2`。本目录保留发布步骤；实际发布时间、制品校验值和市场审核状态以[1.0.2 发布记录](releases/1.0.2.md)为准。
 
 - [npm 发布与核验](npm.md)
 - [DSH 社区市场提交](dsh-market.md)

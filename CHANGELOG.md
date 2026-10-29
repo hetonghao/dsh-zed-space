@@ -2,6 +2,13 @@
 
 本文件记录 Zed Space Skin 及其 Backspace 历史变更。Zed Space Skin 从 1.0.0 开始独立编号；Backspace 的历史版本号和本地候选记录保留原含义。
 
+## Zed Space Skin 1.0.2 — 2026-10-29
+
+- 统一 README、包描述、插件中英文简介、官网源码与市场提交资料中的产品定位：Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤。原生个性化动态背景皮肤，以及市场下载精美的动态壁纸。
+- 官网源码补齐公网壁纸市场说明，移除候选版未发布与市场仍在规划的旧文案。
+- 保留 Open Sea Skin 来源、安装提示和现有功能边界。此版本只更新文案、元数据与版本标识。
+- 发布状态与制品核验见[1.0.2 发布记录](docs/publishing/releases/1.0.2.md)。
+
 ## Zed Space Skin 1.0.1 — 2026-10-28
 
 - 发现入口接入 [Zed Space 公网壁纸市场](https://zed-space.ai-cove.com/wallpapers)，无需启动本地市场服务。

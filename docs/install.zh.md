@@ -1,8 +1,8 @@
 # Zed Space Skin 安装与排错
 
-Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤
+Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤。原生个性化动态背景皮肤，以及市场下载精美的动态壁纸。
 
-当前版本为 `dsh-zed-space@1.0.1`。[发布记录](publishing/releases/1.0.1.md)分别列出 npm、GitHub Release 和社区市场状态；市场收录不影响按精确包名或 Release 文件安装。
+当前版本为 `dsh-zed-space@1.0.2`。[发布记录](publishing/releases/1.0.2.md)分别列出 npm、GitHub Release 和社区市场状态；市场收录不影响按精确包名或 Release 文件安装。
 
 ## 迁移与安装
 
@@ -13,18 +13,18 @@ Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤
 Harness Web（在运行服务的电脑执行）：
 
 ```sh
-dsh plugin --profile web add dsh-zed-space@1.0.1
+dsh plugin --profile web add dsh-zed-space@1.0.2
 ```
 
 已安装 `1.0.0` 时，在同一 profile 执行上面的命令即可更新，无需卸载或清理本地视频。重启 Web 服务，再刷新页面。Desktop 使用独立的 `desktop` profile；macOS 标准安装路径可完全退出 Desktop 后运行：
 
 ```sh
-"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add dsh-zed-space@1.0.1
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add dsh-zed-space@1.0.2
 ```
 
-也可从 [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.1) 下载 tarball，把上述包名替换为文件的绝对路径。[官方插件管理说明](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.0-rc.2/packages/client/ui-plugin-manager/README.md#installing-a-bundle)明确支持 tarball 与绝对本地路径；这些命令是安装指引，实际验证范围见发布记录。非标准应用位置请查找 Desktop 内置 CLI；Windows 不复制 macOS 路径。本次未提供 Windows 原生完整安装验证。
+也可从 [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.2) 下载 tarball，把上述包名替换为文件的绝对路径。[官方插件管理说明](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.0-rc.2/packages/client/ui-plugin-manager/README.md#installing-a-bundle)明确支持 tarball 与绝对本地路径；这些命令是安装指引，实际验证范围见发布记录。非标准应用位置请查找 Desktop 内置 CLI；Windows 不复制 macOS 路径。本次未提供 Windows 原生完整安装验证。
 
-Desktop 也可在「插件 → 添加插件」输入 `dsh-zed-space@1.0.1`。选择 npm 镜像不会加速 GitHub 链接。
+Desktop 也可在「插件 → 添加插件」输入 `dsh-zed-space@1.0.2`。选择 npm 镜像不会加速 GitHub 链接。
 
 ## 使用
 

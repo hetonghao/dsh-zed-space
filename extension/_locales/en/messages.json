@@ -3,13 +3,13 @@
     "message": "Zed Space Skin"
   },
   "extensionDescription": {
-    "message": "Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤"
+    "message": "Zed Space Skin · Dynamic backgrounds and interface skins for DeepSeek Harness. Market downloads require the DSH plugin."
   },
   "tagline": {
-    "message": "Realtime WebGPU ocean · UI skin"
+    "message": "Dynamic backgrounds and interface skins for DeepSeek Harness"
   },
   "toggleLabel": {
-    "message": "Ocean background"
+    "message": "Dynamic background"
   },
   "toggleDescription": {
     "message": "DeepSeek Harness on 127.0.0.1 or localhost"

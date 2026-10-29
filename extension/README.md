@@ -1,11 +1,15 @@
 # Zed Space Skin（Chrome / Edge 扩展）
 
+Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤。原生个性化动态背景皮肤，以及市场下载精美的动态壁纸。
+
+本目录是浏览器扩展，只支持内置场景与本地视频导入；壁纸市场下载请使用根目录的 DSH 插件。
+
 为 DeepSeek Harness 提供海洋、事件视界、吸积涡旋和本地视频背景；两个宇宙入口是同一场景的不同视角。在本机 Harness 界面
 （`http://127.0.0.1/*`、`http://localhost/*`）背后渲染背景，并把界面面板变成
 半透明玻璃。扩展不会接管新标签页、修改浏览器主页或影响用户已有的新标签页扩展，
 也不会修改其他本地网站。此扩展作用于浏览器中的 Harness，不能给 Desktop 换肤。
 
-仓库与技术名为 `dsh-zed-space`，当前版本为 `1.0.1`。可从 [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.1) 下载扩展 ZIP 后解压加载，也可 clone [仓库](https://github.com/hetonghao/dsh-zed-space) 后加载本地目录。Chrome/Edge 扩展商店尚未上架；npm 包用于 Harness 插件安装。
+仓库与技术名为 `dsh-zed-space`，当前版本为 `1.0.2`。可从 [GitHub Release](https://github.com/hetonghao/dsh-zed-space/releases/tag/v1.0.2) 下载扩展 ZIP 后解压加载，也可 clone [仓库](https://github.com/hetonghao/dsh-zed-space) 后加载本地目录。Chrome/Edge 扩展商店尚未上架；npm 包用于 Harness 插件安装。
 
 ## 加载本地扩展
 

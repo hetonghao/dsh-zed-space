@@ -1,5 +1,7 @@
 # Zed Space Skin 源码集成
 
+Zed Space Skin · DeepSeek Harness 动态背景与界面皮肤。原生个性化动态背景皮肤，以及市场下载精美的动态壁纸。
+
 此目录保留旧 React 源码集成，当前仍只接海洋背景。它与根目录的 `dsh-zed-space` DSH bundle 不同，不包含宇宙双视角或本地视频设置。需要多背景时参阅[根目录安装文档](../docs/install.zh.md)。
 
 ## 集成到 Harness 源码
